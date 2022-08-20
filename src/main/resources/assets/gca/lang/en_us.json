@@ -1,0 +1,5 @@
+{
+  "category.GCA": "GCA",
+  "rule.openFakePlayerInventory.name": "Fake Player Inventory",
+  "rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory"
+}

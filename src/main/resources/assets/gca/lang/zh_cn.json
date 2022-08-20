@@ -1,0 +1,5 @@
+{
+  "category.GCA": "GCA",
+  "rule.openFakePlayerInventory.name": "假人背包",
+  "rule.openFakePlayerInventory.desc": "允许玩家打开假人背包"
+}

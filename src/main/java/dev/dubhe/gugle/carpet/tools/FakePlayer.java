@@ -1,0 +1,62 @@
+package dev.dubhe.gugle.carpet.tools;
+
+import carpet.patches.EntityPlayerMPFake;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+
+public class FakePlayer {
+
+    public static boolean checkButton(int slot, boolean flag, SimpleContainer container) {
+        CompoundTag compoundTag = new CompoundTag();
+        compoundTag.putBoolean("GcaClear", true);
+        ItemStack button_off = new ItemStack(Items.STRUCTURE_VOID);
+        ItemStack button_on = new ItemStack(Items.BARRIER);
+        button_off.setTag(compoundTag);
+        button_on.setTag(compoundTag);
+        ItemStack item = container.getItem(slot);
+        if (item.isEmpty() && flag) {
+            container.setItem(slot, button_off);
+            button_on.setCount(0);
+        } else if (item.isEmpty()) {
+            container.setItem(slot, button_on);
+            button_off.setCount(0);
+        } else if (flag) {
+            container.setItem(slot, button_on);
+        } else {
+            container.setItem(slot, button_off);
+        }
+        return container.getItem(slot).is(Items.BARRIER);
+    }
+
+    public static void syncItem(EntityPlayerMPFake fakePlayer, SimpleContainer container) {
+        for (int i = 9; i < 36; i++) {
+            ItemStack itemStack = fakePlayer.getInventory().getItem(i);
+            if (!itemStack.isEmpty()) {
+                container.setItem(i + 9, itemStack);
+            }
+            fakePlayer.getInventory().setItem(i, container.getItem(i + 9));
+        }
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = fakePlayer.getInventory().getItem(i);
+            if (!itemStack.isEmpty()) {
+                container.setItem(i + 45, itemStack);
+            }
+            fakePlayer.getInventory().setItem(i, container.getItem(i + 45));
+        }
+        for (int i = 0; i < 4; i++) {
+            ItemStack itemStack = fakePlayer.getInventory().getArmor(i);
+            if (!itemStack.isEmpty()) {
+                container.setItem(4 - i, itemStack);
+            }
+            fakePlayer.getInventory().armor.set(i, container.getItem(4 - i));
+        }
+        ItemStack itemStack = fakePlayer.getOffhandItem();
+        if (!itemStack.isEmpty()) {
+            container.setItem(7, itemStack);
+        }
+        fakePlayer.setItemSlot(EquipmentSlot.OFFHAND, container.getItem(7));
+    }
+}
