@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "gca",
+  "version": "${version}",
+  "name": "GugleCarpetAddition",
+  "description": "carpet addition for minecraft",
+  "authors": [
+    "Gugle"
+  ],
+  "contact": {
+    "website": "https://gca.dubhe.dev/",
+    "repo": "https://github.com/Gu-ZT/gugle-carpet-addition"
+  },
+  "license": "MIT",
+  "icon": "assets/gca/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.dubhe.gugle.carpet.GcaMod"
+    ],
+    "client": [
+      "dev.dubhe.gugle.carpet.GcaMod"
+    ]
+  },
+  "mixins": [
+    "gca.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "minecraft": "1.19.x",
+    "carpet": ">=1.4.45+v210811"
+  },
+  "custom": {
+    "modmenu": {
+      "parent": "carpet"
+    }
+  }
+}
