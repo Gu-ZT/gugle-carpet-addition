@@ -6,6 +6,7 @@ import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -37,8 +38,6 @@ public abstract class EntityMixin {
                     for (int i = 0; i < 14; i++) {
                         flag[i] = true;
                     }
-                    flag[4] = false;
-                    flag[13] = true;
                 }
                 EntityPlayerActionPack ap = new EntityPlayerActionPack(serverPlayer);
                 syncItem(fakePlayer, container);
@@ -46,12 +45,15 @@ public abstract class EntityMixin {
                 GcaClear.putBoolean("GcaClear", true);
                 ItemStack button = new ItemStack(Items.STRUCTURE_VOID, 1);
                 button.setTag(GcaClear);
-                flag[0] = checkButton(0, flag[0], container);
-                flag[1] = checkButton(5, flag[1], container);
-                flag[2] = checkButton(6, flag[2], container);
-                flag[3] = checkButton(8, flag[3], container);
+                flag[0] = checkButton(0, flag[0], container, 1);
+                flag[1] = checkButton(5, flag[1], container, 1);
+                flag[2] = checkButton(6, flag[2], container, 1);
+                flag[3] = checkButton(8, flag[3], container, 1);
                 for (int i = 9; i < 18; i++) {
-                    boolean bl = checkButton(i, flag[i - 5], container);
+                    boolean bl = checkButton(i, flag[i - 5], container, i - 8,
+                            Component.literal("快捷栏：" + (i - 8)),
+                            Component.literal("快捷栏：" + (i - 8))
+                    );
                     if (bl != flag[i - 5]) {
                         for (int j = 4; j < 13; j++) {
                             flag[j] = false;
