@@ -1,5 +1,13 @@
 {
   "category.GCA": "GCA",
+
   "rule.openFakePlayerInventory.name": "Fake Player Inventory",
-  "rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory"
+  "rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
+
+  "action.attack.interval.14": "Attack every 14 gt: %s",
+  "action.attack.continuous": "Attack continuous: %s",
+  "action.use.continuous": "Use continuous: %s",
+  "action.stop_all": "Stop all action",
+
+  "gac.hotbar": "Hotbar: %s"
 }
