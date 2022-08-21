@@ -89,9 +89,16 @@ public abstract class EntityMixin {
             if (self instanceof ServerPlayer selfPlayer) {
                 if (selfPlayer instanceof EntityPlayerMPFake) {
                     if (player instanceof ServerPlayer serverPlayer) {
-                        SimpleMenuProvider provider = new SimpleMenuProvider(
-                                (i, inventory, p) -> ChestMenu.sixRows(i, inventory, container),
-                                selfPlayer.getDisplayName());
+                        SimpleMenuProvider provider;
+                        if (!serverPlayer.isShiftKeyDown()) {
+                            provider = new SimpleMenuProvider(
+                                    (i, inventory, p) -> ChestMenu.sixRows(i, inventory, container),
+                                    selfPlayer.getDisplayName());
+                        } else {
+                            provider = new SimpleMenuProvider(
+                                    (i, inventory, p) -> ChestMenu.threeRows(i, inventory, selfPlayer.getEnderChestInventory()),
+                                    selfPlayer.getDisplayName());
+                        }
                         serverPlayer.openMenu(provider);
                         cir.setReturnValue(InteractionResult.SUCCESS);
                     }

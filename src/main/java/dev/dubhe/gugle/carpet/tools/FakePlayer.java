@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -42,7 +43,7 @@ public class FakePlayer {
     public static void syncItem(EntityPlayerMPFake fakePlayer, SimpleContainer container) {
         for (int i = 9; i < 36; i++) {
             ItemStack itemStack = fakePlayer.getInventory().getItem(i);
-            if (itemStack == container.getItem(i + 9)) {
+            if (itemStack == container.getItem(i + 9) || container.getItem(i + 9).isEmpty()) {
                 container.setItem(i + 9, itemStack);
             } else {
                 fakePlayer.getInventory().setItem(i, container.getItem(i + 9));
@@ -50,7 +51,7 @@ public class FakePlayer {
         }
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = fakePlayer.getInventory().getItem(i);
-            if (itemStack == container.getItem(i + 45)) {
+            if (itemStack == container.getItem(i + 45) || container.getItem(i + 45).isEmpty()) {
                 container.setItem(i + 45, itemStack);
             } else {
                 fakePlayer.getInventory().setItem(i, container.getItem(i + 45));
@@ -58,17 +59,18 @@ public class FakePlayer {
         }
         for (int i = 0; i < 4; i++) {
             ItemStack itemStack = fakePlayer.getInventory().getArmor(i);
-            if (itemStack == container.getItem(4 - i)) {
+            if (itemStack == container.getItem(4 - i) || container.getItem(4 - i).isEmpty()) {
                 container.setItem(4 - i, itemStack);
             } else {
                 fakePlayer.getInventory().armor.set(i, container.getItem(4 - i));
             }
         }
         ItemStack itemStack = fakePlayer.getOffhandItem();
-        if (itemStack == container.getItem(7)) {
+        if (itemStack == container.getItem(7) || container.getItem(7).isEmpty()) {
             container.setItem(7, itemStack);
         } else {
             fakePlayer.setItemSlot(EquipmentSlot.OFFHAND, container.getItem(7));
         }
     }
+
 }
