@@ -51,6 +51,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     @Override
     public void onPlayerLoggedOut(ServerPlayer player) {
         if (player instanceof EntityPlayerMPFake) {
+            GcaExtension.fakePlayerInventoryMenuHashMap.get(player).clearAllItem();
             GcaExtension.fakePlayerInventoryMenuHashMap.remove(player);
         }
     }

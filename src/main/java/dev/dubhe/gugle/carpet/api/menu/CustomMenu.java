@@ -38,6 +38,12 @@ public abstract class CustomMenu {
                 player.getInventory(), this.container), name);
     }
 
+    public void clearAllItem() {
+        for (int i = 0; i < container.getContainerSize(); i++) {
+            this.container.removeItem(i, container.getItem(i).getCount());
+        }
+    }
+
     public void setItems(int slot_min, int slot_max, NonNullList<ItemStack> itemStacks) {
         for (int i = slot_min; i <= slot_max; i++) {
             int j = i - slot_min;
