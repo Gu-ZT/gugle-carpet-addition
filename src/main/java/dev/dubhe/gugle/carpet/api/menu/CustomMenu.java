@@ -40,7 +40,7 @@ public abstract class CustomMenu {
 
     public void clearAllItem() {
         for (int i = 0; i < container.getContainerSize(); i++) {
-            this.container.removeItem(i, container.getItem(i).getCount());
+            this.container.items.set(i,ItemStack.EMPTY);
         }
     }
 
