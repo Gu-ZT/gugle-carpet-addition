@@ -26,7 +26,7 @@ public class PlayerMixin {
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(CallbackInfo ci) {
         if (GcaSetting.openFakePlayerInventory && self instanceof ServerPlayer serverPlayer) {
-            if (serverPlayer instanceof EntityPlayerMPFake) {
+            if (serverPlayer instanceof EntityPlayerMPFake && serverPlayer.isAlive()) {
                 GcaExtension.fakePlayerInventoryMenuHashMap.get(self).tick();
             } else {
                 ItemStack carried = serverPlayer.containerMenu.getCarried();
