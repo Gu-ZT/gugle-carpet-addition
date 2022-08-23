@@ -9,6 +9,8 @@
 
   ![menu](docs/pics/inv.png)
 
+* 使用 `/carpet openFakePlayerEnderChest true` 允许玩家打开假人末影箱
+
   潜行可以打开假人的末影箱
 
   ![menu](docs/pics/ender.png)

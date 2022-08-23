@@ -10,6 +10,8 @@
 
   ![menu](docs/pics/inv.png)
 
+* Use `/carpet openFakePlayerEnderChest true` Allow player to open the fake player's ender chest
+
   Sneak to open the fake player's ender chest
 
   ![menu](docs/pics/ender.png)

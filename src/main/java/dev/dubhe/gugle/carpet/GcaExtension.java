@@ -2,20 +2,18 @@ package dev.dubhe.gugle.carpet;
 
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
-import carpet.utils.Translations;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
+import carpet.patches.EntityPlayerMPFake;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceLocation;
-import org.apache.commons.io.IOUtils;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
 
@@ -23,12 +21,13 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
+    public static final HashMap<Player, FakePlayerInventoryMenu> fakePlayerInventoryMenuHashMap = new HashMap<>();
+
     public static ResourceLocation id(String path) {
         return new ResourceLocation(MOD_ID, path);
     }
 
-    static
-    {
+    static {
         CarpetServer.manageExtension(new GcaExtension());
     }
 
@@ -39,18 +38,21 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public Map<String, String> canHasTranslations(String lang) {
-        String dataJSON;
-        try {
-            dataJSON = IOUtils.toString(
-                    Objects.requireNonNull(Translations.class.getClassLoader().getResourceAsStream(
-                            String.format("assets/gca/lang/%s.json", lang))),
-                    StandardCharsets.UTF_8);
-        } catch (NullPointerException | IOException e) {
-            return null;
+        return ComponentTranslate.getTranslations(lang);
+    }
+
+    @Override
+    public void onPlayerLoggedIn(ServerPlayer player) {
+        if (player instanceof EntityPlayerMPFake) {
+            GcaExtension.fakePlayerInventoryMenuHashMap.put(player, new FakePlayerInventoryMenu(player));
         }
-        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-        return gson.fromJson(dataJSON, new TypeToken<Map<String, String>>() {
-        }.getType());
+    }
+
+    @Override
+    public void onPlayerLoggedOut(ServerPlayer player) {
+        if (player instanceof EntityPlayerMPFake) {
+            GcaExtension.fakePlayerInventoryMenuHashMap.remove(player);
+        }
     }
 
     @Override

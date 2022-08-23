@@ -1,24 +1,41 @@
-package dev.dubhe.gugle.carpet.tools.menu;
+package dev.dubhe.gugle.carpet.api.menu;
 
 import com.mojang.datafixers.util.Pair;
+import dev.dubhe.gugle.carpet.api.menu.control.Button;
+import dev.dubhe.gugle.carpet.api.menu.control.ButtonList;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class CustomMenu {
+public abstract class CustomMenu {
 
-    private final SimpleContainer container;
-    private List<Pair<Integer, Button>> buttons;
+    public final SimpleContainer container;
+    public final List<Pair<Integer, Button>> buttons = new ArrayList<>();
+    public final List<ButtonList> buttonLists = new ArrayList<>();
+    public final CustomMenuType.Type type;
 
-    public CustomMenu(int rows) {
-        this.container = new SimpleContainer(rows * 9);
+    public CustomMenu(CustomMenuType.Type type) {
+        this.container = new SimpleContainer(CustomMenuType.getCount(type));
+        this.type = type;
+    }
+
+    public void tick() {
+        this.checkButton();
     }
 
     public int getContainerSize() {
         return container.getContainerSize();
+    }
+
+    public SimpleMenuProvider getMenuProvider(Player player, Component name) {
+        return new SimpleMenuProvider((i, inv, p) -> CustomMenuType.getMenu(type, player.getId(),
+                player.getInventory(), this.container), name);
     }
 
     public void setItems(int slot_min, int slot_max, NonNullList<ItemStack> itemStacks) {
@@ -48,9 +65,9 @@ public class CustomMenu {
         return itemStacks;
     }
 
-    public @Nullable ItemStack getItem(int slot) {
+    public ItemStack getItem(int slot) {
         if (getContainerSize() < (slot + 1)) {
-            return null;
+            return ItemStack.EMPTY;
         }
         return container.getItem(slot);
     }
@@ -69,9 +86,13 @@ public class CustomMenu {
         buttons.add(new Pair<>(slot, button));
     }
 
+    public void addButtonList(ButtonList buttonList) {
+        this.buttonLists.add(buttonList);
+    }
+
     private void checkButton() {
-        for (Pair<Integer, Button> i : buttons) {
-            i.getSecond().checkButton(this.container, i.getFirst());
+        for (Pair<Integer, Button> button : buttons) {
+            button.getSecond().checkButton(this.container, button.getFirst());
         }
     }
 }

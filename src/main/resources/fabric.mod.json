@@ -13,6 +13,7 @@
   },
   "license": "MIT",
   "icon": "assets/gca/icon.png",
+  "accessWidener" : "gca.accesswidener",
   "environment": "*",
   "entrypoints": {
     "main": [

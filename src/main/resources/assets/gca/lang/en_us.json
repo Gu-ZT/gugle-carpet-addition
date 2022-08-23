@@ -4,10 +4,16 @@
   "rule.openFakePlayerInventory.name": "Fake Player Inventory",
   "rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
 
+  "rule.openFakePlayerEnderChest.name": "Fake Player Ender Chest",
+  "rule.openFakePlayerEnderChest.desc": "Allow player to open the fake player's ender chest",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",
   "action.stop_all": "Stop all action",
 
-  "gac.hotbar": "Hotbar: %s"
+  "gac.hotbar": "Hotbar: %s",
+
+  "on": "on",
+  "off": "off"
 }
