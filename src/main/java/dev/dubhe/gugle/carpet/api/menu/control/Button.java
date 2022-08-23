@@ -106,6 +106,12 @@ public class Button {
     }
 
     public void updateButton(Container container, int slot, ItemStack onItemStack, ItemStack offItemStack) {
+        if (!(
+                container.getItem(slot).is(onItemStack.getItem()) ||
+                        container.getItem(slot).is(offItemStack.getItem())
+        )) {
+            return;
+        }
         if (flag) {
             container.setItem(slot, onItemStack);
         } else {
