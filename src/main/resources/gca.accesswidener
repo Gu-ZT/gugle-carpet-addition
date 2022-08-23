@@ -1,3 +1,4 @@
 accessWidener	v1	named
 accessible	field	net/minecraft/world/SimpleContainer	items	Lnet/minecraft/core/NonNullList;
+accessible	field	net/minecraft/world/entity/item/ItemEntity	DATA_ITEM	Lnet/minecraft/network/syncher/EntityDataAccessor;
 mutable	field	net/minecraft/world/SimpleContainer	items	Lnet/minecraft/core/NonNullList;
