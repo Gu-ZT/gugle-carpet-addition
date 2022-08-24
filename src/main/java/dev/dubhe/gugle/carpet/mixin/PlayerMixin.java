@@ -3,7 +3,6 @@ package dev.dubhe.gugle.carpet.mixin;
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -27,7 +26,7 @@ public class PlayerMixin {
     private void tick(CallbackInfo ci) {
         if (GcaSetting.openFakePlayerInventory && self instanceof ServerPlayer serverPlayer) {
             if (serverPlayer instanceof EntityPlayerMPFake && serverPlayer.isAlive()) {
-                GcaExtension.fakePlayerInventoryMenuHashMap.get(self).tick();
+                GcaExtension.fakePlayerInventoryContainerMap.get(self).tick();
             } else {
                 ItemStack carried = serverPlayer.containerMenu.getCarried();
                 if (carried.getTag() != null) {
@@ -48,9 +47,8 @@ public class PlayerMixin {
             if (entityToInteractOn instanceof EntityPlayerMPFake fakePlayer) {
                 SimpleMenuProvider provider = null;
                 if (GcaSetting.openFakePlayerInventory) {
-                    FakePlayerInventoryMenu fpim = GcaExtension.fakePlayerInventoryMenuHashMap.get(fakePlayer);
-                    provider = fpim.getMenuProvider(serverPlayer,
-                            fakePlayer.getDisplayName());
+                    provider = new SimpleMenuProvider((i, inventory, p) -> ChestMenu.sixRows(i, inventory,
+                            GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer)), fakePlayer.getDisplayName());
                 }
                 if (GcaSetting.openFakePlayerEnderChest && serverPlayer.isShiftKeyDown()) {
                     provider = new SimpleMenuProvider(
@@ -58,7 +56,7 @@ public class PlayerMixin {
                                     fakePlayer.getEnderChestInventory()),
                             fakePlayer.getDisplayName());
                 }
-                if(provider != null){
+                if (provider != null) {
                     serverPlayer.openMenu(provider);
                 }
                 cir.setReturnValue(InteractionResult.SUCCESS);
