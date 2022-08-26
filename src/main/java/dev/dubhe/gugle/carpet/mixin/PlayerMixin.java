@@ -10,7 +10,6 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,22 +26,13 @@ public class PlayerMixin {
         if (GcaSetting.openFakePlayerInventory && self instanceof ServerPlayer serverPlayer) {
             if (serverPlayer instanceof EntityPlayerMPFake && serverPlayer.isAlive()) {
                 GcaExtension.fakePlayerInventoryContainerMap.get(self).tick();
-            } else {
-                ItemStack carried = serverPlayer.containerMenu.getCarried();
-                if (carried.getTag() != null) {
-                    if (carried.getTag().get("GcaClear") != null) {
-                        if (carried.getTag().getBoolean("GcaClear")) {
-                            carried.setCount(0);
-                        }
-                    }
-                }
             }
         }
     }
 
     @Inject(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"), cancellable = true)
     private void interactOn(Entity entityToInteractOn, InteractionHand hand,
-            CallbackInfoReturnable<InteractionResult> cir) {
+                            CallbackInfoReturnable<InteractionResult> cir) {
         if (self instanceof ServerPlayer serverPlayer) {
             if (entityToInteractOn instanceof EntityPlayerMPFake fakePlayer) {
                 SimpleMenuProvider provider = null;

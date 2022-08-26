@@ -77,7 +77,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         if (pair != null) {
             return pair.getFirst().get(pair.getSecond());
         } else {
-            return null;
+            return ItemStack.EMPTY;
         }
     }
 

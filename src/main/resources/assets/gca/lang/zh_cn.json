@@ -7,6 +7,9 @@
   "rule.openFakePlayerEnderChest.name": "假人末影箱",
   "rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
 
+  "rule.fakePlayerResident.name": "假人驻留",
+  "rule.fakePlayerResident.desc": "退出存档时保留假人",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",

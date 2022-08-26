@@ -20,4 +20,11 @@ public class GcaSetting {
             category = {GCA, EXPERIMENTAL}
     )
     public static boolean openFakePlayerEnderChest = false;
+
+    // 退出存档时保留假人
+    @Rule(
+            desc = "Keep the fake player when exiting the level",
+            category = {GCA, EXPERIMENTAL}
+    )
+    public static boolean fakePlayerResident = false;
 }

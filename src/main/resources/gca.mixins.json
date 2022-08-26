@@ -4,10 +4,9 @@
   "package": "dev.dubhe.gugle.carpet.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "ItemEntityMixin",
-    "ItemStackMixin",
-    "PlayerMixin",
-    "ServerPlayerMixin"
+    "AbstractContainerMenuMixin",
+    "MinecraftServerMixin",
+    "PlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
