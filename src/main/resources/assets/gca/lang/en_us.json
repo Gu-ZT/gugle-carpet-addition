@@ -10,6 +10,9 @@
   "rule.fakePlayerResident.name": "Fake Player Resident",
   "rule.fakePlayerResident.desc": "Keep the fake player when exiting the level",
 
+  "rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
+  "rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",

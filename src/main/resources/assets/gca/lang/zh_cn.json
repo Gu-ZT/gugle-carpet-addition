@@ -10,6 +10,9 @@
   "rule.fakePlayerResident.name": "假人驻留",
   "rule.fakePlayerResident.desc": "退出存档时保留假人",
 
+  "rule.fakePlayerAutoReplenishment.name": "假人补货",
+  "rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",

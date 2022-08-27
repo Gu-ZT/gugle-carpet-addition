@@ -18,3 +18,6 @@
 
 ### 假人驻留
 * 使用 `/carpet fakePlayerResident true` 在退出存档时保留假人
+
+### 假人补货
+* 使用 `/carpet fakePlayerAutoReplenishment true` 让假人自动补货

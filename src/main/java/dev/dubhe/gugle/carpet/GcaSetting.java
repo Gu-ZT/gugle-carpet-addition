@@ -27,4 +27,11 @@ public class GcaSetting {
             category = {GCA, EXPERIMENTAL}
     )
     public static boolean fakePlayerResident = false;
+
+    // 让假人自动补货
+    @Rule(
+            desc = "Make fake player to auto replenishment",
+            category = {GCA, EXPERIMENTAL}
+    )
+    public static boolean fakePlayerAutoReplenishment = false;
 }
