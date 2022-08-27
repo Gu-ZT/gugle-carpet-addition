@@ -20,5 +20,5 @@
 ### fakePlayerResident
 * Use `/carpet fakePlayerResident true` to keep the fake player when exiting the level
 
-### fakePlayerResident
+### fakePlayerAutoReplenishment
 * Use `/carpet fakePlayerAutoReplenishment true` to make fake player to auto replenishment
