@@ -34,4 +34,11 @@ public class GcaSetting {
             category = {GCA, EXPERIMENTAL}
     )
     public static boolean fakePlayerAutoReplenishment = false;
+
+    // 让假人自动钓鱼
+    @Rule(
+            desc = "Make fake player to auto fish",
+            category = {GCA, EXPERIMENTAL}
+    )
+    public static boolean fakePlayerAutoFish = false;
 }

@@ -5,8 +5,10 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractContainerMenuMixin",
+    "FishingHookMixin",
     "ItemStackMixin",
-    "PlayerMixin"
+    "PlayerMixin",
+    "ServerLevelMixin"
   ],
   "server": [
     "MinecraftServerMixin"
