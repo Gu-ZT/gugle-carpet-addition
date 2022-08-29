@@ -6,8 +6,13 @@
   "mixins": [
     "AbstractContainerMenuMixin",
     "ItemStackMixin",
-    "MinecraftServerMixin",
     "PlayerMixin"
+  ],
+  "server": [
+    "MinecraftServerMixin"
+  ],
+  "client": [
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
