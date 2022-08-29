@@ -22,3 +22,6 @@
 
 ### fakePlayerAutoReplenishment
 * Use `/carpet fakePlayerAutoReplenishment true` to make fake player to auto replenishment
+
+### fakePlayerAutoFish
+* Use `/carpet fakePlayerAutoFish true` to make fake player to auto fish

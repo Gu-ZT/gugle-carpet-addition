@@ -21,3 +21,6 @@
 
 ### 假人补货
 * 使用 `/carpet fakePlayerAutoReplenishment true` 让假人自动补货
+
+### 假人钓鱼
+* 使用 `/carpet fakePlayerAutoFish true` 让假人自动钓鱼
