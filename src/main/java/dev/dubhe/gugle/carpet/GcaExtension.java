@@ -103,6 +103,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
             for (Map.Entry<String, JsonElement> entry : fakePlayerList.entrySet()) {
                 FakePlayerResident.load(entry, server);
             }
+            file.delete();
         }
     }
 
