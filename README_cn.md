@@ -24,3 +24,6 @@
 
 ### 假人钓鱼
 * 使用 `/carpet fakePlayerAutoFish true` 让假人自动钓鱼
+
+### 假人切换工具
+* 使用 `/carpet fakePlayerAutoReplaceTool true` 让假人自动切换快损坏的工具

@@ -25,3 +25,6 @@
 
 ### fakePlayerAutoFish
 * Use `/carpet fakePlayerAutoFish true` to make fake player to auto fish
+
+### fakePlayerAutoReplaceTool
+* Use `/carpet fakePlayerAutoReplaceTool true` to make fake player to auto replace tool
