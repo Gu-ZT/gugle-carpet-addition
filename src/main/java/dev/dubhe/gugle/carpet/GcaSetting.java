@@ -41,4 +41,11 @@ public class GcaSetting {
             category = {GCA, EXPERIMENTAL}
     )
     public static boolean fakePlayerAutoFish = false;
+
+    // 让假人自动切换快损坏的工具
+    @Rule(
+            desc = "Make fake player to auto replace almost damaged tool",
+            category = {GCA, EXPERIMENTAL}
+    )
+    public static boolean fakePlayerAutoReplaceTool = false;
 }

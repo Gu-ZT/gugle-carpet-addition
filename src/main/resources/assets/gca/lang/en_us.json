@@ -16,6 +16,9 @@
   "rule.fakePlayerAutoFish.name": "Fake Player Auto Fish",
   "rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
 
+  "rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
+  "rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",

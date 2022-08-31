@@ -16,6 +16,9 @@
   "rule.fakePlayerAutoFish.name": "假人钓鱼",
   "rule.fakePlayerAutoFish.desc": "让假人自动钓鱼",
 
+  "rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
+  "rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换快损坏的工具",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",
