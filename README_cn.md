@@ -4,6 +4,7 @@
 [![GitHub downloads](https://img.shields.io/github/downloads/Gu-ZT/gugle-carpet-addition/total?label=Github%20downloads&logo=github)](https://github.com/Gu-ZT/gugle-carpet-addition/releases)
 ![menu](docs/pics/menu_zh.png)
 ## GCA
+#### 如果你需要Minecraft 1.13版本的GCA, [请点击此处](https://github.com/Gu-ZT/TISCarpet113WithGCA/releases/latest)
 ### 假人背包
 * 使用 `/carpet openFakePlayerInventory true` 允许玩家打开假人背包
 

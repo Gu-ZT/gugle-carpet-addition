@@ -5,6 +5,7 @@
 
 ![menu](docs/pics/menu_en.png)
 ## GCA
+#### If you need GCA for Minecraft 1.13, [please click here](https://github.com/Gu-ZT/TISCarpet113WithGCA/releases/latest)
 ### openFakePlayerInventory
 * Use `/carpet openFakePlayerInventory true` Allow player to open the fake player's inventory
 
