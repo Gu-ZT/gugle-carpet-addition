@@ -86,6 +86,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
                 e.printStackTrace();
             }
         }
+        fakePlayerInventoryContainerMap.clear();
     }
 
     public static void onServerStart(MinecraftServer server) {
