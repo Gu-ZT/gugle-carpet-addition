@@ -19,6 +19,12 @@
   "rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
   "rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换快损坏的工具",
 
+  "rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
+  "rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",
+
+  "rule.betterWoodStrip.name": "更好的原木去皮",
+  "rule.betterWoodStrip.desc": "仅允许名称中包含“去皮”的斧头对原木去皮",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",

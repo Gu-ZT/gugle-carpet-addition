@@ -42,4 +42,16 @@ public class GcaSetting {
             categories = {GCA, EXPERIMENTAL}
     )
     public static boolean fakePlayerAutoReplaceTool = false;
+
+    // 让放置的栅栏门与你点击的栅栏门拥有相同的方块状态
+    @Rule(
+            categories = {GCA, EXPERIMENTAL}
+    )
+    public static boolean betterFenceGatePlacement = false;
+
+    // 仅允许名称中包含“去皮”的斧头对原木去皮
+    @Rule(
+            categories = {GCA, EXPERIMENTAL}
+    )
+    public static boolean betterWoodStrip = false;
 }

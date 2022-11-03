@@ -19,6 +19,12 @@
   "rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
   "rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
 
+  "rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
+  "rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",
+
+  "rule.betterWoodStrip.name": "Better Wood Strip",
+  "rule.betterWoodStrip.desc": "Only the axe with \"Strip\" in its name is allowed to peel logs",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",

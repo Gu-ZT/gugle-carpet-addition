@@ -5,6 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractContainerMenuMixin",
+    "AxeItemMixin",
+    "FenceGateBlockMixin",
     "FishingHookMixin",
     "ItemStackMixin",
     "PlayerMixin",
