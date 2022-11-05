@@ -15,7 +15,7 @@ import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
 public class ServerLevelMixin {
-    ServerLevel self = (ServerLevel) (Object) this;
+    private final ServerLevel self = (ServerLevel) (Object) this;
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(BooleanSupplier hasTimeLeft, CallbackInfo ci) {

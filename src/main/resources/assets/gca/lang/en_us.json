@@ -25,6 +25,12 @@
   "rule.betterWoodStrip.name": "Better Wood Strip",
   "rule.betterWoodStrip.desc": "Only the axe with \"Strip\" in its name is allowed to peel logs",
 
+  "rule.betterSignInteraction.name": "Better Sign Interaction",
+  "rule.betterSignInteraction.desc": "Make the block attached to the sign interact when you right-click it",
+
+  "rule.betterSignEditing.name": "Better Sign Editing",
+  "rule.betterSignEditing.desc": "Possible to use feather editing sign with \"pen\" in the name",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",

@@ -28,7 +28,7 @@ public abstract class FenceGateBlockMixin {
     @Shadow
     @Final
     public static BooleanProperty IN_WALL;
-    FenceGateBlock self = (FenceGateBlock) (Object) this;
+    private final FenceGateBlock self = (FenceGateBlock) (Object) this;
 
     @Inject(method = "getStateForPlacement", at = @At(value = "RETURN"), cancellable = true)
     private void getStateForPlacement(BlockPlaceContext context, CallbackInfoReturnable<BlockState> cir) {

@@ -19,6 +19,8 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +74,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
     }
 
     @Override
+    @Nonnull
     public ItemStack getItem(int slot) {
         Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         if (pair != null) {
@@ -113,6 +116,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
     }
 
     @Override
+    @Nonnull
     public ItemStack removeItem(int slot, int amount) {
         Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
@@ -127,6 +131,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
     }
 
     @Override
+    @Nonnull
     public ItemStack removeItemNoUpdate(int slot) {
         Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
@@ -143,7 +148,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
     }
 
     @Override
-    public void setItem(int slot, ItemStack stack) {
+    public void setItem(int slot, @Nonnull ItemStack stack) {
         Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
         if (pair != null) {
@@ -160,7 +165,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
+    public boolean stillValid(@Nonnull Player player) {
         if (this.player.isRemoved()) {
             return false;
         }

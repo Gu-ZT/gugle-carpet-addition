@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(FishingHook.class)
 public class FishingHookMixin {
-    FishingHook self = (FishingHook) (Object) this;
+    private final FishingHook self = (FishingHook) (Object) this;
 
     @Inject(method = "catchingFish", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/syncher/SynchedEntityData;set(Lnet/minecraft/network/syncher/EntityDataAccessor;Ljava/lang/Object;)V", ordinal = 1))
     private void catchingFish(BlockPos pos, CallbackInfo ci) {

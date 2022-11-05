@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerPlayer.class)
 public class ServerPlayerMixin {
 
-    ServerPlayer self = (ServerPlayer) (Object) this;
+    private final ServerPlayer self = (ServerPlayer) (Object) this;
 
     @Inject(method = "initInventoryMenu", at = @At("RETURN"))
     private void load(CallbackInfo ci) {
