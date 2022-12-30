@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
-public class ServerLevelMixin {
+public abstract class ServerLevelMixin {
     ServerLevel self = (ServerLevel) (Object) this;
 
     @Inject(method = "tick", at = @At("RETURN"))

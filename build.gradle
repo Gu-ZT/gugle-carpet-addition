@@ -3,14 +3,14 @@ plugins {
     id 'maven-publish'
 }
 
-version = project.mod_version + "-1.19"
+version = project.mod_version + "-1.19.3"
 group = project.maven_group
 
 repositories {
-    maven {
-        name = 'ParchmentMC'
-        url = 'https://maven.parchmentmc.org'
-    }
+//    maven {
+//        name = 'ParchmentMC'
+//        url = 'https://maven.parchmentmc.org'
+//    }
     maven {
         url "https://www.cursemaven.com"
     }
@@ -26,7 +26,7 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings loom.layered() {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
+//        parchment("org.parchmentmc.data:parchment-${minecraft_version}:${parchment_version}@zip")
     }
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 

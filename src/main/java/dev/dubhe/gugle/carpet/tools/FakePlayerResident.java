@@ -1,8 +1,10 @@
 package dev.dubhe.gugle.carpet.tools;
+
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -47,7 +49,7 @@ public class FakePlayerResident {
         String gamemode = fakePlayer.get("gamemode").getAsString();
         boolean flying = fakePlayer.get("flying").getAsBoolean();
         EntityPlayerMPFake.createFake(username, server, pos_x, pos_y, pos_z, yaw, pitch,
-                ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(dimension)),
+                ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
                 GameType.byName(gamemode), flying);
     }
 }
