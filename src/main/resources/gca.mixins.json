@@ -10,7 +10,8 @@
     "FishingHookMixin",
     "ItemStackMixin",
     "PlayerMixin",
-    "ServerLevelMixin"
+    "ServerLevelMixin",
+    "SignBlockMixin"
   ],
   "server": [
     "MinecraftServerMixin"

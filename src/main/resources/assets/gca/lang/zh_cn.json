@@ -25,6 +25,12 @@
   "rule.betterWoodStrip.name": "更好的原木去皮",
   "rule.betterWoodStrip.desc": "仅允许名称中包含“去皮”的斧头对原木去皮",
 
+  "rule.betterSignInteraction.name": "更好的告示牌交互",
+  "rule.betterSignInteraction.desc": "右键告示牌时与之附着的方块产生交互",
+
+  "rule.betterSignEditing.name": "更好的告示牌编辑",
+  "rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",
