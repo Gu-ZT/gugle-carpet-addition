@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SignBlock.class)
-public class SignBlockMixin {
+public abstract class SignBlockMixin {
     private final SignBlock self = (SignBlock) (Object) this;
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
