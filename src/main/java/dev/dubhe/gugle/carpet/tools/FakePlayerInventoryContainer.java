@@ -1,6 +1,6 @@
 package dev.dubhe.gugle.carpet.tools;
 
-import carpet.fakes.ServerPlayerEntityInterface;
+import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.helpers.EntityPlayerActionPack.Action;
 import carpet.helpers.EntityPlayerActionPack.ActionType;
@@ -37,7 +37,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         this.items = this.player.getInventory().items;
         this.armor = this.player.getInventory().armor;
         this.offhand = this.player.getInventory().offhand;
-        this.ap = ((ServerPlayerEntityInterface) this.player).getActionPack();
+        this.ap = ((ServerPlayerInterface) this.player).getActionPack();
         this.compartments = ImmutableList.of(this.items, this.armor, this.offhand, this.buttons);
         this.createButton();
         this.ap.setSlot(1);

@@ -34,14 +34,14 @@ public abstract class PlayerMixin {
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand) {
         if (entity instanceof EntityPlayerMPFake fakePlayer) {
             SimpleMenuProvider provider = null;
-            if (GcaSetting.openFakePlayerInventory) {
-                provider = new SimpleMenuProvider((i, inventory, p) -> ChestMenu.sixRows(i, inventory,
-                        GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer)), fakePlayer.getDisplayName());
-            } else if (player.isShiftKeyDown() && GcaSetting.openFakePlayerEnderChest) {
+            if (player.isShiftKeyDown() && GcaSetting.openFakePlayerEnderChest) {
                 provider = new SimpleMenuProvider(
                         (i, inventory, p) -> ChestMenu.threeRows(i, inventory,
                                 fakePlayer.getEnderChestInventory()),
                         fakePlayer.getDisplayName());
+            } else if (GcaSetting.openFakePlayerInventory) {
+                provider = new SimpleMenuProvider((i, inventory, p) -> ChestMenu.sixRows(i, inventory,
+                        GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer)), fakePlayer.getDisplayName());
             }
             if (provider != null) {
                 player.openMenu(provider);
