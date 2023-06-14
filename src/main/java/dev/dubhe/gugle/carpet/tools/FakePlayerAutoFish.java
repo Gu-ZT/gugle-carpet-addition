@@ -12,7 +12,7 @@ public class FakePlayerAutoFish {
 
     public static void autoFish(Player player) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
-        long l = player.getLevel().getGameTime();
+        long l = player.level().getGameTime();
         GcaExtension.planFunction.add(new Pair<>(l + 5, () -> ap.start(ActionType.USE, Action.once())));
         GcaExtension.planFunction.add(new Pair<>(l + 15, () -> ap.start(ActionType.USE, Action.once())));
     }

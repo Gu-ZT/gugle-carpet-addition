@@ -3,7 +3,6 @@ package dev.dubhe.gugle.carpet.tools;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -11,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ public class FakePlayerResident {
         double pos_z = player.getZ();
         double yaw = player.getYRot();
         double pitch = player.getXRot();
-        String dimension = player.level.dimension().location().getPath();
+        String dimension = player.level().dimension().location().getPath();
         String gamemode = ((ServerPlayer) player).gameMode.getGameModeForPlayer().getName();
         boolean flying = player.getAbilities().flying;
         JsonObject fakePlayer = new JsonObject();
@@ -48,7 +48,7 @@ public class FakePlayerResident {
         String dimension = fakePlayer.get("dimension").getAsString();
         String gamemode = fakePlayer.get("gamemode").getAsString();
         boolean flying = fakePlayer.get("flying").getAsBoolean();
-        EntityPlayerMPFake.createFake(username, server, pos_x, pos_y, pos_z, yaw, pitch,
+        EntityPlayerMPFake.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
                 ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
                 GameType.byName(gamemode), flying);
     }

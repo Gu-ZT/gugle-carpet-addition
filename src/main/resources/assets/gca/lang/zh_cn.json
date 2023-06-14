@@ -31,6 +31,9 @@
   "rule.betterSignEditing.name": "更好的告示牌编辑",
   "rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
 
+  "rule.betterQuickCrafting.name": "更好的快速合成",
+  "rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
+
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
   "action.use.continuous": "一直右键：%s",

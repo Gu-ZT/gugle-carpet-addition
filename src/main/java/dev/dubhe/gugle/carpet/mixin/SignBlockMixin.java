@@ -26,22 +26,23 @@ public abstract class SignBlockMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
     public void use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
-        ItemStack itemStack = player.getItemInHand(hand);
-        String name = itemStack.getHoverName().getString();
-        if (GcaSetting.betterSignEditing && itemStack.is(Items.FEATHER) && (name.contains("pen") || name.contains("笔"))) {
-            SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(pos);
-            if (!level.isClientSide && sign != null) {
-                player.openTextEdit(sign);
-            }
-            cir.setReturnValue(InteractionResult.SUCCESS);
-        }else if (GcaSetting.betterSignInteraction && self instanceof WallSignBlock) {
-            Direction direction = state.getValue(WallSignBlock.FACING);
-            BlockPos blockPos = pos.relative(direction, -1);
-            BlockState blockState = level.getBlockState(blockPos);
-            BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(blockPos), direction, blockPos, false);
-            if (blockState.getBlock() instanceof WallSignBlock) return;
-            else blockState.use(level, player, hand, hitResult);
-            cir.setReturnValue(InteractionResult.SUCCESS);
-        }
+//        ItemStack itemStack = player.getItemInHand(hand);
+//        String name = itemStack.getHoverName().getString();
+//        if (GcaSetting.betterSignEditing && itemStack.is(Items.FEATHER) && (name.contains("pen") || name.contains("笔"))) {
+//            SignBlockEntity sign = (SignBlockEntity) level.getBlockEntity(pos);
+//            if (!level.isClientSide && sign != null) {
+//                player.openTextEdit(sign);
+//            }
+//            cir.setReturnValue(InteractionResult.SUCCESS);
+//        }else
+//            if (GcaSetting.betterSignInteraction && self instanceof WallSignBlock) {
+//            Direction direction = state.getValue(WallSignBlock.FACING);
+//            BlockPos blockPos = pos.relative(direction, -1);
+//            BlockState blockState = level.getBlockState(blockPos);
+//            BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(blockPos), direction, blockPos, false);
+//            if (blockState.getBlock() instanceof WallSignBlock) return;
+//            else blockState.use(level, player, hand, hitResult);
+//            cir.setReturnValue(InteractionResult.SUCCESS);
+//        }
     }
 }

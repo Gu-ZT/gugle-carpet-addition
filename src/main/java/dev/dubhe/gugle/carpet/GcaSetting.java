@@ -55,15 +55,21 @@ public class GcaSetting {
     )
     public static boolean betterWoodStrip = false;
 
-    // 右键告示牌时与之附着的方块产生交互
+    //    // 右键告示牌时与之附着的方块产生交互
+//    @Rule(
+//            categories = {GCA, EXPERIMENTAL}
+//    )
+//    public static boolean betterSignInteraction = false;
+//
+//    // 允许使用名称中包含“笔”的羽毛编辑告示牌
+//    @Rule(
+//            categories = {GCA, EXPERIMENTAL}
+//    )
+//    public static boolean betterSignEditing = false;
+//
+    // 快速合成时在物品栏保留一份物品
     @Rule(
             categories = {GCA, EXPERIMENTAL}
     )
-    public static boolean betterSignInteraction = false;
-
-    // 允许使用名称中包含“笔”的羽毛编辑告示牌
-    @Rule(
-            categories = {GCA, EXPERIMENTAL}
-    )
-    public static boolean betterSignEditing = false;
+    public static boolean betterQuickCrafting = false;
 }

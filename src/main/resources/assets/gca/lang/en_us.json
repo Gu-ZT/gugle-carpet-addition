@@ -31,6 +31,9 @@
   "rule.betterSignEditing.name": "Better Sign Editing",
   "rule.betterSignEditing.desc": "Possible to use feather editing sign with \"pen\" in the name",
 
+  "rule.betterQuickCrafting.name": "Better Quick Crafting",
+  "rule.betterQuickCrafting.desc": "Keep an item in the inventory during quick crafting",
+
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",
   "action.use.continuous": "Use continuous: %s",

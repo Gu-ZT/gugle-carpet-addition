@@ -11,6 +11,7 @@
     "ItemStackMixin",
     "PlayerMixin",
     "ServerLevelMixin",
+    "ServerPlaceRecipeMixin",
     "SignBlockMixin"
   ],
   "server": [
