@@ -25,6 +25,12 @@ public class GcaSetting {
     )
     public static boolean fakePlayerResident = false;
 
+    // 退出存档时保留假人动作
+    @Rule(
+            categories = {GCA, EXPERIMENTAL}
+    )
+    public static boolean fakePlayerReloadAction = false;
+
     // 让假人自动补货
     @Rule(
             categories = {GCA, EXPERIMENTAL}
@@ -55,21 +61,21 @@ public class GcaSetting {
     )
     public static boolean betterWoodStrip = false;
 
-    //    // 右键告示牌时与之附着的方块产生交互
-//    @Rule(
-//            categories = {GCA, EXPERIMENTAL}
-//    )
-//    public static boolean betterSignInteraction = false;
-//
-//    // 允许使用名称中包含“笔”的羽毛编辑告示牌
-//    @Rule(
-//            categories = {GCA, EXPERIMENTAL}
-//    )
-//    public static boolean betterSignEditing = false;
-//
+    // 右键告示牌时与之附着的方块产生交互
+    @Rule(
+            categories = {GCA, EXPERIMENTAL}
+    )
+    public static boolean betterSignInteraction = false;
+
     // 快速合成时在物品栏保留一份物品
     @Rule(
             categories = {GCA, EXPERIMENTAL}
     )
     public static boolean betterQuickCrafting = false;
+
+//    // 方便快捷的假人管理菜单
+//    @Rule(
+//            categories = {GCA, EXPERIMENTAL}
+//    )
+//    public static boolean botManagement = false;
 }

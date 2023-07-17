@@ -1,8 +1,12 @@
 package dev.dubhe.gugle.carpet.tools;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -34,6 +38,10 @@ public class FakePlayerResident {
         fakePlayer.addProperty("dimension", dimension);
         fakePlayer.addProperty("gamemode", gamemode);
         fakePlayer.addProperty("flying", flying);
+        if (GcaSetting.fakePlayerReloadAction) {
+            EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
+            fakePlayer.add("actions", apToJson(ap));
+        }
         return fakePlayer;
     }
 
@@ -48,8 +56,42 @@ public class FakePlayerResident {
         String dimension = fakePlayer.get("dimension").getAsString();
         String gamemode = fakePlayer.get("gamemode").getAsString();
         boolean flying = fakePlayer.get("flying").getAsBoolean();
-        EntityPlayerMPFake.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
-                ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
-                GameType.byName(gamemode), flying);
+        if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
+            JsonObject actions = fakePlayer.get("actions").getAsJsonObject();
+            EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
+                    ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
+                    GameType.byName(gamemode), flying);
+            apFromJson(actions, playerMPFake);
+        }
+    }
+
+    static JsonObject apToJson(EntityPlayerActionPack ap) {
+        JsonObject object = new JsonObject();
+        EntityPlayerActionPack.Action attack = ((APAccessor) ap).getActions().get(EntityPlayerActionPack.ActionType.ATTACK);
+        EntityPlayerActionPack.Action use = ((APAccessor) ap).getActions().get(EntityPlayerActionPack.ActionType.USE);
+        EntityPlayerActionPack.Action jump = ((APAccessor) ap).getActions().get(EntityPlayerActionPack.ActionType.JUMP);
+        if (attack != null && !attack.done) object.addProperty("attack", attack.interval);
+        if (use != null && !use.done) object.addProperty("use", use.interval);
+        if (jump != null && !jump.done) object.addProperty("jump", jump.interval);
+        object.addProperty("sneaking", ((APAccessor) ap).getSneaking());
+        object.addProperty("sprinting", ((APAccessor) ap).getSprinting());
+        object.addProperty("forward", ((APAccessor) ap).getForward());
+        object.addProperty("strafing", ((APAccessor) ap).getStrafing());
+        return object;
+    }
+
+    static void apFromJson(JsonObject actions, ServerPlayer player) {
+        EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
+        if (actions.has("sneaking")) ap.setSneaking(actions.get("sneaking").getAsBoolean());
+        if (actions.has("sprinting")) ap.setSprinting(actions.get("sprinting").getAsBoolean());
+        if (actions.has("forward")) ap.setForward(actions.get("forward").getAsFloat());
+        if (actions.has("strafing")) ap.setStrafing(actions.get("strafing").getAsFloat());
+        if (actions.has("attack"))
+            ap.start(EntityPlayerActionPack.ActionType.ATTACK, EntityPlayerActionPack.Action.interval(actions.get("attack").getAsInt()));
+        if (actions.has("use"))
+            ap.start(EntityPlayerActionPack.ActionType.USE, EntityPlayerActionPack.Action.interval(actions.get("use").getAsInt()));
+        if (actions.has("jump"))
+            ap.start(EntityPlayerActionPack.ActionType.JUMP, EntityPlayerActionPack.Action.interval(actions.get("jump").getAsInt()));
+
     }
 }

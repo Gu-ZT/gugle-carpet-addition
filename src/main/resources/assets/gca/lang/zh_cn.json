@@ -10,6 +10,9 @@
   "rule.fakePlayerResident.name": "假人驻留",
   "rule.fakePlayerResident.desc": "退出存档时保留假人",
 
+  "rule.fakePlayerReloadAction.name": "假人动作保存",
+  "rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
+
   "rule.fakePlayerAutoReplenishment.name": "假人补货",
   "rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",
 
@@ -33,6 +36,9 @@
 
   "rule.betterQuickCrafting.name": "更好的快速合成",
   "rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
+
+  "rule.botManagement.name": "假人管理",
+  "rule.botManagement.desc": "一个假人管理菜单",
 
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
