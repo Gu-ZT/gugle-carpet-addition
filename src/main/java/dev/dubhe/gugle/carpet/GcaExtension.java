@@ -4,7 +4,7 @@ import carpet.CarpetExtension;
 import carpet.CarpetServer;
 import carpet.patches.EntityPlayerMPFake;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static String MOD_ID = "gca";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
@@ -64,8 +65,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         CarpetServer.settingsManager.parseSettingsClass(GcaSetting.class);
     }
 
-    @Override
-    public void onServerClosed(MinecraftServer server) {
+    public static void onServerStop(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
             JsonObject fakePlayerList = new JsonObject();
             fakePlayerInventoryContainerMap.forEach((player, fakePlayerInventoryContainer) -> {
@@ -82,7 +82,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
                 }
             }
             try (BufferedWriter bfw = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-                bfw.write(new Gson().toJson(fakePlayerList));
+                bfw.write(GSON.toJson(fakePlayerList));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -98,7 +98,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
                 return;
             }
             try (BufferedReader bfr = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-                fakePlayerList = new Gson().fromJson(bfr, JsonObject.class);
+                fakePlayerList = GSON.fromJson(bfr, JsonObject.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -116,6 +116,5 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onInitialize() {
-
     }
 }

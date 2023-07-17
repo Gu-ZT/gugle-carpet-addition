@@ -1,44 +1,44 @@
 {
-  "category.GCA": "GCA",
+  "carpet.category.GCA": "GCA",
 
-  "rule.openFakePlayerInventory.name": "Fake Player Inventory",
-  "rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
+  "carpet.rule.openFakePlayerInventory.name": "Fake Player Inventory",
+  "carpet.rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
 
-  "rule.openFakePlayerEnderChest.name": "Fake Player Ender Chest",
-  "rule.openFakePlayerEnderChest.desc": "Allow player to open the fake player's ender chest",
+  "carpet.rule.openFakePlayerEnderChest.name": "Fake Player Ender Chest",
+  "carpet.rule.openFakePlayerEnderChest.desc": "Allow player to open the fake player's ender chest",
 
-  "rule.fakePlayerResident.name": "Fake Player Resident",
-  "rule.fakePlayerResident.desc": "Keep the fake player when exiting the level",
+  "carpet.rule.fakePlayerResident.name": "Fake Player Resident",
+  "carpet.rule.fakePlayerResident.desc": "Keep the fake player when exiting the level",
 
-  "rule.fakePlayerReloadAction.name": "Fake Player Reload Action",
-  "rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",
+  "carpet.rule.fakePlayerReloadAction.name": "Fake Player Reload Action",
+  "carpet.rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",
 
-  "rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
-  "rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",
+  "carpet.rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
+  "carpet.rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",
 
-  "rule.fakePlayerAutoFish.name": "Fake Player Auto Fish",
-  "rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
+  "carpet.rule.fakePlayerAutoFish.name": "Fake Player Auto Fish",
+  "carpet.rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
 
-  "rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
-  "rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
+  "carpet.rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
 
-  "rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
-  "rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",
+  "carpet.rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
+  "carpet.rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",
 
-  "rule.betterWoodStrip.name": "Better Wood Strip",
-  "rule.betterWoodStrip.desc": "Only the axe with \"Strip\" in its name is allowed to peel logs",
+  "carpet.rule.betterWoodStrip.name": "Better Wood Strip",
+  "carpet.rule.betterWoodStrip.desc": "Only the axe with \"Strip\" in its name is allowed to peel logs",
 
-  "rule.betterSignInteraction.name": "Better Sign Interaction",
-  "rule.betterSignInteraction.desc": "Make the block attached to the sign interact when you right-click it",
+  "carpet.rule.betterSignInteraction.name": "Better Sign Interaction",
+  "carpet.rule.betterSignInteraction.desc": "Make the block attached to the sign interact when you right-click it",
 
-  "rule.betterSignEditing.name": "Better Sign Editing",
-  "rule.betterSignEditing.desc": "Possible to use feather editing sign with \"pen\" in the name",
+  "carpet.rule.betterSignEditing.name": "Better Sign Editing",
+  "carpet.rule.betterSignEditing.desc": "Possible to use feather editing sign with \"pen\" in the name",
 
-  "rule.betterQuickCrafting.name": "Better Quick Crafting",
-  "rule.betterQuickCrafting.desc": "Keep an item in the inventory during quick crafting",
+  "carpet.rule.betterQuickCrafting.name": "Better Quick Crafting",
+  "carpet.rule.betterQuickCrafting.desc": "Keep an item in the inventory during quick crafting",
 
-  "rule.botManagement.name": "Bot Management",
-  "rule.botManagement.desc": "A Bot Management Menu",
+  "carpet.rule.botManagement.name": "Bot Management",
+  "carpet.rule.botManagement.desc": "A Bot Management Menu",
 
   "action.attack.interval.14": "Attack every 14 gt: %s",
   "action.attack.continuous": "Attack continuous: %s",

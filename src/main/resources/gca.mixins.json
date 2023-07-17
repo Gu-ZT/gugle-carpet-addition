@@ -14,10 +14,10 @@
     "PlayerMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",
-    "SignBlockMixin"
+    "SignBlockMixin",
+    "MinecraftServerMixin"
   ],
   "server": [
-    "MinecraftServerMixin"
   ],
   "client": [
     "ServerPlayerMixin"

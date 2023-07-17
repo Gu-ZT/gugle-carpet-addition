@@ -1,44 +1,44 @@
 {
-  "category.GCA": "GCA",
+  "carpet.category.GCA": "GCA",
 
-  "rule.openFakePlayerInventory.name": "假人背包",
-  "rule.openFakePlayerInventory.desc": "允许玩家打开假人背包",
+  "carpet.rule.openFakePlayerInventory.name": "假人背包",
+  "carpet.rule.openFakePlayerInventory.desc": "允许玩家打开假人背包",
 
-  "rule.openFakePlayerEnderChest.name": "假人末影箱",
-  "rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
+  "carpet.rule.openFakePlayerEnderChest.name": "假人末影箱",
+  "carpet.rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
 
-  "rule.fakePlayerResident.name": "假人驻留",
-  "rule.fakePlayerResident.desc": "退出存档时保留假人",
+  "carpet.rule.fakePlayerResident.name": "假人驻留",
+  "carpet.rule.fakePlayerResident.desc": "退出存档时保留假人",
 
-  "rule.fakePlayerReloadAction.name": "假人动作保存",
-  "rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
+  "carpet.rule.fakePlayerReloadAction.name": "假人动作保存",
+  "carpet.rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
 
-  "rule.fakePlayerAutoReplenishment.name": "假人补货",
-  "rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",
+  "carpet.rule.fakePlayerAutoReplenishment.name": "假人补货",
+  "carpet.rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",
 
-  "rule.fakePlayerAutoFish.name": "假人钓鱼",
-  "rule.fakePlayerAutoFish.desc": "让假人自动钓鱼",
+  "carpet.rule.fakePlayerAutoFish.name": "假人钓鱼",
+  "carpet.rule.fakePlayerAutoFish.desc": "让假人自动钓鱼",
 
-  "rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
-  "rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换快损坏的工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换快损坏的工具",
 
-  "rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
-  "rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",
+  "carpet.rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
+  "carpet.rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",
 
-  "rule.betterWoodStrip.name": "更好的原木去皮",
-  "rule.betterWoodStrip.desc": "仅允许名称中包含“去皮”的斧头对原木去皮",
+  "carpet.rule.betterWoodStrip.name": "更好的原木去皮",
+  "carpet.rule.betterWoodStrip.desc": "仅允许名称中包含“去皮”的斧头对原木去皮",
 
-  "rule.betterSignInteraction.name": "更好的告示牌交互",
-  "rule.betterSignInteraction.desc": "右键告示牌时与之附着的方块产生交互",
+  "carpet.rule.betterSignInteraction.name": "更好的告示牌交互",
+  "carpet.rule.betterSignInteraction.desc": "右键告示牌时与之附着的方块产生交互",
 
-  "rule.betterSignEditing.name": "更好的告示牌编辑",
-  "rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
+  "carpet.rule.betterSignEditing.name": "更好的告示牌编辑",
+  "carpet.rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
 
-  "rule.betterQuickCrafting.name": "更好的快速合成",
-  "rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
+  "carpet.rule.betterQuickCrafting.name": "更好的快速合成",
+  "carpet.rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
 
-  "rule.botManagement.name": "假人管理",
-  "rule.botManagement.desc": "一个假人管理菜单",
+  "carpet.rule.botManagement.name": "假人管理",
+  "carpet.rule.botManagement.desc": "一个假人管理菜单",
 
   "action.attack.interval.14": "间隔14gt攻击：%s",
   "action.attack.continuous": "一直左键： %s",
