@@ -19,7 +19,7 @@ public class FakePlayerAutoReplenishment {
     public static void replenishment(ItemStack itemStack, NonNullList<ItemStack> itemStackList) {
         int count = itemStack.getMaxStackSize() / 2;
         if (!itemStack.isEmpty() && itemStack.getCount() <= 8 && count > 8) {
-            for (ItemStack itemStack1 : itemStackList) {
+            global: for (ItemStack itemStack1 : itemStackList) {
                 if (itemStack1 == ItemStack.EMPTY || itemStack1 == itemStack) continue;
                 if (ItemStack.isSameItemSameTags(itemStack1, itemStack)) {
                     if (itemStack1.getCount() > count) {
@@ -53,7 +53,7 @@ public class FakePlayerAutoReplenishment {
                                         newTag.putByte("Slot", tag.getByte("Slot"));
                                         tagList.set(i, newTag);
                                     }
-                                    break;
+                                    break global;
                                 }
                             }
                         }
