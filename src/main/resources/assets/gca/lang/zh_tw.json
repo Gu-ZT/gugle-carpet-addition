@@ -1,0 +1,43 @@
+{
+  "category.GCA": "GCA",
+
+  "rule.openFakePlayerInventory.name": "假人物品欄",
+  "rule.openFakePlayerInventory.desc": "允許玩家開啟假人的物品欄",
+
+  "rule.openFakePlayerEnderChest.name": "假人終界箱",
+  "rule.openFakePlayerEnderChest.desc": "允許玩家開啟假人的終界箱",
+
+  "rule.fakePlayerResident.name": "假人駐留",
+  "rule.fakePlayerResident.desc": "在玩家離開世界時保留假人",
+
+  "rule.fakePlayerAutoReplenishment.name": "假人自動補充物品",
+  "rule.fakePlayerAutoReplenishment.desc": "讓假人自動補充物品",
+
+  "rule.fakePlayerAutoFish.name": "假人自動釣魚",
+  "rule.fakePlayerAutoFish.desc": "讓假人自動釣魚",
+
+  "rule.fakePlayerAutoReplaceTool.name": "假人自動切換工具",
+  "rule.fakePlayerAutoReplaceTool.desc": "讓假人自動替換快損壞的工具",
+
+  "rule.betterFenceGatePlacement.name": "更好的柵欄門放置",
+  "rule.betterFenceGatePlacement.desc": "讓放置的柵欄門具有與您點擊的柵欄門相同的方塊狀態",
+
+  "rule.betterWoodStrip.name": "更好的原木去皮",
+  "rule.betterWoodStrip.desc": "僅允許名稱中包含「去皮」的斧頭對原木去皮",
+
+  "rule.betterSignInteraction.name": "更好的告示牌互動",
+  "rule.betterSignInteraction.desc": "右鍵點擊告示牌時與附著的方塊產生互動",
+
+  "rule.betterSignEditing.name": "更好的告示牌編輯",
+  "rule.betterSignEditing.desc": "可以使用名稱中包含「pen」的羽毛編輯告示牌",
+
+  "action.attack.interval.14": "間隔 14 gt：%s",
+  "action.attack.continuous": "連續攻擊：%s",
+  "action.use.continuous": "連續使用：%s",
+  "action.stop_all": "停止所有動作",
+
+  "gac.hotbar": "快捷欄：%s",
+
+  "on": "開啟",
+  "off": "關閉"
+}
