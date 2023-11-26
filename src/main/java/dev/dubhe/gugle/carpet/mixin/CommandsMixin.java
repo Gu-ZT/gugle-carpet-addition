@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
 import com.mojang.brigadier.CommandDispatcher;
-import dev.dubhe.gugle.carpet.commands.BotCommand;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,7 +17,7 @@ public class CommandsMixin {
     @Final
     private CommandDispatcher<CommandSourceStack> dispatcher;
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;setConsumer(Lcom/mojang/brigadier/ResultConsumer;)V"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/CommandDispatcher;setConsumer(Lcom/mojang/brigadier/ResultConsumer;)V"), remap = false)
     private void register(Commands.CommandSelection commandSelection, CommandBuildContext commandBuildContext, CallbackInfo ci) {
         //BotCommand.register(this.dispatcher);
     }
