@@ -2,7 +2,7 @@ name: Build Mod
 
 on:
   push:
-    branches: [ '1.20.2' ]
+    branches: [ '1.20.4' ]
     paths:
       - src/**
       - build.gradle
