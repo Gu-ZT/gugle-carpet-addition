@@ -93,7 +93,6 @@ public class FakePlayerResident {
             server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(current, 0, instance.clientInformation()));
             instance.teleportTo(worldIn, pos.x, pos.y, pos.z, (float) yaw, (float) pitch);
             instance.setHealth(20.0F);
-            ((EntityInvoker) instance).unsetRemoved();
             instance.setMaxUpStep(0.6F);
             instance.gameMode.changeGameModeForPlayer(gamemode);
             server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))), dimensionId);
@@ -102,6 +101,7 @@ public class FakePlayerResident {
             instance.getAbilities().flying = flying;
 
             apFromJson(actions, instance);
+            ((EntityInvoker) instance).unsetRemoved();
         });
     }
 
