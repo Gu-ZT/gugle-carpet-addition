@@ -3,6 +3,7 @@ package dev.dubhe.gugle.carpet.mixin;
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -15,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(Player.class)
 public abstract class PlayerMixin {
@@ -36,8 +36,7 @@ public abstract class PlayerMixin {
             SimpleMenuProvider provider = null;
             if (player.isShiftKeyDown() && GcaSetting.openFakePlayerEnderChest) {
                 provider = new SimpleMenuProvider(
-                        (i, inventory, p) -> ChestMenu.threeRows(i, inventory,
-                                fakePlayer.getEnderChestInventory()),
+                        (i, inventory, p) -> new FakePlayerEnderChestContainer(i, inventory, fakePlayer),
                         fakePlayer.getDisplayName());
             } else if (GcaSetting.openFakePlayerInventory) {
                 provider = new SimpleMenuProvider((i, inventory, p) -> ChestMenu.sixRows(i, inventory,
