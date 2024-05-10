@@ -1,43 +1,57 @@
 {
-  "category.GCA": "GCA",
+  "carpet.category.GCA": "GCA",
 
-  "rule.openFakePlayerInventory.name": "假人物品欄",
-  "rule.openFakePlayerInventory.desc": "允許玩家開啟假人的物品欄",
+  "carpet.rule.openFakePlayerInventory.name": "假人物品欄",
+  "carpet.rule.openFakePlayerInventory.desc": "允許玩家開啟假人的物品欄",
 
-  "rule.openFakePlayerEnderChest.name": "假人終界箱",
-  "rule.openFakePlayerEnderChest.desc": "允許玩家開啟假人的終界箱",
+  "carpet.rule.openFakePlayerEnderChest.name": "假人終界箱",
+  "carpet.rule.openFakePlayerEnderChest.desc": "允許玩家開啟假人的終界箱",
 
-  "rule.fakePlayerResident.name": "假人駐留",
-  "rule.fakePlayerResident.desc": "在玩家離開世界時保留假人",
+  "carpet.rule.fakePlayerResident.name": "假人駐留",
+  "carpet.rule.fakePlayerResident.desc": "在玩家離開世界時保留假人",
 
-  "rule.fakePlayerAutoReplenishment.name": "假人自動補充物品",
-  "rule.fakePlayerAutoReplenishment.desc": "讓假人自動補充物品",
+  "carpet.rule.fakePlayerAutoReplenishment.name": "假人自動補充物品",
+  "carpet.rule.fakePlayerAutoReplenishment.desc": "讓假人自動補充物品",
 
-  "rule.fakePlayerAutoFish.name": "假人自動釣魚",
-  "rule.fakePlayerAutoFish.desc": "讓假人自動釣魚",
+  "carpet.rule.fakePlayerAutoFish.name": "假人自動釣魚",
+  "carpet.rule.fakePlayerAutoFish.desc": "讓假人自動釣魚",
 
-  "rule.fakePlayerAutoReplaceTool.name": "假人自動切換工具",
-  "rule.fakePlayerAutoReplaceTool.desc": "讓假人自動替換快損壞的工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.name": "假人自動切換工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "讓假人自動替換快損壞的工具",
 
-  "rule.betterFenceGatePlacement.name": "更好的柵欄門放置",
-  "rule.betterFenceGatePlacement.desc": "讓放置的柵欄門具有與您點擊的柵欄門相同的方塊狀態",
+  "carpet.rule.betterFenceGatePlacement.name": "更好的柵欄門放置",
+  "carpet.rule.betterFenceGatePlacement.desc": "讓放置的柵欄門具有與您點擊的柵欄門相同的方塊狀態",
 
-  "rule.betterWoodStrip.name": "更好的原木去皮",
-  "rule.betterWoodStrip.desc": "僅允許名稱中包含「去皮」的斧頭對原木去皮",
+  "carpet.rule.betterWoodStrip.name": "更好的原木去皮",
+  "carpet.rule.betterWoodStrip.desc": "僅允許名稱中包含「去皮」的斧頭對原木去皮",
 
-  "rule.betterSignInteraction.name": "更好的告示牌互動",
-  "rule.betterSignInteraction.desc": "右鍵點擊告示牌時與附著的方塊產生互動",
+  "carpet.rule.betterSignInteraction.name": "更好的告示牌互動",
+  "carpet.rule.betterSignInteraction.desc": "右鍵點擊告示牌時與附著的方塊產生互動",
 
-  "rule.betterSignEditing.name": "更好的告示牌編輯",
-  "rule.betterSignEditing.desc": "可以使用名稱中包含「pen」的羽毛編輯告示牌",
+  "carpet.rule.betterSignEditing.name": "更好的告示牌編輯",
+  "carpet.rule.betterSignEditing.desc": "可以使用名稱中包含「pen」的羽毛編輯告示牌",
 
-  "action.attack.interval.14": "間隔 14 gt：%s",
-  "action.attack.continuous": "連續攻擊：%s",
-  "action.use.continuous": "連續使用：%s",
-  "action.stop_all": "停止所有動作",
+  "carpet.rule.fakePlayerReloadAction.name": "Fake Player Reload Action",
+  "carpet.rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",
 
-  "gac.hotbar": "快捷欄：%s",
+  "carpet.rule.betterQuickCrafting.name": "Better Quick Crafting",
+  "carpet.rule.betterQuickCrafting.desc": "Keep an item in the inventory during quick crafting",
 
-  "on": "開啟",
-  "off": "關閉"
+  "carpet.rule.botManagement.name": "Bot Management",
+  "carpet.rule.botManagement.desc": "A Bot Management Menu",
+
+  "gca.action.attack.interval.12": "間隔 12 gt攻擊：%s",
+  "gca.action.attack.continuous": "連續攻擊：%s",
+  "gca.action.use.continuous": "連續使用：%s",
+  "gca.action.stop_all": "停止所有動作",
+
+  "gca.hotbar": "快捷欄：%s",
+
+  "gca.button.none": "暫無功能",
+  "gca.button.on": "開啟",
+  "gca.button.off": "關閉",
+
+  "gca.player.ender_chest": "%s 的終界箱",
+  "gca.player.other_controller": "%s 的額外控制面板",
+  "gca.player.inventory": "%s 的物品欄"
 }

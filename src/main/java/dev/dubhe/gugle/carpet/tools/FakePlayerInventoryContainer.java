@@ -5,8 +5,6 @@ import carpet.helpers.EntityPlayerActionPack;
 import carpet.helpers.EntityPlayerActionPack.Action;
 import carpet.helpers.EntityPlayerActionPack.ActionType;
 import com.google.common.collect.ImmutableList;
-import com.mojang.datafixers.util.Pair;
-import dev.dubhe.gugle.carpet.api.menu.CustomMenu;
 import dev.dubhe.gugle.carpet.api.menu.control.AutoResetButton;
 import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import dev.dubhe.gugle.carpet.api.menu.control.RadioList;
@@ -15,25 +13,23 @@ import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class FakePlayerInventoryContainer extends CustomMenu {
-
+public class FakePlayerInventoryContainer extends FakePlayerContainer {
     public final NonNullList<ItemStack> items;
     public final NonNullList<ItemStack> armor;
     public final NonNullList<ItemStack> offhand;
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(13, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> compartments;
-    private final Player player;
     private final EntityPlayerActionPack ap;
 
     public FakePlayerInventoryContainer(Player player) {
-        this.player = player;
+        super(player);
         this.items = this.player.getInventory().items;
         this.armor = this.player.getInventory().armor;
         this.offhand = this.player.getInventory().offhand;
@@ -71,100 +67,35 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         return true;
     }
 
-    @Override
-    public ItemStack getItem(int slot) {
-        Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
-        if (pair != null) {
-            return pair.getFirst().get(pair.getSecond());
-        } else {
-            return ItemStack.EMPTY;
-        }
-    }
-
-    public Pair<NonNullList<ItemStack>, Integer> getItemSlot(int slot) {
+    public Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot) {
         switch (slot) {
             case 0 -> {
-                return new Pair<>(buttons, 0);
+                return Map.entry(buttons, 0);
             }
             case 1, 2, 3, 4 -> {
-                return new Pair<>(armor, 4 - slot);
+                return Map.entry(armor, 4 - slot);
             }
             case 5, 6 -> {
-                return new Pair<>(buttons, slot - 4);
+                return Map.entry(buttons, slot - 4);
             }
             case 7 -> {
-                return new Pair<>(offhand, 0);
+                return Map.entry(offhand, 0);
             }
             case 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> {
-                return new Pair<>(buttons, slot - 5);
+                return Map.entry(buttons, slot - 5);
             }
             case 18, 19, 20, 21, 22, 23, 24, 25, 26,
-                    27, 28, 29, 30, 31, 32, 33, 34, 35,
-                    36, 37, 38, 39, 40, 41, 42, 43, 44 -> {
-                return new Pair<>(items, slot - 9);
+                 27, 28, 29, 30, 31, 32, 33, 34, 35,
+                 36, 37, 38, 39, 40, 41, 42, 43, 44 -> {
+                return Map.entry(items, slot - 9);
             }
             case 45, 46, 47, 48, 49, 50, 51, 52, 53 -> {
-                return new Pair<>(items, slot - 45);
+                return Map.entry(items, slot - 45);
             }
             default -> {
                 return null;
             }
         }
-    }
-
-    @Override
-    public ItemStack removeItem(int slot, int amount) {
-        Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
-        NonNullList<ItemStack> list = null;
-        if (pair != null) {
-            list = pair.getFirst();
-            slot = pair.getSecond();
-        }
-        if (list != null && !list.get(slot).isEmpty()) {
-            return ContainerHelper.removeItem(list, slot, amount);
-        }
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public ItemStack removeItemNoUpdate(int slot) {
-        Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
-        NonNullList<ItemStack> list = null;
-        if (pair != null) {
-            list = pair.getFirst();
-            slot = pair.getSecond();
-        }
-        if (list != null && !list.get(slot).isEmpty()) {
-            ItemStack itemStack = list.get(slot);
-            list.set(slot, ItemStack.EMPTY);
-            return itemStack;
-        }
-        return ItemStack.EMPTY;
-    }
-
-    @Override
-    public void setItem(int slot, ItemStack stack) {
-        Pair<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
-        NonNullList<ItemStack> list = null;
-        if (pair != null) {
-            list = pair.getFirst();
-            slot = pair.getSecond();
-        }
-        if (list != null) {
-            list.set(slot, stack);
-        }
-    }
-
-    @Override
-    public void setChanged() {
-    }
-
-    @Override
-    public boolean stillValid(Player player) {
-        if (this.player.isRemoved()) {
-            return false;
-        }
-        return !(player.distanceToSqr(this.player) > 64.0);
     }
 
     @Override
@@ -178,15 +109,15 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         List<Button> hotBarList = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             Component hotBarComponent = ComponentTranslate.trans(
-                    "gac.hotbar",
-                    Color.WHITE,
-                    Style.EMPTY.withBold(true).withItalic(false),
-                    i + 1
+                "gca.hotbar",
+                Color.WHITE,
+                Style.EMPTY.withBold(true).withItalic(false),
+                i + 1
             );
             boolean defaultState = i == 0;
             Button button = new Button(defaultState, i + 1,
-                    hotBarComponent,
-                    hotBarComponent
+                hotBarComponent,
+                hotBarComponent
             );
             int finalI = i + 1;
             button.addTurnOnFunction(() -> ap.setSlot(finalI));
@@ -195,10 +126,10 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         }
         this.addButtonList(new RadioList(hotBarList, true));
 
-        Button stopAll = new AutoResetButton("action.stop_all");
-        Button attackInterval14 = new Button(false, "action.attack.interval.14");
-        Button attackContinuous = new Button(false, "action.attack.continuous");
-        Button useContinuous = new Button(false, "action.use.continuous");
+        Button stopAll = new AutoResetButton("gca.action.stop_all");
+        Button attackInterval14 = new Button(false, "gca.action.attack.interval.12");
+        Button attackContinuous = new Button(false, "gca.action.attack.continuous");
+        Button useContinuous = new Button(false, "gca.action.use.continuous");
 
         stopAll.addTurnOnFunction(() -> {
             attackInterval14.turnOffWithoutFunction();
@@ -208,7 +139,7 @@ public class FakePlayerInventoryContainer extends CustomMenu {
         });
 
         attackInterval14.addTurnOnFunction(() -> {
-            ap.start(ActionType.ATTACK, Action.interval(14));
+            ap.start(ActionType.ATTACK, Action.interval(12));
             attackContinuous.turnOffWithoutFunction();
         });
         attackInterval14.addTurnOffFunction(() -> ap.start(ActionType.ATTACK, Action.once()));

@@ -40,13 +40,18 @@
   "carpet.rule.botManagement.name": "Bot Management",
   "carpet.rule.botManagement.desc": "A Bot Management Menu",
 
-  "action.attack.interval.14": "Attack every 14 gt: %s",
-  "action.attack.continuous": "Attack continuous: %s",
-  "action.use.continuous": "Use continuous: %s",
-  "action.stop_all": "Stop all action",
+  "gca.action.attack.interval.12": "Attack every 12 gt: %s",
+  "gca.action.attack.continuous": "Attack continuous: %s",
+  "gca.action.use.continuous": "Use continuous: %s",
+  "gca.action.stop_all": "Stop all action",
 
-  "gac.hotbar": "Hotbar: %s",
+  "gca.hotbar": "Hotbar: %s",
 
-  "on": "on",
-  "off": "off"
+  "gca.button.none": "No function at this time",
+  "gca.button.on": "on",
+  "gca.button.off": "off",
+
+  "gca.player.ender_chest": "%s's Ender Chest",
+  "gca.player.other_controller": "%s's Other Controller",
+  "gca.player.inventory": "%s's Inventory"
 }

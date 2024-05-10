@@ -13,17 +13,19 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SignBlock.class)
-public abstract class SignBlockMixin {
-    private final SignBlock self = (SignBlock) (Object) this;
+abstract class SignBlockMixin {
+    @Unique
+    private final SignBlock gca$self = (SignBlock) (Object) this;
 
     @Inject(method = "use", at = @At(value = "INVOKE",target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;)V"), cancellable = true)
     public void use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit, CallbackInfoReturnable<InteractionResult> cir) {
-        if (GcaSetting.betterSignInteraction && self instanceof WallSignBlock) {
+        if (GcaSetting.betterSignInteraction && gca$self instanceof WallSignBlock) {
             Direction direction = state.getValue(WallSignBlock.FACING);
             BlockPos blockPos = pos.relative(direction, -1);
             BlockState blockState = level.getBlockState(blockPos);

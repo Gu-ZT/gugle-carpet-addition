@@ -15,12 +15,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
 public class FakePlayerResident {
 
-    public static JsonObject save(Player player) {
+    public static @NotNull JsonObject save(@NotNull Player player) {
         double pos_x = player.getX();
         double pos_y = player.getY();
         double pos_z = player.getZ();
@@ -45,7 +46,7 @@ public class FakePlayerResident {
         return fakePlayer;
     }
 
-    public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
+    public static void load(Map.@NotNull Entry<String, JsonElement> entry, MinecraftServer server) {
         String username = entry.getKey();
         JsonObject fakePlayer = entry.getValue().getAsJsonObject();
         double pos_x = fakePlayer.get("pos_x").getAsDouble();
@@ -65,7 +66,7 @@ public class FakePlayerResident {
         }
     }
 
-    static JsonObject apToJson(EntityPlayerActionPack ap) {
+    static @NotNull JsonObject apToJson(EntityPlayerActionPack ap) {
         JsonObject object = new JsonObject();
         EntityPlayerActionPack.Action attack = ((APAccessor) ap).getActions().get(EntityPlayerActionPack.ActionType.ATTACK);
         EntityPlayerActionPack.Action use = ((APAccessor) ap).getActions().get(EntityPlayerActionPack.ActionType.USE);
@@ -80,7 +81,7 @@ public class FakePlayerResident {
         return object;
     }
 
-    static void apFromJson(JsonObject actions, ServerPlayer player) {
+    static void apFromJson(@NotNull JsonObject actions, ServerPlayer player) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
         if (actions.has("sneaking")) ap.setSneaking(actions.get("sneaking").getAsBoolean());
         if (actions.has("sprinting")) ap.setSprinting(actions.get("sprinting").getAsBoolean());

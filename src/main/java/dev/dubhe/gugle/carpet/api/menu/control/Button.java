@@ -10,19 +10,17 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 public class Button {
-
     private boolean init = false;
     private boolean flag;
-    private final Item onItem;
-    private final Item offItem;
-    private final int itemCount;
-    private final Component onText;
-    private final Component offText;
+    private final ItemStack onItem;
+    private final ItemStack offItem;
     CompoundTag compoundTag = new CompoundTag();
 
     private final List<Function> turnOnFunctions = new ArrayList<>();
@@ -51,8 +49,8 @@ public class Button {
 
     public Button(boolean defaultState, String key) {
         this(defaultState, Items.BARRIER, Items.STRUCTURE_VOID, 1,
-                ComponentTranslate.trans(key, Color.GREEN, Style.EMPTY.withBold(true).withItalic(false), "on"),
-                ComponentTranslate.trans(key, Color.RED, Style.EMPTY.withBold(true).withItalic(false), "off")
+            ComponentTranslate.trans(key, Color.GREEN, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.on")),
+            ComponentTranslate.trans(key, Color.RED, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.off"))
         );
     }
 
@@ -62,30 +60,42 @@ public class Button {
 
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount) {
         this(defaultState, onItem, offItem, itemCount,
-                ComponentTranslate.trans("on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
-                ComponentTranslate.trans("off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
+            ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
+            ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
         );
     }
 
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount, Component onText, Component offText) {
         this.flag = defaultState;
-        this.onText = onText;
-        this.offText = offText;
-        this.onItem = onItem;
-        this.offItem = offItem;
-        this.itemCount = itemCount;
         this.compoundTag.putBoolean("GcaClear", true);
+
+        ItemStack onItemStack = new ItemStack(onItem, itemCount);
+        onItemStack.setTag(compoundTag.copy());
+        onItemStack.setHoverName(onText);
+        this.onItem = onItemStack;
+
+        ItemStack offItemStack = new ItemStack(offItem, itemCount);
+        offItemStack.setTag(compoundTag.copy());
+        offItemStack.setHoverName(offText);
+        this.offItem = offItemStack;
+    }
+
+    public Button(boolean defaultState, @NotNull ItemStack onItem, @NotNull ItemStack offItem) {
+        this.flag = defaultState;
+        this.compoundTag.putBoolean("GcaClear", true);
+
+        ItemStack onItemStack = onItem.copy();
+        onItemStack.setTag(compoundTag.copy());
+        this.onItem = onItemStack;
+
+        ItemStack offItemStack = offItem.copy();
+        offItemStack.setTag(compoundTag.copy());
+        this.offItem = offItemStack;
     }
 
     public void checkButton(Container container, int slot) {
-        ItemStack onItemStack = new ItemStack(this.onItem, this.itemCount);
-        onItemStack.setTag(compoundTag.copy());
-        onItemStack.setHoverName(this.onText);
-
-        ItemStack offItemStack = new ItemStack(this.offItem, this.itemCount);
-        offItemStack.setTag(compoundTag.copy());
-        offItemStack.setHoverName(this.offText);
-
+        ItemStack onItemStack = this.onItem.copy();
+        ItemStack offItemStack = this.offItem.copy();
         if (!this.init) {
             updateButton(container, slot, onItemStack, offItemStack);
             this.init = true;
@@ -105,11 +115,11 @@ public class Button {
         updateButton(container, slot, onItemStack, offItemStack);
     }
 
-    public void updateButton(Container container, int slot, ItemStack onItemStack, ItemStack offItemStack) {
+    public void updateButton(@NotNull Container container, int slot, @NotNull ItemStack onItemStack, ItemStack offItemStack) {
         if (!(
-                container.getItem(slot).is(onItemStack.getItem()) ||
-                        container.getItem(slot).is(offItemStack.getItem()) ||
-                        container.getItem(slot).isEmpty()
+            container.getItem(slot).is(onItemStack.getItem()) ||
+                container.getItem(slot).is(offItemStack.getItem()) ||
+                container.getItem(slot).isEmpty()
         )) {
             return;
         }

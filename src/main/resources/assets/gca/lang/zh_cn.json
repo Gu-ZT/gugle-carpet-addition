@@ -40,13 +40,18 @@
   "carpet.rule.botManagement.name": "假人管理",
   "carpet.rule.botManagement.desc": "一个假人管理菜单",
 
-  "action.attack.interval.14": "间隔14gt攻击：%s",
-  "action.attack.continuous": "一直左键： %s",
-  "action.use.continuous": "一直右键：%s",
-  "action.stop_all": "停止所有动作",
+  "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",
+  "gca.action.attack.continuous": "一直左键： %s",
+  "gca.action.use.continuous": "一直右键：%s",
+  "gca.action.stop_all": "停止所有动作",
 
-  "gac.hotbar": "快捷栏：%s",
+  "gca.hotbar": "快捷栏：%s",
 
-  "on": "开启",
-  "off": "关闭"
+  "gca.button.none": "暂无功能",
+  "gca.button.on": "开启",
+  "gca.button.off": "关闭",
+
+  "gca.player.ender_chest": "%s 的末影箱",
+  "gca.player.other_controller": "%s 的额外控制面板",
+  "gca.player.inventory": "%s 的背包"
 }
