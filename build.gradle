@@ -3,8 +3,12 @@ plugins {
     id 'maven-publish'
 }
 
-version = project.mod_version + "-" + project.minecraft_version
+version = "mc" + project.minecraft_version + "-" + project.mod_version
 group = project.maven_group
+
+if (build_number != "undefined") {
+    version += "+build.${build_number}"
+}
 
 repositories {
 //    maven {

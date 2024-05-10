@@ -1,8 +1,10 @@
 name: Build Mod
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ '1.20.x' ]
+    branches:
+      - fabric/**
     paths:
       - src/**
       - build.gradle
@@ -11,23 +13,93 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 17 ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+
     steps:
-      - name: Check out
-        uses: actions/checkout@v2
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
+      - name: checkout
+        uses: actions/checkout@v3.1.0
+
+      - name: validate gradle wrapper
+        uses: gradle/wrapper-validation-action@v1
+
+      - name: setup java ${{ matrix.java }}
+        uses: actions/setup-java@v3.6.0
         with:
-          java-version: '17'
-          distribution: 'adopt'
+          distribution: 'zulu'
+          java-version: ${{ matrix.java }}
+
+      - name: Setup cache
+        uses: actions/cache@v3.0.11
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+
+      - name: make gradle wrapper executable
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+
       - name: Set build number
         run: sed -i "s/undefined/$GITHUB_RUN_NUMBER/g" gradle.properties
-      - name: Grant execute permission
-        run: chmod +x gradlew
-      - name: Build with Gradle
+
+      - name: build
         run: ./gradlew build
-      - name: Publish artifacts
-        uses: actions/upload-artifact@v2
+
+      - name: Find correct JAR
+        id: find-jar
+        run: |
+          output="$(find build/libs/ ! -name "*-dev.jar" ! -name "*-sources.jar" -type f -printf "%f\n")"
+          echo "jarname=$output" >> $GITHUB_OUTPUT
+          echo "jarname=$output"
+
+      - name: Get name
+        id: get-name
+        run: |
+          output="$(find build/libs/ ! -name "*-dev.jar" ! -name "*-sources.jar" -type f -printf "%f\n")"
+          output_without_extension="${output%.jar}"
+          echo "name=$output_without_extension" >> $GITHUB_OUTPUT
+          echo "name=$output_without_extension"
+
+      - name: Get Version
+        id: version
+        run: |
+          MESSAGE=$(ls build/libs/* | grep dev.jar -v | grep sources.jar -v | awk -F 'gugle-carpet-addition-|.jar' '{print $2}')
+          echo "version=$MESSAGE" >> $GITHUB_OUTPUT
+          echo "version=$MESSAGE"
+
+      - name: capture build artifacts
+        if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
+        uses: actions/upload-artifact@v3.1.1
         with:
-          name: Artifacts for ${{ github.sha }}
-          path: build/libs/
+          name: ${{ steps.get-name.outputs.name }}
+          path: build/libs/${{ steps.find-jar.outputs.jarname }}
+
+      - name: publish mc mod
+        uses: Kir-Antipov/mc-publish@v3.3
+        continue-on-error: true
+        with:
+          name: GugleCarpetAddition ${{ steps.version.outputs.version }}
+          version: ${{ steps.version.outputs.version }}
+          game-versions: 1.20.1
+          version-type: release
+          java: 17
+          loaders: |
+            fabric
+            quilt
+          dependencies: carpet@1.4.112(required){modrinth:TQTTVgYE}{curseforge:349239}
+
+          fail-mode: skip
+
+          modrinth-id: UHjbX5mk
+          modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+          modrinth-featured: true
+
+          curseforge-id: 662867
+          curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+
+          files: build/libs/${{ steps.find-jar.outputs.jarname }}
