@@ -1,0 +1,24 @@
+name: TODO
+description: Add a to-do list for a project - 添加一个项目的待做事项
+title: "[TODO] "
+labels:
+  - 📋️ TODO
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        这是一个项目内部使用的 `issue` 模板，请不要使用这个模板！
+        This is an internal `issue` template for a project, please do not use this template!
+
+  - type: input
+    attributes:
+      label: Matters to be added to TODO - 将要加入TODO的事项
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Describe what this TODO will do - 描述这个TODO要做的事情
+    validations:
+      required: false

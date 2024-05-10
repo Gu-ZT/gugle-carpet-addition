@@ -1,0 +1,29 @@
+name: Feature request - 功能请求
+description: Suggest an idea for this project - 为这个项目推荐一个新想法
+title: "[Feature] "
+labels:
+  - 🪁 enhancement
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filling in this `issue`, please make sure that there are no similar or duplicate `issues` that have been opened.
+        填写此 `issue` 前，请先确认已经开启的 `issue` 没有类似或重复的 `issue`。
+
+  - type: textarea
+    attributes:
+      label: What new features do you want? - 你想要什么新功能？
+      description: |
+        What new feature or change you want? How it improves? Please tell us the requirements is with a clear and detailed description, put your screenshots if possible.
+        你想要什么新功能或者什么改变？这会带来什么提升？请清晰而详细地描述你的需求，如果可以的话最好附带截图。
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: know
+    attributes:
+      label: This issue is unique - 这个issue是唯一的
+      options:
+        - label: I have searched the issue tracker and did not find an issue describing my bug. - 我已经搜索问题追踪器并且没有发现相同的 issue。
+          required: true
