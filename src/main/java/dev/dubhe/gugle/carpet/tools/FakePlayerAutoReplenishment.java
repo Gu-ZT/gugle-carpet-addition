@@ -27,7 +27,7 @@ public class FakePlayerAutoReplenishment {
         if (count <= rs) return;
         global:
         for (ItemStack itemStack1 : itemStackList) {
-            if (itemStack1 == ItemStack.EMPTY || itemStack1 == itemStack) continue;
+            if (itemStack1.isEmpty() || itemStack1 == itemStack) continue;
             if (ItemStack.isSameItemSameTags(itemStack1, itemStack)) {
                 if (itemStack1.getCount() > count) {
                     itemStack.setCount(itemStack.getCount() + count);
