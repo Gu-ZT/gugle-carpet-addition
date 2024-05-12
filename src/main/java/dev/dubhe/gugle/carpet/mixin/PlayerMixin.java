@@ -29,7 +29,7 @@ abstract class PlayerMixin {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(CallbackInfo ci) {
-        if (GcaSetting.openFakePlayerInventory && gca$self instanceof ServerPlayer serverPlayer &&
+        if (gca$self instanceof ServerPlayer serverPlayer &&
             serverPlayer instanceof EntityPlayerMPFake && serverPlayer.isAlive()) {
             Map.Entry<FakePlayerInventoryContainer, FakePlayerEnderChestContainer> entry = GcaExtension.fakePlayerInventoryContainerMap.get(gca$self);
             entry.getKey().tick();
