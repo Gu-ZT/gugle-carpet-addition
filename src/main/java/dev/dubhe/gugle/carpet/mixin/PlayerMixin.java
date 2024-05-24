@@ -6,6 +6,7 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
+import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -61,7 +62,7 @@ abstract class PlayerMixin {
             }
         } else if (GcaSetting.openFakePlayerInventory) {
             provider = new SimpleMenuProvider(
-                (i, inventory, p) -> ChestMenu.sixRows(
+                (i, inventory, p) -> new FakePlayerInventoryMenu(
                     i, inventory,
                     GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer).getKey()
                 ),
