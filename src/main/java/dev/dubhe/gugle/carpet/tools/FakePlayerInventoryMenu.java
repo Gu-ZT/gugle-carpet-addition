@@ -27,7 +27,7 @@ public class FakePlayerInventoryMenu extends ChestMenu {
                     return ItemStack.EMPTY;
                 }
             } else if (slotStack.getItem() instanceof ArmorItem armorItem) {
-                // 如果是盔甲，移动的盔甲槽
+                // 如果是盔甲，移动到盔甲槽
                 int ordinal = armorItem.getType().ordinal();
                 if (moveToArmor(slotStack, ordinal) || moveToInventory(slotStack)) {
                     return ItemStack.EMPTY;
