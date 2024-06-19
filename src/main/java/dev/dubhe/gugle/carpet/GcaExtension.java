@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import dev.dubhe.gugle.carpet.api.Function;
+import dev.dubhe.gugle.carpet.api.Consumer;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
@@ -40,12 +40,12 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
     public static @NotNull ResourceLocation id(String path) {
-        return new ResourceLocation(MOD_ID, path);
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static final HashMap<Player, Map.Entry<FakePlayerInventoryContainer, FakePlayerEnderChestContainer>> fakePlayerInventoryContainerMap = new HashMap<>();
 
-    public static final List<Map.Entry<Long, Function>> planFunction = new ArrayList<>();
+    public static final List<Map.Entry<Long, Consumer>> planFunction = new ArrayList<>();
 
     static {
         CarpetServer.manageExtension(new GcaExtension());
@@ -54,7 +54,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
         GcaExtension.fakePlayerInventoryContainerMap.put(player, Map.entry(
-            new FakePlayerInventoryContainer(player), new FakePlayerEnderChestContainer(player)
+                new FakePlayerInventoryContainer(player), new FakePlayerEnderChestContainer(player)
         ));
     }
 
@@ -77,13 +77,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
                 fakePlayerList.add(username, FakePlayerResident.save(player));
             });
             File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();
-            if (!file.isFile()) {
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    GcaExtension.LOGGER.error(e.getMessage(), e);
-                }
-            }
+            // 文件不需要存在
             try (BufferedWriter bfw = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
                 bfw.write(GSON.toJson(fakePlayerList));
             } catch (IOException e) {

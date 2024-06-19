@@ -68,34 +68,18 @@ public class FakePlayerInventoryContainer extends FakePlayerContainer {
     }
 
     public Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot) {
-        switch (slot) {
-            case 0 -> {
-                return Map.entry(buttons, 0);
-            }
-            case 1, 2, 3, 4 -> {
-                return Map.entry(armor, 4 - slot);
-            }
-            case 5, 6 -> {
-                return Map.entry(buttons, slot - 4);
-            }
-            case 7 -> {
-                return Map.entry(offhand, 0);
-            }
-            case 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> {
-                return Map.entry(buttons, slot - 5);
-            }
+        return switch (slot) {
+            case 0 -> Map.entry(buttons, 0);
+            case 1, 2, 3, 4 -> Map.entry(armor, 4 - slot);
+            case 5, 6 -> Map.entry(buttons, slot - 4);
+            case 7 -> Map.entry(offhand, 0);
+            case 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 -> Map.entry(buttons, slot - 5);
             case 18, 19, 20, 21, 22, 23, 24, 25, 26,
                  27, 28, 29, 30, 31, 32, 33, 34, 35,
-                 36, 37, 38, 39, 40, 41, 42, 43, 44 -> {
-                return Map.entry(items, slot - 9);
-            }
-            case 45, 46, 47, 48, 49, 50, 51, 52, 53 -> {
-                return Map.entry(items, slot - 45);
-            }
-            default -> {
-                return null;
-            }
-        }
+                 36, 37, 38, 39, 40, 41, 42, 43, 44 -> Map.entry(items, slot - 9);
+            case 45, 46, 47, 48, 49, 50, 51, 52, 53 -> Map.entry(items, slot - 45);
+            default -> null;
+        };
     }
 
     @Override
@@ -109,15 +93,15 @@ public class FakePlayerInventoryContainer extends FakePlayerContainer {
         List<Button> hotBarList = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             Component hotBarComponent = ComponentTranslate.trans(
-                "gca.hotbar",
-                Color.WHITE,
-                Style.EMPTY.withBold(true).withItalic(false),
-                i + 1
+                    "gca.hotbar",
+                    Color.WHITE,
+                    Style.EMPTY.withBold(true).withItalic(false),
+                    i + 1
             );
             boolean defaultState = i == 0;
             Button button = new Button(defaultState, i + 1,
-                hotBarComponent,
-                hotBarComponent
+                    hotBarComponent,
+                    hotBarComponent
             );
             int finalI = i + 1;
             button.addTurnOnFunction(() -> ap.setSlot(finalI));
