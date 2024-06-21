@@ -1,5 +1,6 @@
 package dev.dubhe.gugle.carpet.tools;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -27,12 +28,12 @@ public class FakePlayerInventoryMenu extends ChestMenu {
                     return ItemStack.EMPTY;
                 }
             } else if (slotStack.getItem() instanceof ArmorItem armorItem) {
-                // 如果是盔甲，移动的盔甲槽
+                // 如果是盔甲，移动到盔甲槽
                 int ordinal = armorItem.getType().ordinal();
                 if (moveToArmor(slotStack, ordinal) || moveToInventory(slotStack)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (slotStack.isEdible()) {
+            } else if (slotStack.has(DataComponents.FOOD)) {
                 // 如果是食物，移动到副手
                 if (moveToOffHand(slotStack) || (moveToInventory(slotStack))) {
                     return ItemStack.EMPTY;

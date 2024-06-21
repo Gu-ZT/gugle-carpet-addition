@@ -1,8 +1,9 @@
 package dev.dubhe.gugle.carpet.api.menu.control;
 
-import dev.dubhe.gugle.carpet.api.Function;
+import dev.dubhe.gugle.carpet.api.Consumer;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -10,6 +11,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -23,9 +25,9 @@ public class Button {
     private final ItemStack offItem;
     CompoundTag compoundTag = new CompoundTag();
 
-    private final List<Function> turnOnFunctions = new ArrayList<>();
+    private final List<Consumer> turnOnConsumers = new ArrayList<>();
 
-    private final List<Function> turnOffFunctions = new ArrayList<>();
+    private final List<Consumer> turnOffConsumers = new ArrayList<>();
 
     public Button() {
         this(true, Items.BARRIER, Items.STRUCTURE_VOID);
@@ -49,8 +51,8 @@ public class Button {
 
     public Button(boolean defaultState, String key) {
         this(defaultState, Items.BARRIER, Items.STRUCTURE_VOID, 1,
-            ComponentTranslate.trans(key, Color.GREEN, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.on")),
-            ComponentTranslate.trans(key, Color.RED, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.off"))
+                ComponentTranslate.trans(key, Color.GREEN, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.on")),
+                ComponentTranslate.trans(key, Color.RED, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.off"))
         );
     }
 
@@ -60,8 +62,8 @@ public class Button {
 
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount) {
         this(defaultState, onItem, offItem, itemCount,
-            ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
-            ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
+                ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
+                ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
         );
     }
 
@@ -70,13 +72,13 @@ public class Button {
         this.compoundTag.putBoolean("GcaClear", true);
 
         ItemStack onItemStack = new ItemStack(onItem, itemCount);
-        onItemStack.setTag(compoundTag.copy());
-        onItemStack.setHoverName(onText);
+        onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag));
+        onItemStack.set(DataComponents.ITEM_NAME, onText);
         this.onItem = onItemStack;
 
         ItemStack offItemStack = new ItemStack(offItem, itemCount);
-        offItemStack.setTag(compoundTag.copy());
-        offItemStack.setHoverName(offText);
+        offItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
+        offItemStack.set(DataComponents.ITEM_NAME, offText);
         this.offItem = offItemStack;
     }
 
@@ -85,11 +87,11 @@ public class Button {
         this.compoundTag.putBoolean("GcaClear", true);
 
         ItemStack onItemStack = onItem.copy();
-        onItemStack.setTag(compoundTag.copy());
+        onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
         this.onItem = onItemStack;
 
         ItemStack offItemStack = offItem.copy();
-        offItemStack.setTag(compoundTag.copy());
+        offItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
         this.offItem = offItemStack;
     }
 
@@ -117,9 +119,9 @@ public class Button {
 
     public void updateButton(@NotNull Container container, int slot, @NotNull ItemStack onItemStack, ItemStack offItemStack) {
         if (!(
-            container.getItem(slot).is(onItemStack.getItem()) ||
-                container.getItem(slot).is(offItemStack.getItem()) ||
-                container.getItem(slot).isEmpty()
+                container.getItem(slot).is(onItemStack.getItem()) ||
+                        container.getItem(slot).is(offItemStack.getItem()) ||
+                        container.getItem(slot).isEmpty()
         )) {
             return;
         }
@@ -130,12 +132,12 @@ public class Button {
         }
     }
 
-    public void addTurnOnFunction(Function function) {
-        this.turnOnFunctions.add(function);
+    public void addTurnOnFunction(Consumer consumer) {
+        this.turnOnConsumers.add(consumer);
     }
 
-    public void addTurnOffFunction(Function function) {
-        this.turnOffFunctions.add(function);
+    public void addTurnOffFunction(Consumer consumer) {
+        this.turnOffConsumers.add(consumer);
     }
 
     public void turnOnWithoutFunction() {
@@ -157,14 +159,14 @@ public class Button {
     }
 
     public void runTurnOnFunction() {
-        for (Function turnOnFunction : this.turnOnFunctions) {
-            turnOnFunction.accept();
+        for (Consumer turnOnConsumer : this.turnOnConsumers) {
+            turnOnConsumer.accept();
         }
     }
 
     public void runTurnOffFunction() {
-        for (Function turnOffFunction : this.turnOffFunctions) {
-            turnOffFunction.accept();
+        for (Consumer turnOffConsumer : this.turnOffConsumers) {
+            turnOffConsumer.accept();
         }
     }
 

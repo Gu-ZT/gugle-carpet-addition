@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.mixin;
 
 import dev.dubhe.gugle.carpet.GcaExtension;
-import dev.dubhe.gugle.carpet.api.Function;
+import dev.dubhe.gugle.carpet.api.Consumer;
 import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,8 +22,8 @@ abstract class ServerLevelMixin {
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(BooleanSupplier hasTimeLeft, CallbackInfo ci) {
         long gameTime = gca$self.getLevel().getGameTime();
-        List<Map.Entry<Long, Function>> remove = new ArrayList<>();
-        for (Map.Entry<Long, Function> pair : GcaExtension.planFunction) {
+        List<Map.Entry<Long, Consumer>> remove = new ArrayList<>();
+        for (Map.Entry<Long, Consumer> pair : GcaExtension.planFunction) {
             if (pair.getKey() == gameTime) {
                 pair.getValue().accept();
                 remove.add(pair);
@@ -31,7 +31,7 @@ abstract class ServerLevelMixin {
                 remove.add(pair);
             }
         }
-        for (Map.Entry<Long, Function> pair : remove) {
+        for (Map.Entry<Long, Consumer> pair : remove) {
             GcaExtension.planFunction.remove(pair);
         }
     }

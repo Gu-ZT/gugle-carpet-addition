@@ -8,14 +8,17 @@
     "APAccessor",
     "AxeItemMixin",
     "CommandsMixin",
+    "EntityInvoker",
+    "EntityPlayerMPFakeInvoker",
     "FenceGateBlockMixin",
     "FishingHookMixin",
     "ItemStackMixin",
+    "MinecraftServerMixin",
+    "PlayerAccessor",
     "PlayerMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",
-    "SignBlockMixin",
-    "MinecraftServerMixin"
+    "SignBlockMixin"
   ],
   "server": [
   ],
