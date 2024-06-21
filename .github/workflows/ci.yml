@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        java: [ 17 ]
+        java: [ 21 ]
         os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
 
@@ -73,7 +73,7 @@ jobs:
           echo "version=$MESSAGE"
 
       - name: capture build artifacts
-        if: ${{ runner.os == 'Linux' && matrix.java == '17' }}
+        if: ${{ runner.os == 'Linux' && matrix.java == '21' }}
         uses: actions/upload-artifact@v3.1.1
         with:
           name: ${{ steps.get-name.outputs.name }}
@@ -87,7 +87,7 @@ jobs:
           version: ${{ steps.version.outputs.version }}
           game-versions: 1.20.1
           version-type: release
-          java: 17
+          java: 21
           loaders: |
             fabric
             quilt
