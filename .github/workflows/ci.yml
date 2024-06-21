@@ -44,6 +44,13 @@ jobs:
         if: ${{ runner.os != 'Windows' }}
         run: chmod +x ./gradlew
 
+      - name: Read Properties
+        id: 'properties'
+        uses: christian-draeger/read-properties@1.1.1
+        with:
+          path: gradle.properties
+          properties: 'minecraft_version'
+
       - name: Set build number
         run: sed -i "s/undefined/$GITHUB_RUN_NUMBER/g" gradle.properties
 
@@ -85,7 +92,7 @@ jobs:
         with:
           name: GugleCarpetAddition ${{ steps.version.outputs.version }}
           version: ${{ steps.version.outputs.version }}
-          game-versions: 1.20.1
+          game-versions: ${{ steps.properties.outputs.minecraft_version }}
           version-type: release
           java: 21
           loaders: |
