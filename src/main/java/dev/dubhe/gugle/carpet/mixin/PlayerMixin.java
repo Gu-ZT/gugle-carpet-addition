@@ -9,6 +9,7 @@ import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
+import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -40,11 +41,22 @@ abstract class PlayerMixin {
 
     @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
-        if (!(entity instanceof EntityPlayerMPFake fakePlayer)) {
-            return original.call(entity, player, hand);
+        if (entity instanceof EntityPlayerMPFake fakePlayer) {
+            // 打开物品栏
+            return this.openInventory(player, fakePlayer);
+        } else if (entity instanceof RemotePlayer) {
+            // 在客户端中，玩家可以与客户端的被交互玩家交互并返回PASS，这时交互玩家手上如果拿着可以使用的物品，则物品会被使用
+            // 所以如果判断被交互实体是客户端玩家，返回SUCCESS
+            return InteractionResult.SUCCESS;
         }
+        return original.call(entity, player, hand);
+    }
+
+    @Unique
+    private InteractionResult openInventory(Player player, EntityPlayerMPFake fakePlayer) {
         SimpleMenuProvider provider = null;
         if (player.isShiftKeyDown()) {
+            // 打开末影箱
             if (GcaSetting.openFakePlayerEnderChest) {
                 provider = new SimpleMenuProvider(
                         (i, inventory, p) -> ChestMenu.sixRows(
@@ -54,6 +66,7 @@ abstract class PlayerMixin {
                         ComponentTranslate.trans("gca.player.ender_chest", fakePlayer.getDisplayName())
                 );
             } else {
+                // 打开额外功能菜单
                 provider = new SimpleMenuProvider(
                         (i, inventory, p) -> ChestMenu.threeRows(
                                 i, inventory,
@@ -63,6 +76,7 @@ abstract class PlayerMixin {
                 );
             }
         } else if (GcaSetting.openFakePlayerInventory) {
+            // 打开物品栏
             provider = new SimpleMenuProvider(
                     (i, inventory, p) -> new FakePlayerInventoryMenu(
                             i, inventory,
@@ -71,9 +85,11 @@ abstract class PlayerMixin {
                     ComponentTranslate.trans("gca.player.inventory", fakePlayer.getDisplayName())
             );
         }
-        if (provider != null) {
-            player.openMenu(provider);
+
+        if (provider == null) {
+            return InteractionResult.PASS;
         }
-        return InteractionResult.SUCCESS;
+        player.openMenu(provider);
+        return InteractionResult.CONSUME;
     }
 }
