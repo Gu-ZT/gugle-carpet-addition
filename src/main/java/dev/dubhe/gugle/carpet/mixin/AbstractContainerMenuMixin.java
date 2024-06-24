@@ -1,5 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,10 +27,10 @@ abstract class AbstractContainerMenuMixin {
         Slot slot = gca$self.getSlot(slotIndex);
         ItemStack itemStack = slot.getItem();
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        if (customData == null || customData.copyTag().get("GcaClear") == null) {
+        if (customData == null || customData.copyTag().get(Button.GCA_CLEAR) == null) {
             return;
         }
-        if (customData.copyTag().getBoolean("GcaClear")) {
+        if (customData.copyTag().getBoolean(Button.GCA_CLEAR)) {
             itemStack.setCount(0);
             ci.cancel();
         }

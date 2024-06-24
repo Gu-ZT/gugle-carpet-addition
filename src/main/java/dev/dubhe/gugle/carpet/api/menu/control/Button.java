@@ -24,6 +24,7 @@ public class Button {
     private final ItemStack onItem;
     private final ItemStack offItem;
     CompoundTag compoundTag = new CompoundTag();
+    public static final String GCA_CLEAR = "GcaClear";
 
     private final List<Consumer> turnOnConsumers = new ArrayList<>();
 
@@ -69,7 +70,7 @@ public class Button {
 
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount, Component onText, Component offText) {
         this.flag = defaultState;
-        this.compoundTag.putBoolean("GcaClear", true);
+        this.compoundTag.putBoolean(GCA_CLEAR, true);
 
         ItemStack onItemStack = new ItemStack(onItem, itemCount);
         onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag));
@@ -84,7 +85,7 @@ public class Button {
 
     public Button(boolean defaultState, @NotNull ItemStack onItem, @NotNull ItemStack offItem) {
         this.flag = defaultState;
-        this.compoundTag.putBoolean("GcaClear", true);
+        this.compoundTag.putBoolean(GCA_CLEAR, true);
 
         ItemStack onItemStack = onItem.copy();
         onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
