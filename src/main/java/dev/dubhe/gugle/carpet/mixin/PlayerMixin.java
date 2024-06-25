@@ -9,7 +9,6 @@ import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
-import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -44,10 +43,6 @@ abstract class PlayerMixin {
         if (entity instanceof EntityPlayerMPFake fakePlayer) {
             // 打开物品栏
             return this.openInventory(player, fakePlayer);
-        } else if (entity instanceof RemotePlayer) {
-            // 在客户端中，玩家可以与客户端的被交互玩家交互并返回PASS，这时交互玩家手上如果拿着可以使用的物品，则物品会被使用
-            // 所以如果判断被交互实体是客户端玩家，返回SUCCESS
-            return InteractionResult.SUCCESS;
         }
         return original.call(entity, player, hand);
     }
