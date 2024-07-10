@@ -47,10 +47,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     public static final List<Map.Entry<Long, Consumer>> planFunction = new ArrayList<>();
 
-    static {
-        CarpetServer.manageExtension(new GcaExtension());
-    }
-
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
         GcaExtension.fakePlayerInventoryContainerMap.put(player, Map.entry(
@@ -68,7 +64,8 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         CarpetServer.settingsManager.parseSettingsClass(GcaSetting.class);
     }
 
-    public static void onServerStop(MinecraftServer server) {
+    @Override
+    public void onServerClosed(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
             JsonObject fakePlayerList = new JsonObject();
             fakePlayerInventoryContainerMap.forEach((player, fakePlayerInventoryContainer) -> {
@@ -113,5 +110,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onInitialize() {
+        CarpetServer.manageExtension(this);
     }
 }

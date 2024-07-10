@@ -13,7 +13,6 @@
     "FenceGateBlockMixin",
     "FishingHookMixin",
     "ItemStackMixin",
-    "MinecraftServerMixin",
     "PlayerAccessor",
     "PlayerMixin",
     "ServerLevelMixin",
