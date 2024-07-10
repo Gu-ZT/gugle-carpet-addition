@@ -23,8 +23,7 @@
   "server": [
   ],
   "client": [
-    "EntityMixin",
-    "ServerPlayerMixin"
+    "EntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

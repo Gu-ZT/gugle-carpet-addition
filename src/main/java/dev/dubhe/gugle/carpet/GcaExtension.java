@@ -87,20 +87,20 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         fakePlayerInventoryContainerMap.clear();
     }
 
-    public static void onServerStart(MinecraftServer server) {
+    @Override
+    public void onServerLoadedWorlds(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
-            JsonObject fakePlayerList = new JsonObject();
             File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();
             if (!file.isFile()) {
                 return;
             }
             try (BufferedReader bfr = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-                fakePlayerList = GSON.fromJson(bfr, JsonObject.class);
+                JsonObject fakePlayerList = GSON.fromJson(bfr, JsonObject.class);
+                for (Map.Entry<String, JsonElement> entry : fakePlayerList.entrySet()) {
+                    FakePlayerResident.load(entry, server);
+                }
             } catch (IOException e) {
                 GcaExtension.LOGGER.error(e.getMessage(), e);
-            }
-            for (Map.Entry<String, JsonElement> entry : fakePlayerList.entrySet()) {
-                FakePlayerResident.load(entry, server);
             }
             file.delete();
         }

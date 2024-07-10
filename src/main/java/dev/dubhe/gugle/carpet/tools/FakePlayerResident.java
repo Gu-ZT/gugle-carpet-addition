@@ -83,7 +83,7 @@ public class FakePlayerResident {
             gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username);
         }
         GameProfile finalGameprofile = gameprofile;
-        EntityPlayerMPFakeInvoker.invokerFetchGameProfile(gameprofile.getName()).thenAccept((p) -> {
+        EntityPlayerMPFakeInvoker.invokerFetchGameProfile(gameprofile.getName()).thenAcceptAsync((p) -> {
             GameProfile current = finalGameprofile;
             if (p.isPresent()) {
                 current = p.get();
@@ -102,7 +102,7 @@ public class FakePlayerResident {
             playerMPFake.getAbilities().flying = flying;
             actionPackFromJson(actions, playerMPFake);
             ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
-        });
+        }, server);
     }
 
     public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
