@@ -15,24 +15,16 @@ import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
@@ -41,7 +33,7 @@ public class FakePlayerResident {
         JsonObject fakePlayer = new JsonObject();
         if (GcaSetting.fakePlayerReloadAction) {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
-            fakePlayer.add("actions", apToJson(actionPack));
+            fakePlayer.add("actions", actionPackToJson(actionPack));
         }
         return fakePlayer;
     }
@@ -79,7 +71,8 @@ public class FakePlayerResident {
             server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.serverLevel().dimension());
             server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.serverLevel().dimension());
             playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
-            actionPackFromJson(actions, playerMPFake);
+
+            applyActionPackFromJson(actions, playerMPFake);
             ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
         }, server);
     }
@@ -94,7 +87,7 @@ public class FakePlayerResident {
         FakePlayerResident.createFake(username, server, actions);
     }
 
-    static JsonObject apToJson(EntityPlayerActionPack actionPack) {
+    static JsonObject actionPackToJson(EntityPlayerActionPack actionPack) {
         JsonObject object = new JsonObject();
         EntityPlayerActionPack.Action attack = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.ATTACK);
         EntityPlayerActionPack.Action use = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.USE);
@@ -115,7 +108,7 @@ public class FakePlayerResident {
         return object;
     }
 
-    static void actionPackFromJson(JsonObject actions, ServerPlayer player) {
+    static void applyActionPackFromJson(JsonObject actions, ServerPlayer player) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
         if (actions.has("sneaking")) ap.setSneaking(actions.get("sneaking").getAsBoolean());
         if (actions.has("sprinting")) ap.setSprinting(actions.get("sprinting").getAsBoolean());
