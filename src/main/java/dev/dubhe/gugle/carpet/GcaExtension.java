@@ -13,6 +13,7 @@ import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerResident;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,9 +69,10 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public void onServerClosed(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
             JsonObject fakePlayerList = new JsonObject();
-            fakePlayerInventoryContainerMap.forEach((player, fakePlayerInventoryContainer) -> {
+            server.getPlayerList().getPlayers().forEach(player -> {
                 if (!(player instanceof EntityPlayerMPFake)) return;
-                String username = player.getName().getString();
+                if (player.saveWithoutId(new CompoundTag()).contains("gca.NoResident")) return;
+                String username = player.getGameProfile().getName();
                 fakePlayerList.add(username, FakePlayerResident.save(player));
             });
             File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();

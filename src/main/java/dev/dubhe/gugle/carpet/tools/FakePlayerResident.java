@@ -15,55 +15,30 @@ import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.core.UUIDUtil;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 
 public class FakePlayerResident {
-
     public static JsonObject save(Player player) {
-        double pos_x = player.getX();
-        double pos_y = player.getY();
-        double pos_z = player.getZ();
-        double yaw = player.getYRot();
-        double pitch = player.getXRot();
-        String dimension = player.level().dimension().location().getPath();
-        String gamemode = ((ServerPlayer) player).gameMode.getGameModeForPlayer().getName();
-        boolean flying = player.getAbilities().flying;
         JsonObject fakePlayer = new JsonObject();
-        fakePlayer.addProperty("pos_x", pos_x);
-        fakePlayer.addProperty("pos_y", pos_y);
-        fakePlayer.addProperty("pos_z", pos_z);
-        fakePlayer.addProperty("yaw", yaw);
-        fakePlayer.addProperty("pitch", pitch);
-        fakePlayer.addProperty("dimension", dimension);
-        fakePlayer.addProperty("gamemode", gamemode);
-        fakePlayer.addProperty("flying", flying);
         if (GcaSetting.fakePlayerReloadAction) {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
-            fakePlayer.add("actions", apToJson(actionPack));
+            fakePlayer.add("actions", actionPackToJson(actionPack));
         }
         return fakePlayer;
     }
 
-    public static void createFake(String username, MinecraftServer server, Vec3 pos, double yaw, double pitch, ResourceKey<Level> dimensionId, GameType gamemode, boolean flying, final JsonObject actions, Runnable onError) {
-        ServerLevel worldIn = server.getLevel(dimensionId);
+    public static void createFake(String username, MinecraftServer server, final JsonObject actions) {
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile;
         try {
@@ -77,7 +52,7 @@ public class FakePlayerResident {
         }
         if (gameprofile == null) {
             if (!CarpetSettings.allowSpawningOfflinePlayers) {
-                onError.run();
+                GcaExtension.LOGGER.error("Spawning offline players %s is not allowed!".formatted(username));
                 return;
             }
             gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username);
@@ -88,19 +63,16 @@ public class FakePlayerResident {
             if (p.isPresent()) {
                 current = p.get();
             }
-            EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.respawnFake(server, worldIn, current, ClientInformation.createDefault());
-            playerMPFake.fixStartingPosition = () -> playerMPFake.moveTo(pos.x, pos.y, pos.z, (float) yaw, (float) pitch);
+            EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.respawnFake(server, server.overworld(), current, ClientInformation.createDefault());
             server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), playerMPFake,
                     new CommonListenerCookie(current, 0, playerMPFake.clientInformation(), false));
-            playerMPFake.teleportTo(worldIn, pos.x, pos.y, pos.z, (float) yaw, (float) pitch);
             playerMPFake.setHealth(20.0F);
             playerMPFake.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6F);
-            playerMPFake.gameMode.changeGameModeForPlayer(gamemode);
-            server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), dimensionId);
-            server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), dimensionId);
+            server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.serverLevel().dimension());
+            server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.serverLevel().dimension());
             playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
-            playerMPFake.getAbilities().flying = flying;
-            actionPackFromJson(actions, playerMPFake);
+
+            applyActionPackFromJson(actions, playerMPFake);
             ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
         }, server);
     }
@@ -108,24 +80,14 @@ public class FakePlayerResident {
     public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
         String username = entry.getKey();
         JsonObject fakePlayer = entry.getValue().getAsJsonObject();
-        double pos_x = fakePlayer.get("pos_x").getAsDouble();
-        double pos_y = fakePlayer.get("pos_y").getAsDouble();
-        double pos_z = fakePlayer.get("pos_z").getAsDouble();
-        double yaw = fakePlayer.get("yaw").getAsDouble();
-        double pitch = fakePlayer.get("pitch").getAsDouble();
-        String dimension = fakePlayer.get("dimension").getAsString();
-        String gamemode = fakePlayer.get("gamemode").getAsString();
-        boolean flying = fakePlayer.get("flying").getAsBoolean();
         JsonObject actions = new JsonObject();
         if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
             actions = fakePlayer.get("actions").getAsJsonObject();
         }
-        FakePlayerResident.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
-                ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(dimension)),
-                GameType.byName(gamemode), flying, actions, () -> GcaExtension.LOGGER.error("Not allow spawning offline players!"));
+        FakePlayerResident.createFake(username, server, actions);
     }
 
-    static JsonObject apToJson(EntityPlayerActionPack actionPack) {
+    static JsonObject actionPackToJson(EntityPlayerActionPack actionPack) {
         JsonObject object = new JsonObject();
         EntityPlayerActionPack.Action attack = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.ATTACK);
         EntityPlayerActionPack.Action use = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.USE);
@@ -146,7 +108,7 @@ public class FakePlayerResident {
         return object;
     }
 
-    static void actionPackFromJson(JsonObject actions, ServerPlayer player) {
+    static void applyActionPackFromJson(JsonObject actions, ServerPlayer player) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
         if (actions.has("sneaking")) ap.setSneaking(actions.get("sneaking").getAsBoolean());
         if (actions.has("sprinting")) ap.setSprinting(actions.get("sprinting").getAsBoolean());
