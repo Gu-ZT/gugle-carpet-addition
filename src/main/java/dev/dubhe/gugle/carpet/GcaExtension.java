@@ -69,7 +69,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public void onServerClosed(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
             JsonObject fakePlayerList = new JsonObject();
-            server.getPlayerList().getPlayers().forEach(player -> {
+            fakePlayerInventoryContainerMap.keySet().forEach(player -> {
                 if (!(player instanceof EntityPlayerMPFake)) return;
                 if (player.saveWithoutId(new CompoundTag()).contains("gca.NoResident")) return;
                 String username = player.getGameProfile().getName();
