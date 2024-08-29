@@ -26,7 +26,7 @@ import java.util.Map;
 @Mixin(Player.class)
 abstract class PlayerMixin {
     @Unique
-    Player gca$self = (Player) (Object) this;
+    private final Player gca$self = (Player) (Object) this;
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(CallbackInfo ci) {
@@ -40,16 +40,28 @@ abstract class PlayerMixin {
 
     @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
-        if (entity instanceof EntityPlayerMPFake fakePlayer) {
-            // 打开物品栏
-            return this.openInventory(player, fakePlayer);
+        if (GcaSetting.openFakePlayerInventory || GcaSetting.openFakePlayerEnderChest) {
+            return interact(entity, player, hand, original);
         }
         return original.call(entity, player, hand);
     }
 
     @Unique
+    private InteractionResult interact(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
+        InteractionResult result;
+        if (entity instanceof EntityPlayerMPFake fakePlayer) {
+            // 打开物品栏
+            result = this.openInventory(player, fakePlayer);
+        } else {
+            // 怎么判断一个客户端玩家是不是假玩家？
+            return InteractionResult.SUCCESS;
+        }
+        return result == InteractionResult.PASS ? original.call(entity, player, hand) : result;
+    }
+
+    @Unique
     private InteractionResult openInventory(Player player, EntityPlayerMPFake fakePlayer) {
-        SimpleMenuProvider provider = null;
+        SimpleMenuProvider provider;
         if (player.isShiftKeyDown()) {
             // 打开末影箱
             if (GcaSetting.openFakePlayerEnderChest) {
@@ -79,9 +91,7 @@ abstract class PlayerMixin {
                     ),
                     ComponentTranslate.trans("gca.player.inventory", fakePlayer.getDisplayName())
             );
-        }
-
-        if (provider == null) {
+        } else {
             return InteractionResult.PASS;
         }
         player.openMenu(provider);
