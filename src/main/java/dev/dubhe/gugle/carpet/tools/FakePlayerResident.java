@@ -57,11 +57,11 @@ public class FakePlayerResident {
         String dimension = fakePlayer.get("dimension").getAsString();
         String gamemode = fakePlayer.get("gamemode").getAsString();
         boolean flying = fakePlayer.get("flying").getAsBoolean();
+        EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
+            ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
+            GameType.byName(gamemode), flying);
         if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
             JsonObject actions = fakePlayer.get("actions").getAsJsonObject();
-            EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.createFake(username, server, new Vec3(pos_x, pos_y, pos_z), yaw, pitch,
-                    ResourceKey.create(Registries.DIMENSION, new ResourceLocation(dimension)),
-                    GameType.byName(gamemode), flying);
             apFromJson(actions, playerMPFake);
         }
     }
