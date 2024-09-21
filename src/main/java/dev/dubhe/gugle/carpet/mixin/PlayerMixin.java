@@ -40,14 +40,21 @@ abstract class PlayerMixin {
 
     @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
-        if (GcaSetting.openFakePlayerInventory || GcaSetting.openFakePlayerEnderChest) {
-            return interact(entity, player, hand, original);
+        // 此处不能直接使用entity instanceof EntityPlayerMPFake
+        // 第一次entity instanceof Player是为了排除掉非玩家实体，避免影响非玩家实体的交互逻辑，第二次instanceof在interact方法中，用来判断交互玩家是否为假玩家
+        // 在服务端，entity instanceof Player可能是多余的
+        // 但是在客户端中，如果直接entity instanceof EntityPlayerMPFake，那么在右键假玩家时，客户端并不知道当前交互的玩家是不是假玩家
+        // 因此右键交互时可能会应用玩家手中的物品功能，例如使用熔岩桶右键玩家时可能在假玩家位置放置岩浆，使用风弹右键玩家时可能发射风弹
+        // 所以客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
+        // 尽管这带来了一些新的问题，例如玩家飞行时不能对着玩家使用烟花，不能对着玩家吃食物，但是这相比意外使用物品是小问题
+        if (entity instanceof Player interactPlayer && (GcaSetting.openFakePlayerInventory || GcaSetting.openFakePlayerEnderChest)) {
+            return interact(interactPlayer, player, hand, original);
         }
         return original.call(entity, player, hand);
     }
 
     @Unique
-    private InteractionResult interact(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
+    private InteractionResult interact(Player entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
         InteractionResult result;
         if (entity instanceof EntityPlayerMPFake fakePlayer) {
             // 打开物品栏
