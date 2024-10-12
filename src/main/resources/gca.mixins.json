@@ -12,6 +12,7 @@
     "EntityPlayerMPFakeInvoker",
     "FenceGateBlockMixin",
     "FishingHookMixin",
+    "ItemFrameMixin",
     "ItemStackMixin",
     "PlayerAccessor",
     "PlayerMixin",

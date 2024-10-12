@@ -37,6 +37,9 @@
   "carpet.rule.betterQuickCrafting.name": "Better Quick Crafting",
   "carpet.rule.betterQuickCrafting.desc": "Keep an item in the inventory during quick crafting",
 
+  "carpet.rule.betterItemFrameInteraction.name": "Better ItemFrame Interaction",
+  "carpet.rule.betterItemFrameInteraction.desc": "Make the block attached to the ItemFrame interact when you right-click it",
+
   "carpet.rule.botManagement.name": "Bot Management",
   "carpet.rule.botManagement.desc": "A Bot Management Menu",
 

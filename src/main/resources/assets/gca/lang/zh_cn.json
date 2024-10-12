@@ -31,6 +31,9 @@
   "carpet.rule.betterSignInteraction.name": "更好的告示牌交互",
   "carpet.rule.betterSignInteraction.desc": "右键告示牌时与之附着的方块产生交互",
 
+  "carpet.rule.betterItemFrameInteraction.name": "更好的展示框交互",
+  "carpet.rule.betterItemFrameInteraction.desc": "右键包含物品的展示框时与之附着的方块产生交互",
+
   "carpet.rule.betterSignEditing.name": "更好的告示牌编辑",
   "carpet.rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
 

@@ -67,6 +67,12 @@ public class GcaSetting {
     )
     public static boolean betterSignInteraction = false;
 
+    // 右键包含物品的展示框时与之附着的方块产生交互
+    @Rule(
+        categories = {GCA, EXPERIMENTAL}
+    )
+    public static boolean betterItemFrameInteraction = false;
+
     // 快速合成时在物品栏保留一份物品
     @Rule(
             categories = {GCA, EXPERIMENTAL}
