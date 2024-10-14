@@ -1,5 +1,6 @@
 {
   "carpet.category.GCA": "GCA",
+  "carpet.category.BOT": "假人",
 
   "carpet.rule.openFakePlayerInventory.name": "假人背包",
   "carpet.rule.openFakePlayerInventory.desc": "允许玩家打开假人背包",
@@ -40,8 +41,14 @@
   "carpet.rule.betterQuickCrafting.name": "更好的快速合成",
   "carpet.rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
 
-  "carpet.rule.botManagement.name": "假人管理",
-  "carpet.rule.botManagement.desc": "一个假人管理菜单",
+  "carpet.rule.fakePlayerPrefixName.name": "假人名称前缀",
+  "carpet.rule.fakePlayerPrefixName.desc": "假人名称前缀",
+
+  "carpet.rule.fakePlayerSuffixName.name": "假人名称后缀",
+  "carpet.rule.fakePlayerSuffixName.desc": "假人名称后缀",
+
+  "carpet.rule.commandBot.name": "假人管理",
+  "carpet.rule.commandBot.desc": "一个假人管理菜单",
 
   "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",
   "gca.action.attack.continuous": "一直左键： %s",

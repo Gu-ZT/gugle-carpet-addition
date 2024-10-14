@@ -1,5 +1,6 @@
 {
   "carpet.category.GCA": "GCA",
+  "carpet.category.BOT": "BOT",
 
   "carpet.rule.openFakePlayerInventory.name": "Fake Player Inventory",
   "carpet.rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
@@ -40,8 +41,14 @@
   "carpet.rule.betterItemFrameInteraction.name": "Better ItemFrame Interaction",
   "carpet.rule.betterItemFrameInteraction.desc": "Make the block attached to the ItemFrame interact when you right-click it",
 
-  "carpet.rule.botManagement.name": "Bot Management",
-  "carpet.rule.botManagement.desc": "A Bot Management Menu",
+  "carpet.rule.fakePlayerPrefixName.name": "Fake Player Prefix Name",
+  "carpet.rule.fakePlayerPrefixName.desc": "Fake Player Prefix Name",
+
+  "carpet.rule.fakePlayerSuffixName.name": "Fake Player Suffix Name",
+  "carpet.rule.fakePlayerSuffixName.desc": "Fake Player Suffix Name",
+
+  "carpet.rule.commandBot.name": "Bot Management",
+  "carpet.rule.commandBot.desc": "A Bot Management Menu",
 
   "gca.action.attack.interval.12": "Attack every 12 gt: %s",
   "gca.action.attack.continuous": "Attack continuous: %s",

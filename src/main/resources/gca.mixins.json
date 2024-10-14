@@ -15,6 +15,7 @@
     "ItemFrameMixin",
     "ItemStackMixin",
     "PlayerAccessor",
+    "PlayerCommandMixin",
     "PlayerMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",
