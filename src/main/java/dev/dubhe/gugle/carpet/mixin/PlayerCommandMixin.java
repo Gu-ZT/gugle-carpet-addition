@@ -3,6 +3,7 @@ package dev.dubhe.gugle.carpet.mixin;
 import carpet.commands.PlayerCommand;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
@@ -12,6 +13,16 @@ import java.util.Locale;
 abstract class PlayerCommandMixin {
     @ModifyVariable(method = "spawn", at = @At("STORE"), remap = false)
     private static String spawn(String value) {
+        return PlayerCommandMixin.gca$getName(value);
+    }
+
+    @ModifyVariable(method = "cantSpawn", at = @At("STORE"), remap = false)
+    private static String cantSpawn(String value) {
+        return PlayerCommandMixin.gca$getName(value);
+    }
+
+    @Unique
+    private static String gca$getName(String value) {
         if (
             !GcaSetting.fakePlayerNoneName.equals(GcaSetting.fakePlayerPrefixName)
                 && !value.toLowerCase(Locale.ROOT).startsWith(GcaSetting.fakePlayerPrefixName.toLowerCase(Locale.ROOT))
