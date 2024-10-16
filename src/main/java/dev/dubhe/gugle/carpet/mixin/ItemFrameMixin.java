@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin({ItemFrame.class})
+@Mixin(ItemFrame.class)
 abstract class ItemFrameMixin extends Entity {
     public ItemFrameMixin(EntityType<?> entityType, Level level) {
         super(entityType, level);
