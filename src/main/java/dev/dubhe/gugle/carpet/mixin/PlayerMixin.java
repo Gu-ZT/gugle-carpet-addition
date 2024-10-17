@@ -6,11 +6,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.tools.ClientUtils;
 import dev.dubhe.gugle.carpet.tools.FakePlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryContainer;
 import dev.dubhe.gugle.carpet.tools.FakePlayerInventoryMenu;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -44,11 +43,8 @@ abstract class PlayerMixin {
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
-            if (entity instanceof Player && Minecraft.getInstance().getConnection() != null) {
-                PlayerInfo info = Minecraft.getInstance().getConnection().getPlayerInfo(player.getUUID());
-                if (info != null && info.getLatency() == 0) {
-                    return InteractionResult.CONSUME;
-                }
+            if (entity instanceof Player && ClientUtils.isFakePlayer(player)) {
+                return InteractionResult.CONSUME;
             }
         } else {
             if ((GcaSetting.openFakePlayerInventory || GcaSetting.openFakePlayerEnderChest) && entity instanceof EntityPlayerMPFake fakePlayer) {
