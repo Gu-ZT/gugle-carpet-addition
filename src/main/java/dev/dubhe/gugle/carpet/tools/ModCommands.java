@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 public class ModCommands {
     public static @NotNull LiteralArgumentBuilder<CommandSourceStack> root(@NotNull CommandDispatcher<CommandSourceStack> dispatcher, String string) {
         String prefix = "";
-        if (dispatcher.getRoot().getChild("bot") != null) prefix = "gca";
+        if (dispatcher.getRoot().getChild(string) != null) prefix = "gca";
         return Commands.literal(prefix + string);
     }
 }
