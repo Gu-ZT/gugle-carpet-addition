@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.tools.PosUtils;
 import dev.dubhe.gugle.carpet.tools.IdGenerator;
 import net.minecraft.ChatFormatting;
@@ -36,7 +37,7 @@ public class LocCommand {
 
     public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            Commands.literal("loc")
+            ModCommands.root(dispatcher, "loc")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandLoc))
                 .executes(LocCommand::list)
                 .then(

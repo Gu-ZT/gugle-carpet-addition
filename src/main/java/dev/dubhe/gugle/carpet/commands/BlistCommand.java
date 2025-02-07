@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -29,7 +30,7 @@ public class BlistCommand {
 
     public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            Commands.literal("blist")
+            ModCommands.root(dispatcher, "blist")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBlist) && WlistCommand.hasPermission(PERMISSION, stack))
                 .executes(BlistCommand::list)
                 .then(

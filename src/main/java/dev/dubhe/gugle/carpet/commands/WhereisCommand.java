@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.tools.PosUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -16,7 +17,15 @@ import org.jetbrains.annotations.NotNull;
 public class WhereisCommand {
     public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            Commands.literal("whereis")
+            ModCommands.root(dispatcher, "whereis")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandWhereis))
+                .then(
+                    Commands.argument("player", EntityArgument.player())
+                        .executes(WhereisCommand::execute)
+                )
+        );
+        dispatcher.register(
+            ModCommands.root(dispatcher, "vris")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandWhereis))
                 .then(
                     Commands.argument("player", EntityArgument.player())

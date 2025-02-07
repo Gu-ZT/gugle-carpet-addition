@@ -21,6 +21,7 @@ import dev.dubhe.gugle.carpet.tools.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -68,115 +69,116 @@ public class BotCommand {
     public static final FilesUtil.MapFile<String, BotGroupInfo> BOT_GROUP_INFO = new FilesUtil.MapFile<>("botGroup", Object::toString, BotGroupInfo.class);
 
     public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("bot")
-            .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBot))
-            .executes(BotCommand::list)
-            .then(
-                Commands.literal("list").executes(BotCommand::list)
-                    .then(
-                        Commands.argument("page", IntegerArgumentType.integer(1))
-                            .executes(BotCommand::list)
-                    )
-            )
-            .then(
-                Commands.literal("add")
-                    .then(
-                        Commands.argument("player", EntityArgument.player())
-                            .then(
-                                Commands.argument("desc", StringArgumentType.greedyString())
-                                    .executes(BotCommand::add)
-                            )
-                    )
-            )
-            .then(
-                Commands.literal("load")
-                    .then(
-                        Commands.argument("player", StringArgumentType.string())
-                            .suggests(BotCommand::suggestPlayer)
-                            .executes(BotCommand::load)
-                    )
-            )
-            .then(
-                Commands.literal("remove")
-                    .then(
-                        Commands.argument("player", StringArgumentType.string())
-                            .suggests(BotCommand::suggestPlayer)
-                            .executes(BotCommand::remove)
-                    )
-            )
-            .then(
-                Commands.literal("group")
-                    .executes(BotCommand::groupList)
-                    .then(
-                        Commands.literal("create")
-                            .then(
-                                Commands.argument("name", StringArgumentType.greedyString())
-                                    .executes(BotCommand::groupCreate)
-                            )
-                    )
-                    .then(
-                        Commands.literal("list").executes(BotCommand::groupList)
-                            .then(
-                                Commands.argument("page", IntegerArgumentType.integer(1))
-                                    .executes(BotCommand::groupList)
-                            )
-                    )
-                    .then(
-                        Commands.literal("remove")
-                            .then(
-                                Commands.argument("name", StringArgumentType.greedyString())
-                                    .executes(BotCommand::groupRemove)
-                            )
-                    )
-                    .then(
-                        Commands.literal("add")
-                            .then(
-                                Commands.argument("bot", StringArgumentType.string())
-                                    .suggests(BotCommand::suggestPlayer)
-                                    .then(
-                                        Commands.argument("group", StringArgumentType.greedyString())
-                                            .suggests(BotCommand::suggestGroup)
-                                            .executes(BotCommand::groupAddBot)
-                                    )
-                            )
-                    )
-                    .then(
-                        Commands.literal("remove")
-                            .then(
-                                Commands.argument("bot", StringArgumentType.string())
-                                    .suggests(BotCommand::suggestPlayer)
-                                    .then(
-                                        Commands.argument("group", StringArgumentType.greedyString())
-                                            .suggests(BotCommand::suggestGroup)
-                                            .executes(BotCommand::groupRemoveBot)
-                                    )
-                            )
-                    )
-                    .then(
-                        Commands.literal("load")
-                            .then(
-                                Commands.argument("group", StringArgumentType.greedyString())
-                                    .suggests(BotCommand::suggestGroup)
-                                    .executes(BotCommand::groupLoadBot)
-                            )
-                    )
-                    .then(
-                        Commands.literal("unload")
-                            .then(
-                                Commands.argument("group", StringArgumentType.greedyString())
-                                    .suggests(BotCommand::suggestGroup)
-                                    .executes(BotCommand::groupUnloadBot)
-                            )
-                    )
-                    .then(
-                        Commands.literal("info")
-                            .then(
-                                Commands.argument("group", StringArgumentType.greedyString())
-                                    .suggests(BotCommand::suggestGroup)
-                                    .executes(BotCommand::groupInfo)
-                            )
-                    )
-            )
+        dispatcher.register(
+            ModCommands.root(dispatcher, "bot")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBot))
+                .executes(BotCommand::list)
+                .then(
+                    Commands.literal("list").executes(BotCommand::list)
+                        .then(
+                            Commands.argument("page", IntegerArgumentType.integer(1))
+                                .executes(BotCommand::list)
+                        )
+                )
+                .then(
+                    Commands.literal("add")
+                        .then(
+                            Commands.argument("player", EntityArgument.player())
+                                .then(
+                                    Commands.argument("desc", StringArgumentType.greedyString())
+                                        .executes(BotCommand::add)
+                                )
+                        )
+                )
+                .then(
+                    Commands.literal("load")
+                        .then(
+                            Commands.argument("player", StringArgumentType.string())
+                                .suggests(BotCommand::suggestPlayer)
+                                .executes(BotCommand::load)
+                        )
+                )
+                .then(
+                    Commands.literal("remove")
+                        .then(
+                            Commands.argument("player", StringArgumentType.string())
+                                .suggests(BotCommand::suggestPlayer)
+                                .executes(BotCommand::remove)
+                        )
+                )
+                .then(
+                    Commands.literal("group")
+                        .executes(BotCommand::groupList)
+                        .then(
+                            Commands.literal("create")
+                                .then(
+                                    Commands.argument("name", StringArgumentType.greedyString())
+                                        .executes(BotCommand::groupCreate)
+                                )
+                        )
+                        .then(
+                            Commands.literal("list").executes(BotCommand::groupList)
+                                .then(
+                                    Commands.argument("page", IntegerArgumentType.integer(1))
+                                        .executes(BotCommand::groupList)
+                                )
+                        )
+                        .then(
+                            Commands.literal("remove")
+                                .then(
+                                    Commands.argument("name", StringArgumentType.greedyString())
+                                        .executes(BotCommand::groupRemove)
+                                )
+                        )
+                        .then(
+                            Commands.literal("add")
+                                .then(
+                                    Commands.argument("bot", StringArgumentType.string())
+                                        .suggests(BotCommand::suggestPlayer)
+                                        .then(
+                                            Commands.argument("group", StringArgumentType.greedyString())
+                                                .suggests(BotCommand::suggestGroup)
+                                                .executes(BotCommand::groupAddBot)
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("remove")
+                                .then(
+                                    Commands.argument("bot", StringArgumentType.string())
+                                        .suggests(BotCommand::suggestPlayer)
+                                        .then(
+                                            Commands.argument("group", StringArgumentType.greedyString())
+                                                .suggests(BotCommand::suggestGroup)
+                                                .executes(BotCommand::groupRemoveBot)
+                                        )
+                                )
+                        )
+                        .then(
+                            Commands.literal("load")
+                                .then(
+                                    Commands.argument("group", StringArgumentType.greedyString())
+                                        .suggests(BotCommand::suggestGroup)
+                                        .executes(BotCommand::groupLoadBot)
+                                )
+                        )
+                        .then(
+                            Commands.literal("unload")
+                                .then(
+                                    Commands.argument("group", StringArgumentType.greedyString())
+                                        .suggests(BotCommand::suggestGroup)
+                                        .executes(BotCommand::groupUnloadBot)
+                                )
+                        )
+                        .then(
+                            Commands.literal("info")
+                                .then(
+                                    Commands.argument("group", StringArgumentType.greedyString())
+                                        .suggests(BotCommand::suggestGroup)
+                                        .executes(BotCommand::groupInfo)
+                                )
+                        )
+                )
         );
     }
 

@@ -5,6 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.GcaValidators;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.tools.PosUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -19,7 +20,7 @@ public class HereCommand {
             return;
         }
         dispatcher.register(
-            Commands.literal("here")
+            ModCommands.root(dispatcher, "here")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandHere))
                 .executes(HereCommand::execute)
         );

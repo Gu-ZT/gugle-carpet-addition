@@ -8,6 +8,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -26,7 +27,7 @@ public class WlistCommand {
 
     public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            Commands.literal("wlist")
+            ModCommands.root(dispatcher, "wlist")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandWlist) && WlistCommand.hasPermission(PERMISSION, stack))
                 .executes(WlistCommand::list)
                 .then(

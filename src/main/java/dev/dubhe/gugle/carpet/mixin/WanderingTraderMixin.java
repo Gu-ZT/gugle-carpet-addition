@@ -1,6 +1,5 @@
 package dev.dubhe.gugle.carpet.mixin;
 
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.GcaSetting;
@@ -51,36 +50,38 @@ abstract class WanderingTraderMixin {
         this.gca$llama = 0;
     }
 
-    @WrapWithCondition(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private boolean spawn0(RandomSource instance, int i) {
-        if (i > this.spawnChance) {
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int spawn0(RandomSource instance, int i, @NotNull Operation<Integer> original) {
+        int result = original.call(instance, i);
+        if (result > this.spawnChance) {
             this.gca$sendMsg(
                 ComponentTranslate.trans(
                     "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
                     Color.YELLOW,
                     Style.EMPTY,
                     "i <= %s".formatted(this.spawnChance),
-                    i
+                    result
                 )
             );
         }
-        return true;
+        return result;
     }
 
-    @WrapWithCondition(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private boolean spawn1(RandomSource instance, int i) {
-        if (i != 0) {
+    @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int spawn1(RandomSource instance, int i, @NotNull Operation<Integer> original) {
+        int result = original.call(instance, i);
+        if (result != 0) {
             this.gca$sendMsg(
                 ComponentTranslate.trans(
                     "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
                     Color.YELLOW,
                     Style.EMPTY,
                     "i == 0",
-                    i
+                    result
                 )
             );
         }
-        return true;
+        return result;
     }
 
     @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getRandomPlayer()Lnet/minecraft/server/level/ServerPlayer;"))
