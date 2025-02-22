@@ -17,7 +17,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.FakePlayerSerializer;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;

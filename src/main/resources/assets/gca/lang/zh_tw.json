@@ -5,6 +5,9 @@
   "carpet.rule.openFakePlayerInventory.name": "假人物品欄",
   "carpet.rule.openFakePlayerInventory.desc": "允許玩家開啟假人的物品欄",
 
+  "carpet.rule.openRealPlayerInventory.name": "Real Player Inventory",
+  "carpet.rule.openRealPlayerInventory.desc": "Allow player to open the real player's inventory",
+
   "carpet.rule.openFakePlayerEnderChest.name": "假人終界箱",
   "carpet.rule.openFakePlayerEnderChest.desc": "允許玩家開啟假人的終界箱",
 
@@ -13,6 +16,9 @@
 
   "carpet.rule.fakePlayerAutoReplenishment.name": "假人自動補充物品",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "讓假人自動補充物品",
+
+  "carpet.rule.fakePlayerAutoReplenishmentFormShulkerBox.name": "Fake Player Auto Replenishment Form Shulker Box",
+  "carpet.rule.fakePlayerAutoReplenishmentFormShulkerBox.desc": "Make fake player to auto replenishment form shulker box",
 
   "carpet.rule.fakePlayerAutoFish.name": "假人自動釣魚",
   "carpet.rule.fakePlayerAutoFish.desc": "讓假人自動釣魚",
@@ -105,6 +111,9 @@
   "gca.action.attack.continuous": "連續攻擊：%s",
   "gca.action.use.continuous": "連續使用：%s",
   "gca.action.stop_all": "停止所有動作",
+  "gca.action.sneak": "Sneak",
+  "gca.action.jump_continuous": "Jump Continuous",
+  "gca.action.quit": "Quit",
 
   "gca.hotbar": "快捷欄：%s",
 

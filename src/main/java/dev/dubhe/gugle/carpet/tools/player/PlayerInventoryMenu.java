@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.mixin.AbstractContainerMenuAccessor;
 import net.minecraft.world.Container;
@@ -21,8 +21,8 @@ import net.minecraft.core.component.DataComponents;
 //#else
 //#endif
 
-public class FakePlayerInventoryMenu extends ChestMenu {
-    public FakePlayerInventoryMenu(int i, Inventory inventory, Container container) {
+public class PlayerInventoryMenu extends ChestMenu {
+    public PlayerInventoryMenu(int i, Inventory inventory, Container container) {
         super(MenuType.GENERIC_9x6, i, inventory, container, 6);
     }
 
@@ -45,12 +45,12 @@ public class FakePlayerInventoryMenu extends ChestMenu {
             } else if (slotStack.getItem() instanceof ArmorItem armorItem) {
                 // 如果是盔甲，移动到盔甲槽
                 int ordinal = getArmorOrdinal(armorItem);
-                if (ordinal >= 0 && FakePlayerInventoryMenu.moveToArmor(chestMenu, slotStack, ordinal) || moveToInventory(chestMenu, slotStack)) {
+                if (ordinal >= 0 && PlayerInventoryMenu.moveToArmor(chestMenu, slotStack, ordinal) || moveToInventory(chestMenu, slotStack)) {
                     return ItemStack.EMPTY;
                 }
             } else if (slotStack.is(Items.ELYTRA)) {
                 // 如果是鞘翅，移动到盔甲槽
-                if (FakePlayerInventoryMenu.moveToArmor(chestMenu, slotStack, 1) || moveToInventory(chestMenu, slotStack)) {
+                if (PlayerInventoryMenu.moveToArmor(chestMenu, slotStack, 1) || moveToInventory(chestMenu, slotStack)) {
                     return ItemStack.EMPTY;
                 }
             } else if (
@@ -61,7 +61,7 @@ public class FakePlayerInventoryMenu extends ChestMenu {
                 //#endif
             ) {
                 // 如果是食物，移动到副手
-                if (FakePlayerInventoryMenu.moveToOffHand(chestMenu, slotStack) || moveToInventory(chestMenu, slotStack)) {
+                if (PlayerInventoryMenu.moveToOffHand(chestMenu, slotStack) || moveToInventory(chestMenu, slotStack)) {
                     return ItemStack.EMPTY;
                 }
             } else if (moveToInventory(chestMenu, slotStack)) {

@@ -5,6 +5,9 @@
   "carpet.rule.openFakePlayerInventory.name": "Fake Player Inventory",
   "carpet.rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
 
+  "carpet.rule.openRealPlayerInventory.name": "Real Player Inventory",
+  "carpet.rule.openRealPlayerInventory.desc": "Allow player to open the real player's inventory",
+
   "carpet.rule.openFakePlayerEnderChest.name": "Fake Player Ender Chest",
   "carpet.rule.openFakePlayerEnderChest.desc": "Allow player to open the fake player's ender chest",
 
@@ -16,6 +19,9 @@
 
   "carpet.rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",
+
+  "carpet.rule.fakePlayerAutoReplenishmentFormShulkerBox.name": "Fake Player Auto Replenishment Form Shulker Box",
+  "carpet.rule.fakePlayerAutoReplenishmentFormShulkerBox.desc": "Make fake player to auto replenishment form shulker box",
 
   "carpet.rule.fakePlayerAutoFish.name": "Fake Player Auto Fish",
   "carpet.rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
@@ -105,6 +111,9 @@
   "gca.action.attack.continuous": "Attack continuous: %s",
   "gca.action.use.continuous": "Use continuous: %s",
   "gca.action.stop_all": "Stop all action",
+  "gca.action.sneak": "Sneak",
+  "gca.action.jump_continuous": "Jump Continuous",
+  "gca.action.quit": "Quit",
 
   "gca.hotbar": "Hotbar: %s",
 

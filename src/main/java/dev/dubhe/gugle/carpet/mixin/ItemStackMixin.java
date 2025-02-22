@@ -2,8 +2,8 @@ package dev.dubhe.gugle.carpet.mixin;
 
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.FakePlayerAutoReplaceTool;
-import dev.dubhe.gugle.carpet.tools.FakePlayerAutoReplenishment;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplenishment;
 import net.minecraft.world.InteractionHand;
 //#if MC>=12104
 //$$ import net.minecraft.world.InteractionResult;

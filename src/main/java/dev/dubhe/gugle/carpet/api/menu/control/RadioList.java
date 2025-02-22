@@ -3,7 +3,6 @@ package dev.dubhe.gugle.carpet.api.menu.control;
 import java.util.List;
 
 public class RadioList extends ButtonList {
-
     public RadioList(List<Button> buttons, boolean required) {
         super(buttons, required);
         for (Button button : this.buttons) {

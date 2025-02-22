@@ -2,7 +2,7 @@ package dev.dubhe.gugle.carpet.mixin;
 
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.FakePlayerAutoFish;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoFish;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FishingHook;

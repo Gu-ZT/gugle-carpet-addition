@@ -1,7 +1,5 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.tools.player;
 
-import carpet.fakes.ServerPlayerInterface;
-import carpet.helpers.EntityPlayerActionPack;
 import carpet.helpers.EntityPlayerActionPack.Action;
 import carpet.helpers.EntityPlayerActionPack.ActionType;
 import com.google.common.collect.ImmutableList;
@@ -13,30 +11,31 @@ import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class FakePlayerInventoryContainer extends FakePlayerContainer {
+public class PlayerInventoryContainer extends PlayerContainer {
     public final NonNullList<ItemStack> items;
     public final NonNullList<ItemStack> armor;
     public final NonNullList<ItemStack> offhand;
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(13, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> compartments;
-    private final EntityPlayerActionPack ap;
+    private final RadioList hotbar;
 
-    public FakePlayerInventoryContainer(Player player) {
+    public PlayerInventoryContainer(ServerPlayer player) {
         super(player);
         this.items = this.player.getInventory().items;
         this.armor = this.player.getInventory().armor;
         this.offhand = this.player.getInventory().offhand;
-        this.ap = ((ServerPlayerInterface) this.player).getActionPack();
         this.compartments = ImmutableList.of(this.items, this.armor, this.offhand, this.buttons);
+        this.hotbar = PlayerInventoryContainer.createHotbarButton(this::addButton, this);
         this.createButton();
-        this.ap.setSlot(1);
     }
 
     @Override
@@ -89,26 +88,30 @@ public class FakePlayerInventoryContainer extends FakePlayerContainer {
         }
     }
 
-    private void createButton() {
+    private static @NotNull RadioList createHotbarButton(BiConsumer<Integer, Button> adder, PlayerInventoryContainer container) {
         List<Button> hotBarList = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             Component hotBarComponent = ComponentTranslate.trans(
-                    "gca.hotbar",
-                    Color.WHITE,
-                    Style.EMPTY.withBold(true).withItalic(false),
-                    i + 1
+                "gca.hotbar",
+                Color.WHITE,
+                Style.EMPTY.withBold(true).withItalic(false),
+                i + 1
             );
             boolean defaultState = i == 0;
             Button button = new Button(defaultState, i + 1,
-                    hotBarComponent,
-                    hotBarComponent
+                hotBarComponent,
+                hotBarComponent
             );
             int finalI = i + 1;
-            button.addTurnOnFunction(() -> ap.setSlot(finalI));
-            this.addButton(i + 9, button);
+            button.addTurnOnFunction(() -> container.ap.setSlot(finalI));
+            adder.accept(i + 9, button);
             hotBarList.add(button);
         }
-        this.addButtonList(new RadioList(hotBarList, true));
+        return new RadioList(hotBarList, true);
+    }
+
+    private void createButton() {
+        this.addButtonList(this.hotbar);
 
         Button stopAll = new AutoResetButton("gca.action.stop_all");
         Button attackInterval14 = new Button(false, "gca.action.attack.interval.12");
@@ -141,5 +144,18 @@ public class FakePlayerInventoryContainer extends FakePlayerContainer {
         this.addButton(5, attackInterval14);
         this.addButton(6, attackContinuous);
         this.addButton(8, useContinuous);
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        List<Button> buttonList = this.hotbar.getButtons();
+        for (int i = 0; i < buttonList.size(); i++) {
+            if (i == this.player.getInventory().selected) {
+                buttonList.get(i).turnOnWithoutFunction();
+            } else {
+                buttonList.get(i).turnOffWithoutFunction();
+            }
+        }
     }
 }

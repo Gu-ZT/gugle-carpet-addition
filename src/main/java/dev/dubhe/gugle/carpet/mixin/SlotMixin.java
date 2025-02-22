@@ -1,6 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
-import dev.dubhe.gugle.carpet.tools.SlotIcon;
+import dev.dubhe.gugle.carpet.tools.player.ISlotIcon;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
@@ -14,9 +14,8 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.inventory.InventoryMenu;
 //#endif
 
-@SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(Slot.class)
-public class SlotMixin implements SlotIcon {
+public class SlotMixin implements ISlotIcon {
     @Unique
     //#if MC>=12104
     //$$ private ResourceLocation location;
@@ -40,6 +39,7 @@ public class SlotMixin implements SlotIcon {
     }
 
     @Override
+    @SuppressWarnings("AddedMixinMembersNamePattern")
     public void setIcon(ResourceLocation resource) {
         if (resource != null) {
             //#if MC>=12104

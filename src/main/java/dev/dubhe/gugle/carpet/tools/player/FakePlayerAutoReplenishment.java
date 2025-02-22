@@ -1,5 +1,6 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.tools.player;
 
+import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -45,7 +46,7 @@ public class FakePlayerAutoReplenishment {
                     eachItem.setCount(0);
                 }
                 break;
-            } else if (hasContainer(eachItem)) {
+            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && hasContainer(eachItem)) {
                 int result = pickItemFromBox(eachItem, itemStack, half);
                 if (result == 0) {
                     continue;

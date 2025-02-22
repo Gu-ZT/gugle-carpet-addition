@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.tools.player;
 
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;

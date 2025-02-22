@@ -1,6 +1,5 @@
 package dev.dubhe.gugle.carpet.api.menu.control;
 
-import dev.dubhe.gugle.carpet.api.Consumer;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import net.minecraft.nbt.CompoundTag;
@@ -30,9 +29,9 @@ public class Button {
     CompoundTag compoundTag = new CompoundTag();
     public static final String GCA_CLEAR = "GcaClear";
 
-    private final List<Consumer> turnOnConsumers = new ArrayList<>();
+    private final List<Runnable> turnOnRunnableList = new ArrayList<>();
 
-    private final List<Consumer> turnOffConsumers = new ArrayList<>();
+    private final List<Runnable> turnOffRunnableList = new ArrayList<>();
 
     public Button() {
         this(true, Items.BARRIER, Items.STRUCTURE_VOID);
@@ -162,12 +161,12 @@ public class Button {
         }
     }
 
-    public void addTurnOnFunction(Consumer consumer) {
-        this.turnOnConsumers.add(consumer);
+    public void addTurnOnFunction(Runnable consumer) {
+        this.turnOnRunnableList.add(consumer);
     }
 
-    public void addTurnOffFunction(Consumer consumer) {
-        this.turnOffConsumers.add(consumer);
+    public void addTurnOffFunction(Runnable consumer) {
+        this.turnOffRunnableList.add(consumer);
     }
 
     public void turnOnWithoutFunction() {
@@ -189,14 +188,14 @@ public class Button {
     }
 
     public void runTurnOnFunction() {
-        for (Consumer turnOnConsumer : this.turnOnConsumers) {
-            turnOnConsumer.accept();
+        for (Runnable turnOnConsumer : this.turnOnRunnableList) {
+            turnOnConsumer.run();
         }
     }
 
     public void runTurnOffFunction() {
-        for (Consumer turnOffConsumer : this.turnOffConsumers) {
-            turnOffConsumer.accept();
+        for (Runnable turnOffConsumer : this.turnOffRunnableList) {
+            turnOffConsumer.run();
         }
     }
 

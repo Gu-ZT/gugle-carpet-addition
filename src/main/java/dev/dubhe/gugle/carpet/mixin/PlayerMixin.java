@@ -1,10 +1,15 @@
 package dev.dubhe.gugle.carpet.mixin;
 
 import carpet.patches.EntityPlayerMPFake;
-import dev.dubhe.gugle.carpet.GcaExtension;
+import carpet.utils.CommandHelper;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.tools.*;
+import dev.dubhe.gugle.carpet.tools.player.IClientMenuTick;
+import dev.dubhe.gugle.carpet.tools.player.IGcaPlayer;
+import dev.dubhe.gugle.carpet.tools.player.PlayerInventoryMenu;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.SimpleMenuProvider;
@@ -19,8 +24,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-
-import java.util.Map;
+//#if MC>=12104
+//$$ import net.minecraft.server.level.ServerLevel;
+//#endif
 
 @Mixin(Player.class)
 abstract class PlayerMixin {
@@ -29,15 +35,12 @@ abstract class PlayerMixin {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void tick(CallbackInfo ci) {
-        if (gca$self instanceof EntityPlayerMPFake fakePlayer && fakePlayer.isAlive()) {
-            Map.Entry<FakePlayerInventoryContainer, FakePlayerEnderChestContainer> entry
-                = GcaExtension.fakePlayerInventoryContainerMap.get(gca$self);
-            entry.getKey().tick();
-            entry.getValue().tick();
-        } else if (gca$self.level().isClientSide) {
-            if (gca$self.containerMenu instanceof ClientMenuTick tick) {
-                tick.tick();
-            }
+        if (this.gca$self.isAlive() && this.gca$self instanceof IGcaPlayer gcaPlayer) {
+            gcaPlayer.getEnderChestContainer().tick();
+            gcaPlayer.getInventoryContainer().tick();
+        }
+        if (this.gca$self.level().isClientSide && this.gca$self.containerMenu instanceof IClientMenuTick tick) {
+            tick.tick();
         }
     }
 
@@ -48,10 +51,10 @@ abstract class PlayerMixin {
             if (entity instanceof Player && ClientUtils.isFakePlayer(player)) {
                 return InteractionResult.CONSUME;
             }
-        } else {
-            if ((GcaSetting.openFakePlayerInventory || SettingUtils.openFakePlayerEnderChest(player)) && entity instanceof EntityPlayerMPFake fakePlayer) {
+        } else if (player instanceof ServerPlayer serverPlayer) {
+            if ((GcaSetting.openFakePlayerInventory || SettingUtils.openFakePlayerEnderChest(player)) && entity instanceof ServerPlayer otherPlayer) {
                 // 打开物品栏
-                InteractionResult result = this.openInventory(player, fakePlayer);
+                InteractionResult result = this.openInventory(serverPlayer, otherPlayer);
                 if (result != InteractionResult.PASS) {
                     player.stopUsingItem();
                     return result;
@@ -62,41 +65,53 @@ abstract class PlayerMixin {
     }
 
     @Unique
-    private InteractionResult openInventory(@NotNull Player player, EntityPlayerMPFake fakePlayer) {
+    private InteractionResult openInventory(@NotNull ServerPlayer player, @NotNull ServerPlayer otherPlayer) {
         SimpleMenuProvider provider;
-        if (player.isShiftKeyDown()) {
+        if (!(otherPlayer instanceof IGcaPlayer gcaPlayer)) return InteractionResult.PASS;
+        if (player.isShiftKeyDown() && gca$hasPremission(player, otherPlayer)) {
             // 打开末影箱
             if (SettingUtils.openFakePlayerEnderChest(player)) {
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.sixRows(
                         i, inventory,
-                        GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer).getValue()
+                        gcaPlayer.getEnderChestContainer()
                     ),
-                    ComponentTranslate.trans("gca.player.ender_chest", fakePlayer.getDisplayName())
+                    ComponentTranslate.trans("gca.player.ender_chest", otherPlayer.getDisplayName())
                 );
             } else {
                 // 打开额外功能菜单
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.threeRows(
                         i, inventory,
-                        GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer).getValue()
+                        gcaPlayer.getEnderChestContainer()
                     ),
-                    ComponentTranslate.trans("gca.player.other_controller", fakePlayer.getDisplayName())
+                    ComponentTranslate.trans("gca.player.other_controller", otherPlayer.getDisplayName())
                 );
             }
-        } else if (GcaSetting.openFakePlayerInventory) {
+        } else if (GcaSetting.openFakePlayerInventory && gca$hasPremission(player, otherPlayer)) {
             // 打开物品栏
             provider = new SimpleMenuProvider(
-                (i, inventory, p) -> new FakePlayerInventoryMenu(
+                (i, inventory, p) -> new PlayerInventoryMenu(
                     i, inventory,
-                    GcaExtension.fakePlayerInventoryContainerMap.get(fakePlayer).getKey()
+                    gcaPlayer.getInventoryContainer()
                 ),
-                ComponentTranslate.trans("gca.player.inventory", fakePlayer.getDisplayName())
+                ComponentTranslate.trans("gca.player.inventory", otherPlayer.getDisplayName())
             );
         } else {
             return InteractionResult.PASS;
         }
         player.openMenu(provider);
         return InteractionResult.CONSUME;
+    }
+
+    @Unique
+    private static boolean gca$hasPremission(@NotNull ServerPlayer player, @NotNull ServerPlayer otherPlayer) {
+        //#if MC>=12104
+        //$$ if(!(player.level() instanceof ServerLevel serverLevel)) return otherPlayer instanceof EntityPlayerMPFake;
+        //$$ CommandSourceStack stack = player.createCommandSourceStackForNameResolution(serverLevel);
+        //#else
+        CommandSourceStack stack = player.createCommandSourceStack();
+        //#endif
+        return otherPlayer instanceof EntityPlayerMPFake || CommandHelper.canUseCommand(stack, GcaSetting.openRealPlayerInventory);
     }
 }

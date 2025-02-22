@@ -24,6 +24,7 @@
     "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",
+    "ServerPlayerMixin",
     "SignBlockMixin",
     "SlotMixin",
     "TransferCommandMixin",

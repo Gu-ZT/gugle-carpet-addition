@@ -1,7 +1,10 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.tools.player;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import dev.dubhe.gugle.carpet.api.menu.CustomMenu;
 import net.minecraft.core.NonNullList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -9,11 +12,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public abstract class FakePlayerContainer extends CustomMenu {
-    protected final Player player;
+public abstract class PlayerContainer extends CustomMenu {
+    protected final ServerPlayer player;
+    protected final EntityPlayerActionPack ap;
 
-    public FakePlayerContainer(Player player) {
+    public PlayerContainer(ServerPlayer player) {
         this.player = player;
+        this.ap = ((ServerPlayerInterface) this.player).getActionPack();
     }
 
     @Override

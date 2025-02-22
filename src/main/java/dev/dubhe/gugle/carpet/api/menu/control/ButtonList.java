@@ -2,10 +2,11 @@ package dev.dubhe.gugle.carpet.api.menu.control;
 
 import java.util.List;
 
+@SuppressWarnings("unused")
 public abstract class ButtonList {
-
     protected final List<Button> buttons;
 
+    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     public ButtonList(List<Button> buttons, boolean required) {
         this.buttons = buttons;
         if (required) {
@@ -36,5 +37,9 @@ public abstract class ButtonList {
             }
         }
         return true;
+    }
+
+    public List<Button> getButtons() {
+        return buttons;
     }
 }
