@@ -41,18 +41,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
     private static final HashSet<EntityPlayerMPFake> RESIDENT_PLAYERS = new HashSet<>();
     public static final Gson GSON = new GsonBuilder()
-            .setPrettyPrinting()
-            .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
-            .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
-            .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
-            .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
-            .create();
+        .setPrettyPrinting()
+        .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
+        .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+        .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
+        .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
+        .create();
     public static String MOD_ID = "gca";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
