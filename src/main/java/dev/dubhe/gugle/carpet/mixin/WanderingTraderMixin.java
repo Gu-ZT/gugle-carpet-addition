@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.tools.ComponentUtils;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
@@ -45,7 +46,11 @@ abstract class WanderingTraderMixin {
     private int spawnChance;
 
     @Inject(method = "tick", at = @At("HEAD"))
+    //#if MC >= 12105
+    //$$ private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfo ci) {
+    //#else
     private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cir) {
+        //#endif
         this.gca$server = serverLevel.getServer();
         this.gca$llama = 0;
     }
@@ -144,7 +149,7 @@ abstract class WanderingTraderMixin {
                         Style.EMPTY
                             .withColor(ChatFormatting.GREEN)
                             .withClickEvent(
-                                new ClickEvent(
+                                ComponentUtils.createClickEvent(
                                     ClickEvent.Action.SUGGEST_COMMAND,
                                     "/tp @s %.1f %.1f %.1f".formatted(center.x, center.y, center.z)
                                 )

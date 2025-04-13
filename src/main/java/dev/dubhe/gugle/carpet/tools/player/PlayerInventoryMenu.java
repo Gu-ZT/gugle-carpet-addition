@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +15,8 @@ import org.jetbrains.annotations.NotNull;
 //#if MC>=12104
 //$$ import net.minecraft.world.item.equipment.Equippable;
 //$$ import net.minecraft.world.entity.EquipmentSlot;
+//#else
+import net.minecraft.world.item.ArmorItem;
 //#endif
 //#if MC>=12100
 import net.minecraft.core.component.DataComponents;
@@ -31,9 +33,10 @@ public class PlayerInventoryMenu extends ChestMenu {
         return quickMove(this, slotIndex);
     }
 
-    public static ItemStack quickMove(ChestMenu chestMenu, int slotIndex) {
+    public static ItemStack quickMove(@NotNull ChestMenu chestMenu, int slotIndex) {
         ItemStack remainingItem = ItemStack.EMPTY;
         Slot slot = chestMenu.slots.get(slotIndex);
+        int ordinal;
         if (slot.hasItem()) {
             ItemStack slotStack = slot.getItem();
             remainingItem = slotStack.copy();
@@ -42,10 +45,9 @@ public class PlayerInventoryMenu extends ChestMenu {
                 if (!accessor.invokerMoveItemStackTo(slotStack, 54, chestMenu.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (slotStack.getItem() instanceof ArmorItem armorItem) {
+            } else if ((ordinal = getArmorOrdinal(slotStack)) >= 0) {
                 // 如果是盔甲，移动到盔甲槽
-                int ordinal = getArmorOrdinal(armorItem);
-                if (ordinal >= 0 && PlayerInventoryMenu.moveToArmor(chestMenu, slotStack, ordinal) || moveToInventory(chestMenu, slotStack)) {
+                if (PlayerInventoryMenu.moveToArmor(chestMenu, slotStack, ordinal) || moveToInventory(chestMenu, slotStack)) {
                     return ItemStack.EMPTY;
                 }
             } else if (slotStack.is(Items.ELYTRA)) {
@@ -82,11 +84,11 @@ public class PlayerInventoryMenu extends ChestMenu {
         return remainingItem;
     }
 
-    private static int getArmorOrdinal(@NotNull ArmorItem armorItem) {
-        int ordinal;
+    private static int getArmorOrdinal(@NotNull ItemStack stack) {
+        int ordinal = -1;
+        Item item = stack.getItem();
         //#if MC>=12104
-        //$$ ordinal = -1;
-        //$$ Equippable equippable = armorItem.components().get(DataComponents.EQUIPPABLE);
+        //$$ Equippable equippable = item.components().get(DataComponents.EQUIPPABLE);
         //$$ if (equippable != null) {
         //$$     EquipmentSlot slot1 = equippable.slot();
         //$$     ordinal = switch (slot1) {
@@ -98,7 +100,9 @@ public class PlayerInventoryMenu extends ChestMenu {
         //$$     };
         //$$ }
         //#else
-        ordinal = armorItem.getType().ordinal();
+        if (item instanceof ArmorItem armorItem) {
+            ordinal = armorItem.getType().ordinal();
+        }
         //#endif
         return ordinal;
     }

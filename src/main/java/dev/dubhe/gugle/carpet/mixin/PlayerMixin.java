@@ -48,7 +48,7 @@ abstract class PlayerMixin {
     private InteractionResult interactOn(Entity entity, @NotNull Player player, InteractionHand hand, Operation<InteractionResult> original) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
-            if (entity instanceof Player && ClientUtils.isFakePlayer(player)) {
+            if (entity instanceof Player otherPlayer && ClientUtils.isFakePlayer(otherPlayer)) {
                 return InteractionResult.CONSUME;
             }
         } else if (player instanceof ServerPlayer serverPlayer) {

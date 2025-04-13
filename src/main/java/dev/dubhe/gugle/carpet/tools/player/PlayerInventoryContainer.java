@@ -8,6 +8,7 @@ import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import dev.dubhe.gugle.carpet.api.menu.control.RadioList;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.tools.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -30,9 +31,9 @@ public class PlayerInventoryContainer extends PlayerContainer {
 
     public PlayerInventoryContainer(ServerPlayer player) {
         super(player);
-        this.items = this.player.getInventory().items;
-        this.armor = this.player.getInventory().armor;
-        this.offhand = this.player.getInventory().offhand;
+        this.items = InventoryUtil.getItems(this.player);
+        this.armor = InventoryUtil.getArmor(this.player);
+        this.offhand = InventoryUtil.getOffHand(this.player);
         this.compartments = ImmutableList.of(this.items, this.armor, this.offhand, this.buttons);
         this.hotbar = PlayerInventoryContainer.createHotbarButton(this::addButton, this);
         this.createButton();
@@ -151,7 +152,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
         super.tick();
         List<Button> buttonList = this.hotbar.getButtons();
         for (int i = 0; i < buttonList.size(); i++) {
-            if (i == this.player.getInventory().selected) {
+            if (i == InventoryUtil.getSelected(this.player)) {
                 buttonList.get(i).turnOnWithoutFunction();
             } else {
                 buttonList.get(i).turnOffWithoutFunction();

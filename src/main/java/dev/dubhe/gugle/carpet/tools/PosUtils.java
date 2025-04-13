@@ -47,7 +47,7 @@ public class PosUtils {
                                 ChatFormatting.LIGHT_PURPLE :
                                 ChatFormatting.AQUA
                 )
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(dimension.location().toString())))
+                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(dimension.location().toString())))
         );
         double scale = 0;
         ResourceKey<Level> toDimension = Level.END;
@@ -67,7 +67,7 @@ public class PosUtils {
                             ChatFormatting.GREEN :
                             ChatFormatting.AQUA
                 )
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(toDimension.location().toString())))
+                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(toDimension.location().toString())))
         );
         return scale > 0 ?
             List.of(pos, xaero(desc, x, y, z, dimension), toPos, xaero(desc, x * scale, y, z * scale, toDimension)) :

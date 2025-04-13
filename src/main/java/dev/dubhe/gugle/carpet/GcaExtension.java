@@ -17,6 +17,7 @@ import dev.dubhe.gugle.carpet.commands.SopCommand;
 import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
+import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
@@ -53,7 +54,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
-        .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocation.Serializer())
+        .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocationSerializer())
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
         .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
         .create();

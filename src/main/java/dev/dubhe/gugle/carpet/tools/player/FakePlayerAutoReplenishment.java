@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.tools.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +20,7 @@ import net.minecraft.world.item.component.ItemContainerContents;
 public class FakePlayerAutoReplenishment {
 
     public static void autoReplenishment(@NotNull Player fakePlayer) {
-        NonNullList<ItemStack> itemStackList = fakePlayer.getInventory().items;
+        NonNullList<ItemStack> itemStackList = InventoryUtil.getItems(fakePlayer);
         replenishment(fakePlayer.getMainHandItem(), itemStackList);
         replenishment(fakePlayer.getOffhandItem(), itemStackList);
     }

@@ -6,6 +6,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,6 +25,21 @@ abstract class AbstractContainerMenuMixin {
     @Unique
     private final AbstractContainerMenu gca$self = (AbstractContainerMenu) (Object) this;
 
+    //#if MC < 12100
+    //#elseif MC < 12105
+    @Unique
+    @SuppressWarnings("SameParameterValue")
+    private boolean gca$getBoolean(@NotNull CustomData data, String string) {
+        return data.copyTag().getBoolean(string);
+    }
+    //#else
+    //$$ @Unique
+    //$$ @SuppressWarnings("SameParameterValue")
+    //$$ private boolean gca$getBoolean(@NotNull CustomData data, String string) {
+    //$$     return data.copyTag().getBoolean(string).orElse(false);
+    //$$ }
+    //#endif
+
     @Inject(method = "doClick", at = @At("HEAD"), cancellable = true)
     private void doClick(int slotIndex, int button, ClickType clickType, Player player, CallbackInfo ci) {
         if (slotIndex < 0) return;
@@ -34,7 +50,7 @@ abstract class AbstractContainerMenuMixin {
         if (customData == null || customData.copyTag().get(Button.GCA_CLEAR) == null) {
             return;
         }
-        if (customData.copyTag().getBoolean(Button.GCA_CLEAR)) {
+        if (this.gca$getBoolean(customData, Button.GCA_CLEAR)) {
             itemStack.setCount(0);
             ci.cancel();
         }

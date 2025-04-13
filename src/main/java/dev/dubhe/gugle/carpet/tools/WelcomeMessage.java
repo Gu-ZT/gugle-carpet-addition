@@ -178,13 +178,13 @@ public class WelcomeMessage {
                 MutableComponent component1 = Component.literal(name);
                 Style style = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
                     .withHoverEvent(
-                        new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
+                        ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
                     );
                 //#if MC>=12100
                 style = style.withClickEvent(
                     host.contains(":") ?
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])) :
-                        new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
+                        ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])) :
+                        ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
                 );
                 //#else
                 //#endif
