@@ -6,7 +6,7 @@ import net.minecraft.recipebook.ServerPlaceRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-//#if MC>=12104
+//#if MC>=12102
 //$$ import org.spongepowered.asm.mixin.injection.Inject;
 //$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //#elseif MC>=12100
@@ -27,7 +27,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 @Mixin(ServerPlaceRecipe.class)
 abstract class ServerPlaceRecipeMixin {
-    //#if MC>=12104
+    //#if MC>=12102
     //$$ @Inject(method = "calculateAmountToCraft", at = @At("RETURN"), cancellable = true)
     //$$ private void calculateAmountToCraft(int i, boolean bl, CallbackInfoReturnable<Integer> cir) {
     //$$     if (GcaSetting.betterQuickCrafting) cir.setReturnValue(cir.getReturnValueI() - 1);

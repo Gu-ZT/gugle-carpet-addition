@@ -9,7 +9,7 @@ import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplenishment;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-//#if MC>=12104
+//#if MC>=12102
 //$$ import net.minecraft.world.InteractionResult;
 //#else
 import net.minecraft.world.InteractionResultHolder;
@@ -57,7 +57,7 @@ abstract class ItemStackMixin {
 
     @Inject(method = "use", at = @At("HEAD"))
     private void use(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<
-        //#if MC>=12104
+        //#if MC>=12102
         //$$ InteractionResult
         //#else
         InteractionResultHolder<ItemStack>

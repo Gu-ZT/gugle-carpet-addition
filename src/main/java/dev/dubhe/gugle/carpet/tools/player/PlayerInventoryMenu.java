@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.jetbrains.annotations.NotNull;
 
-//#if MC>=12104
+//#if MC>=12102
 //$$ import net.minecraft.world.item.equipment.Equippable;
 //$$ import net.minecraft.world.entity.EquipmentSlot;
 //#else
@@ -87,7 +87,7 @@ public class PlayerInventoryMenu extends ChestMenu {
     private static int getArmorOrdinal(@NotNull ItemStack stack) {
         int ordinal = -1;
         Item item = stack.getItem();
-        //#if MC>=12104
+        //#if MC>=12102
         //$$ Equippable equippable = item.components().get(DataComponents.EQUIPPABLE);
         //$$ if (equippable != null) {
         //$$     EquipmentSlot slot1 = equippable.slot();

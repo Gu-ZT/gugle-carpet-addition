@@ -38,7 +38,7 @@ abstract class ItemFrameMixin extends Entity {
 
     @Inject(
         method =
-            //#if MC>=12104
+            //#if MC>=12102
             //$$ "dropItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Z)V",
             //#else
             "dropItem(Lnet/minecraft/world/entity/Entity;Z)V",
