@@ -12,12 +12,14 @@ import net.minecraft.world.InteractionHand;
 //#if MC>=12102
 //$$ import net.minecraft.world.InteractionResult;
 //#else
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 //#endif
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -64,8 +66,17 @@ abstract class ItemStackMixin {
         //#endif
         > cir) {
         if (GcaSetting.fakePlayerAutoReplenishment && player instanceof EntityPlayerMPFake fakePlayer) {
-            FakePlayerAutoReplenishment.autoReplenishment(fakePlayer);
+            FakePlayerAutoReplenishment.autoReplenishment(fakePlayer, usedHand);
         }
+    }
+
+    @WrapOperation(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult useOn(Item item, UseOnContext context, Operation<InteractionResult> original) {
+        InteractionResult call = original.call(item, context);
+        if (GcaSetting.fakePlayerAutoReplenishment && context.getPlayer() instanceof EntityPlayerMPFake fakePlayer) {
+            FakePlayerAutoReplenishment.autoReplenishment(fakePlayer, context.getHand());
+        }
+        return call;
     }
 
     //#if MC>=12100
