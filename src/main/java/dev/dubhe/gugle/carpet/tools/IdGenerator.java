@@ -82,7 +82,7 @@ public class IdGenerator {
         try {
             e = NetworkInterface.getNetworkInterfaces();
         } catch (SocketException e1) {
-            GcaExtension.LOGGER.error(e1);
+            GcaExtension.LOGGER.error(e1.getMessage(), e1);
         }
         if (e != null) {
             while (e.hasMoreElements()) {

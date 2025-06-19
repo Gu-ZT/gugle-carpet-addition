@@ -15,7 +15,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 //#endif
 
 @Mixin(Slot.class)
-public class SlotMixin implements ISlotIcon {
+abstract class SlotMixin implements ISlotIcon {
     @Unique
     //#if MC>=12104
     //$$ private ResourceLocation location;

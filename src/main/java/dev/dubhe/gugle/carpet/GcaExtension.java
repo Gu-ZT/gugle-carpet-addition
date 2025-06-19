@@ -31,10 +31,14 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+//#if MC>=12106
+//$$ import net.minecraft.util.ProblemReporter;
+//$$ import net.minecraft.world.level.storage.TagValueOutput;
+//#endif
 import net.minecraft.world.level.storage.LevelResource;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -59,7 +63,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
         .create();
     public static String MOD_ID = "gca";
-    public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
     public static final List<Map.Entry<Long, Runnable>> PLAN_FUNCTION = new ArrayList<>();
 
@@ -109,7 +113,17 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
             if (GcaSetting.fakePlayerResident) {
                 JsonObject fakePlayerList = new JsonObject();
                 for (EntityPlayerMPFake player : RESIDENT_PLAYERS) {
-                    if (player.saveWithoutId(new CompoundTag()).contains("gca.NoResident")) {
+                    CompoundTag tag;
+                    //#if MC>=12106
+                    //$$ try (ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(player.problemPath(), GcaExtension.LOGGER)) {
+                    //$$     TagValueOutput valueOutput = TagValueOutput.createWithContext(reporter, player.registryAccess());
+                    //$$     player.saveWithoutId(valueOutput);
+                    //$$     tag = valueOutput.buildResult();
+                    //$$ }
+                    //#else
+                    tag = player.saveWithoutId(new CompoundTag());
+                    //#endif
+                    if (tag.contains("gca.NoResident")) {
                         continue;
                     }
                     String username = player.getGameProfile().getName();

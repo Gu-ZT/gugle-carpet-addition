@@ -11,10 +11,12 @@ preprocess {
     def mc1213 = createNode("1.21.3", 1_21_03, "official")
     def mc1214 = createNode("1.21.4", 1_21_04, "official")
     def mc1215 = createNode("1.21.5", 1_21_05, "official")
+    def mc1216 = createNode("1.21.6", 1_21_06, "official")
 
     mc1201.link(mc1211, null)
     mc1212.link(mc1211, null)
     mc1213.link(mc1211, null)
     mc1214.link(mc1211, null)
     mc1215.link(mc1211, null)
+    mc1216.link(mc1211, null)
 }

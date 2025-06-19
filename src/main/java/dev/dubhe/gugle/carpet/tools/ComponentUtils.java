@@ -8,6 +8,10 @@ import org.jetbrains.annotations.NotNull;
 //$$ import net.minecraft.world.item.ItemStack;
 //$$ import java.net.URI;
 //#endif
+//#if MC >= 12106
+//$$ import net.minecraft.resources.ResourceLocation;
+//$$ import java.util.Optional;
+//#endif
 
 public class ComponentUtils {
     //#if MC <= 12104
@@ -40,6 +44,11 @@ public class ComponentUtils {
     //$$             case SUGGEST_COMMAND -> new ClickEvent.SuggestCommand(string);
     //$$             case COPY_TO_CLIPBOARD -> new ClickEvent.CopyToClipboard(string);
     //$$             case CHANGE_PAGE -> new ClickEvent.ChangePage(Integer.parseInt(string));
+    //#endif
+    //#if MC >= 12106
+    //$$             default -> new ClickEvent.Custom(ResourceLocation.parse(string), Optional.empty());
+    //#endif
+    //#if MC >= 12105
     //$$         };
     //$$     } catch (Exception e) {
     //$$         throw new RuntimeException(e);

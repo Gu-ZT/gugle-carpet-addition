@@ -79,11 +79,11 @@ public class FakePlayerResident {
             playerMPFake.setHealth(20.0F);
             AttributeInstance attribute = playerMPFake.getAttribute(Attributes.STEP_HEIGHT);
             if (attribute != null) attribute.setBaseValue(0.6F);
-            server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.serverLevel().dimension());
+            server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.level().dimension());
             //#if MC>=12102
-            //$$ server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(playerMPFake), playerMPFake.serverLevel().dimension());
+            //$$ server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(playerMPFake), playerMPFake.level().dimension());
             //#else
-            server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.serverLevel().dimension());
+            server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.level().dimension());
             //#endif
             playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
 
@@ -95,8 +95,8 @@ public class FakePlayerResident {
         //$$ server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), playerMPFake);
         //$$ playerMPFake.setHealth(20.0F);
         //$$ playerMPFake.setMaxUpStep(0.6F);
-        //$$ server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.serverLevel().dimension());
-        //$$ server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.serverLevel().dimension());
+        //$$ server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(playerMPFake, ((byte) (playerMPFake.yHeadRot * 256.0F / 360.0F))), playerMPFake.level().dimension());
+        //$$ server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.level().dimension());
         //$$ playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
         //$$ FakePlayerSerializer.applyActionPackFromJson(actions, playerMPFake);
         //$$ ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
