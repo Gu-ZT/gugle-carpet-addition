@@ -28,9 +28,8 @@ abstract class TransferCommandMixin {
     //#if MC>=12106
     //$$ @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;hasPermission(I)Lnet/minecraft/server/commands/PermissionCheck;"))
     //$$ private static @NotNull PermissionCheck<CommandSourceStack> registerPermission(int i, @NotNull Operation<PermissionCheck<CommandSourceStack>> original) {
+    //$$     final PermissionCheck<CommandSourceStack> call = original.call(i);
     //$$     return new PermissionCheck<>() {
-    //$$         private final PermissionCheck<CommandSourceStack> call = original.call(i);
-    //$$
     //$$         @Override
     //$$         public int requiredLevel() {
     //$$             return call.requiredLevel();
