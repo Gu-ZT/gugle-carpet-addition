@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//#if MC>=12104
+//#if MC>=12102
 //$$ import net.minecraft.server.level.ServerLevel;
 //#else
 //#endif
@@ -50,7 +50,7 @@ abstract class ItemFrameMixin extends Entity {
         cancellable = true
     )
     private void dropItem(
-        //#if MC>=12104
+        //#if MC>=12102
         //$$ ServerLevel serverLevel,
         //#endif
         Entity entity,
