@@ -20,6 +20,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.ComponentUtils;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
@@ -65,6 +66,10 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 //#else
+//#endif
+
+//#if MC>=12109
+//$$ import net.minecraft.server.players.NameAndId;
 //#endif
 
 public class BotCommand {
@@ -507,12 +512,12 @@ public class BotCommand {
         return component.append(" ").append(delete);
     }
 
-    private static boolean load(String name, Consumer<Component> failure) {
-        if (BOT_INFO.server.getPlayerList().getPlayerByName(name) != null) {
-            failure.accept(Component.literal("player %s is already exist.".formatted(name)));
+    private static boolean load(String username, Consumer<Component> failure) {
+        if (BOT_INFO.server.getPlayerList().getPlayerByName(username) != null) {
+            failure.accept(Component.literal("player %s is already exist.".formatted(username)));
             return false;
         }
-        BotInfo botInfo = BOT_INFO.map.getOrDefault(name, null);
+        BotInfo botInfo = BOT_INFO.map.getOrDefault(username, null);
         if (botInfo == null) {
             failure.accept(Component.literal("%s is not exist."));
             return false;
@@ -520,46 +525,75 @@ public class BotCommand {
         boolean success = false;
         try {
             ServerLevel worldIn = BOT_INFO.server.getLevel(botInfo.dimType);
+            //#if MC<12109
             GameProfileCache.setUsesAuthentication(false);
             GameProfile gameprofile;
+            //#else
+            //$$ NameAndId gameprofile;
+            //#endif
             try {
-                GameProfileCache profileCache = BOT_INFO.server.getProfileCache();
-                if (profileCache == null) gameprofile = null;
-                else gameprofile = profileCache.get(name).orElse(null);
+                GameProfileCache profileCache = GameProfileHelper.getProfileCache(BOT_INFO.server);
+                if (profileCache == null) {
+                    gameprofile = null;
+                } else {
+                    //#if MC<12109
+                    gameprofile = profileCache.get(username).orElse(null);
+                    //#else
+                    //$$ profileCache.resolveOfflineUsers(true);
+                    //$$ gameprofile = profileCache.get(username).orElse(null);
+                    //$$ profileCache.resolveOfflineUsers(BOT_INFO.server.isDedicatedServer() && BOT_INFO.server.usesAuthentication());
+                    //#endif
+                }
                 if (gameprofile == null) {
                     if (!CarpetSettings.allowSpawningOfflinePlayers) return false;
-                    gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
+                    //#if MC<12109
+                    gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username);
+                    //#else
+                    //$$ gameprofile = new NameAndId(UUIDUtil.createOfflinePlayerUUID(username), username);
+                    //#endif
                 }
                 //#if MC>=12100
-                GameProfile finalGP = gameprofile;
-                SkullBlockEntity.fetchGameProfile(gameprofile.getName()).thenAcceptAsync((p) -> {
-                    System.out.println(1);
-                    GameProfile current = finalGP;
-                    if (p.isPresent()) current = p.get();
-                    if (worldIn == null) return;
-                    EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, current, ClientInformation.createDefault());
-                    instance.fixStartingPosition = () -> instance.moveTo(botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
-                    BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(current, 0, instance.clientInformation(), false));
-                    //#if MC>=12102
-                    //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
+                //#if MC<12109
+                GameProfile finalGameprofile = gameprofile;
+                //#endif
+                //#if MC<12109
+                SkullBlockEntity.fetchGameProfile(gameprofile.getName())
                     //#else
-                    instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
+                    //$$ GameProfileHelper.fetchGameProfile(BOT_INFO.server, gameprofile.id())
                     //#endif
-                    instance.setHealth(20.0F);
-                    ((EntityInvoker) instance).invokerUnsetRemoved();
-                    AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
-                    if (attribute != null) attribute.setBaseValue(0.6000000238418579);
-                    instance.gameMode.changeGameModeForPlayer(botInfo.mode);
-                    BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);
-                    //#if MC>=12102
-                    //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
-                    //#else
-                    BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
-                    //#endif
-                    instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
-                    instance.getAbilities().flying = botInfo.flying;
-                    FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);
-                }, BOT_INFO.server);
+                    .thenAcceptAsync((p) -> {
+                        //#if MC<12109
+                        GameProfile current = finalGameprofile;
+                        if (p.isPresent()) {
+                            current = p.get();
+                        }
+                        //#else
+                        //$$ GameProfile current = p;
+                        //#endif
+                        if (worldIn == null) return;
+                        EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, current, ClientInformation.createDefault());
+                        instance.fixStartingPosition = () -> instance.moveTo(botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
+                        BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(current, 0, instance.clientInformation(), false));
+                        //#if MC>=12102
+                        //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
+                        //#else
+                        instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
+                        //#endif
+                        instance.setHealth(20.0F);
+                        ((EntityInvoker) instance).invokerUnsetRemoved();
+                        AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
+                        if (attribute != null) attribute.setBaseValue(0.6000000238418579);
+                        instance.gameMode.changeGameModeForPlayer(botInfo.mode);
+                        BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);
+                        //#if MC>=12102
+                        //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
+                        //#else
+                        BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
+                        //#endif
+                        instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
+                        instance.getAbilities().flying = botInfo.flying;
+                        FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);
+                    }, BOT_INFO.server);
                 //#else
                 //$$ if (worldIn == null) return false;
                 //$$ EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, gameprofile);
@@ -578,12 +612,14 @@ public class BotCommand {
                 //#endif
                 success = true;
             } finally {
+                //#if MC<12109
                 GameProfileCache.setUsesAuthentication(BOT_INFO.server.isDedicatedServer() && BOT_INFO.server.usesAuthentication());
+                //#endif
             }
         } catch (Exception e) {
             GcaExtension.LOGGER.error(e.getMessage(), e);
         }
-        if (!success) failure.accept(Component.literal("%s is not loaded.".formatted(name)));
+        if (!success) failure.accept(Component.literal("%s is not loaded.".formatted(username)));
         return success;
     }
 
@@ -600,10 +636,21 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
-            source.sendFailure(Component.literal("%s is not a fake player.".formatted(p.getGameProfile().getName())));
+            source.sendFailure(Component.literal("%s is not a fake player.".formatted(
+                //#if MC<12109
+                p.getGameProfile().getName()
+                //#else
+                //$$ p.getGameProfile().name()
+                //#endif
+            )));
             return 0;
         }
-        String name = player.getGameProfile().getName();
+        String name =
+            //#if MC<12109
+            player.getGameProfile().getName();
+            //#else
+            //$$ player.getGameProfile().name();
+            //#endif
         if (BOT_INFO.map.containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;

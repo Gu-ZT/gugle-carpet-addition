@@ -39,7 +39,7 @@ abstract class PlayerMixin {
             gcaPlayer.getEnderChestContainer().tick();
             gcaPlayer.getInventoryContainer().tick();
         }
-        if (this.gca$self.level().isClientSide && this.gca$self.containerMenu instanceof IClientMenuTick tick) {
+        if (this.gca$self.level().isClientSide() && this.gca$self.containerMenu instanceof IClientMenuTick tick) {
             tick.tick();
         }
     }

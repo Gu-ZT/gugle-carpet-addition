@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
-import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,6 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -19,6 +19,8 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class WlistCommand {
     public static final FilesUtil.MapFile<String, Boolean> PERMISSION = new FilesUtil.MapFile<>("wlist", Object::toString, Boolean.class);
@@ -57,8 +59,8 @@ public class WlistCommand {
                                     return SharedSuggestionProvider.suggest(
                                         playerList.getPlayers()
                                             .stream()
-                                            .filter((serverPlayer) -> !playerList.getWhiteList().isWhiteListed(serverPlayer.getGameProfile()))
-                                            .map((serverPlayer) -> serverPlayer.getGameProfile().getName()),
+                                            .filter((serverPlayer) -> !playerList.getWhiteList().isWhiteListed(GameProfileHelper.prasePlayerGameProfile(serverPlayer)))
+                                            .map(GameProfileHelper::prasePlayerGameName),
                                         suggestionsBuilder
                                     );
                                 })
@@ -79,36 +81,40 @@ public class WlistCommand {
     public static int add(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList userWhiteList = source.getServer().getPlayerList().getWhiteList();
-        int i = 0;
-        for (GameProfile gameProfile : GameProfileArgument.getGameProfiles(context, "targets")) {
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context, "targets", (gameProfile, name, uuid) -> {
             if (!userWhiteList.isWhiteListed(gameProfile)) {
                 UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(gameProfile);
                 userWhiteList.add(userWhiteListEntry);
-                i++;
-                source.sendSuccess(() -> Component.translatable("commands.whitelist.add.success", Component.literal(gameProfile.getName())), true);
+                i.getAndIncrement();
+                source.sendSuccess(() -> Component.translatable("commands.whitelist.add.success", Component.literal(name)), true);
             }
-        }
-        if (i == 0) throw ERROR_ALREADY_WHITELISTED.create();
-        else return i;
+        });
+        if (i.get() == 0) throw ERROR_ALREADY_WHITELISTED.create();
+        else return i.get();
     }
 
     public static int remove(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList userWhiteList = source.getServer().getPlayerList().getWhiteList();
-        int i = 0;
-        for (GameProfile gameProfile : GameProfileArgument.getGameProfiles(context, "targets")) {
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context, "targets", (gameProfile, name, uuid) -> {
             if (userWhiteList.isWhiteListed(gameProfile)) {
                 UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(gameProfile);
                 userWhiteList.remove(userWhiteListEntry);
-                i++;
-                source.sendSuccess(() -> Component.translatable("commands.whitelist.remove.success", Component.literal(gameProfile.getName())), true);
+                i.getAndIncrement();
+                source.sendSuccess(() -> Component.translatable("commands.whitelist.remove.success", Component.literal(name)), true);
             }
-        }
-        if (i == 0) {
+        });
+        if (i.get() == 0) {
             throw ERROR_NOT_WHITELISTED.create();
         } else {
-            source.getServer().kickUnlistedPlayers(source);
-            return i;
+            source.getServer().kickUnlistedPlayers(
+                //#if MC<12109
+                source
+                //#endif
+            );
+            return i.get();
         }
     }
 
@@ -128,31 +134,31 @@ public class WlistCommand {
         if (stack.isPlayer()) {
             ServerPlayer player = stack.getPlayer();
             if (player == null) return false;
-            return permission.map.getOrDefault(player.getGameProfile().getId().toString(), false);
+            return permission.map.getOrDefault(GameProfileHelper.prasePlayerGameID(player).toString(), false);
         } else return true;
     }
 
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         PERMISSION.init(context);
-        int i = 0;
-        for (GameProfile target : GameProfileArgument.getGameProfiles(context, "targets")) {
-            PERMISSION.map.put(target.getId().toString(), true);
-            context.getSource().sendSuccess(()->Component.literal("Player %s has been granted permission to operate the whitelist.".formatted(target.getName())),true);
-            ++i;
-        }
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context, "targets", (gameProfile, name, uuid) -> {
+            PERMISSION.map.put(uuid.toString(), true);
+            context.getSource().sendSuccess(()->Component.literal("Player %s has been granted permission to operate the whitelist.".formatted(name)),true);
+            i.incrementAndGet();
+        });
         PERMISSION.save();
-        return i;
+        return i.get();
     }
 
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         PERMISSION.init(context);
-        int i = 0;
-        for (GameProfile target : GameProfileArgument.getGameProfiles(context, "targets")) {
-            PERMISSION.map.put(target.getId().toString(), false);
-            context.getSource().sendSuccess(()->Component.literal("Revoked player %s's permission to operate the whitelist".formatted(target.getName())),true);
-            ++i;
-        }
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context, "targets", (gameProfile, name, uuid) -> {
+            PERMISSION.map.put(uuid.toString(), false);
+            context.getSource().sendSuccess(()->Component.literal("Revoked player %s's permission to operate the whitelist".formatted(name)),true);
+            i.incrementAndGet();
+        });
         PERMISSION.save();
-        return i;
+        return i.get();
     }
 }

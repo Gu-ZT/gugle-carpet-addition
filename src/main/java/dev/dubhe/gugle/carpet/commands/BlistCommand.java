@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
-import com.mojang.authlib.GameProfile;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -9,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -16,12 +17,12 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.players.BanListEntry;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlistCommand {
     private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.ban.failed"));
@@ -76,47 +77,50 @@ public class BlistCommand {
     public static int add(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList userBanList = source.getServer().getPlayerList().getBans();
-        int i = 0;
+        AtomicInteger i = new AtomicInteger();
         Component component = null;
         try {
             component = Component.literal(StringArgumentType.getString(context, "reson"));
         } catch (IllegalArgumentException ignored) {
         }
-        for (GameProfile gameProfile : GameProfileArgument.getGameProfiles(context, "targets")) {
+        Component finalComponent = component;
+        GameProfileHelper.praseGameProfileCollection(context,"targets", (gameProfile,name,id) -> {
             if (!userBanList.isBanned(gameProfile)) {
-                UserBanListEntry userBanListEntry = new UserBanListEntry(gameProfile, null, source.getTextName(), null, component == null ? null : component.getString());
+                UserBanListEntry userBanListEntry = new UserBanListEntry(gameProfile, null, source.getTextName(), null, finalComponent == null ? null : finalComponent.getString());
                 userBanList.add(userBanListEntry);
-                ++i;
-                source.sendSuccess(() -> Component.translatable("commands.ban.success", Component.literal(gameProfile.getName()), userBanListEntry.getReason()), true);
-                ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(gameProfile.getId());
+                i.incrementAndGet();
+                source.sendSuccess(() -> Component.translatable("commands.ban.success", Component.literal(name), userBanListEntry.getReason()), true);
+                ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(id);
                 if (serverPlayer != null) {
                     serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
                 }
             }
-        }
+        });
 
-        if (i == 0) {
+        if (i.get() == 0) {
             throw ERROR_ALREADY_BANNED.create();
         } else {
-            return i;
+            return i.get();
         }
     }
 
-    public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int remove(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList userBanList = source.getServer().getPlayerList().getBans();
-        int i = 0;
-        for (GameProfile gameProfile : GameProfileArgument.getGameProfiles(context, "targets")) {
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context,"targets", (gameProfile,name,id) -> {
             if (userBanList.isBanned(gameProfile)) {
-                userBanList.remove(gameProfile);
-                ++i;
-                source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(gameProfile.getName())), true);
+                if (userBanList.isBanned(gameProfile)) {
+                    userBanList.remove(gameProfile);
+                    i.incrementAndGet();
+                    source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(name)), true);
+                }
             }
-        }
-        if (i == 0) {
+        });
+        if (i.get() == 0) {
             throw ERROR_NOT_BANNED.create();
         } else {
-            return i;
+            return i.get();
         }
     }
 
@@ -129,7 +133,7 @@ public class BlistCommand {
             source.sendSuccess(() -> Component.translatable("commands.banlist.list", collection.size()), false);
 
             for (UserBanListEntry userBanListEntry : collection) {
-                source.sendSuccess(() -> Component.translatable("commands.banlist.entry", ((BanListEntry<?>) userBanListEntry).getDisplayName(), userBanListEntry.getSource(), userBanListEntry.getReason()), false);
+                source.sendSuccess(() -> Component.translatable("commands.banlist.entry", userBanListEntry.getDisplayName(), userBanListEntry.getSource(), userBanListEntry.getReason()), false);
             }
         }
         return collection.size();
@@ -137,25 +141,25 @@ public class BlistCommand {
 
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         PERMISSION.init(context);
-        int i = 0;
-        for (GameProfile target : GameProfileArgument.getGameProfiles(context, "targets")) {
-            PERMISSION.map.put(target.getId().toString(), true);
-            context.getSource().sendSuccess(()->Component.literal("Player %s has been granted permission to operate the banned list.".formatted(target.getName())),true);
-            ++i;
-        }
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context,"targets", (gameProfile,name,id) -> {
+            PERMISSION.map.put(id.toString(), true);
+            context.getSource().sendSuccess(()->Component.literal("Player %s has been granted permission to operate the banned list.".formatted(name)),true);
+            i.incrementAndGet();
+        });
         PERMISSION.save();
-        return i;
+        return i.get();
     }
 
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         PERMISSION.init(context);
-        int i = 0;
-        for (GameProfile target : GameProfileArgument.getGameProfiles(context, "targets")) {
-            PERMISSION.map.put(target.getId().toString(), false);
-            context.getSource().sendSuccess(()->Component.literal("Revoked player %s's permission to operate the banned list".formatted(target.getName())),true);
-            ++i;
-        }
+        AtomicInteger i = new AtomicInteger();
+        GameProfileHelper.praseGameProfileCollection(context,"targets", (gameProfile,name,id) -> {
+            PERMISSION.map.put(id.toString(), false);
+            context.getSource().sendSuccess(()->Component.literal("Revoked player %s's permission to operate the banned list".formatted(name)),true);
+            i.incrementAndGet();
+        });
         PERMISSION.save();
-        return i;
+        return i.get();
     }
 }

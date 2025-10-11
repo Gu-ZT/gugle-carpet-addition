@@ -40,7 +40,7 @@ public class WelcomeMessage {
 
     public static void onPlayerLoggedIn(@NotNull ServerPlayer player) {
         MessageConfig config = WELCOME_MESSAGE.obj;
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
         for (String msg : config.message) {
             List<String> argKeys = new ArrayList<>();
             Matcher matcher = Pattern.compile(ARGS_REGEX).matcher(msg);
@@ -128,7 +128,13 @@ public class WelcomeMessage {
 
     public enum MessageDataType implements WelcomeMessageFunction {
         NONE(GcaExtension.id("none"), (s, p, d) -> Component.literal("")),
-        PLAYER(GcaExtension.id("player"), (s, p, d) -> Component.literal(p.getGameProfile().getName())),
+        PLAYER(
+            GcaExtension.id("player"), (s, p, d) -> {
+                MutableComponent component = Component.literal("");
+                GameProfileHelper.prasePlayerGameProfile(p, (profile, name, uuid) -> component.append(name));
+                return component;
+            }
+        ),
         DAYCOUNT(GcaExtension.id("day_count"), (s, p, d) -> {
             MutableComponent component = Component.literal(String.valueOf((s.overworld().getDayTime() / 1728000)));
             if (d == null || d.isJsonNull() || (!d.isJsonPrimitive() && !d.isJsonObject()) || (d.isJsonObject() && d.getAsJsonObject().asMap().isEmpty())) {

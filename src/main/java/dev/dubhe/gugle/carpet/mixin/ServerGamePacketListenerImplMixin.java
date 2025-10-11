@@ -4,6 +4,7 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FastPingFriend;
 import dev.dubhe.gugle.carpet.tools.SimpleInGameCalculator;
 import dev.dubhe.gugle.carpet.tools.TriConsumer;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
@@ -50,7 +51,7 @@ abstract class ServerGamePacketListenerImplMixin {
         if (!string.startsWith(prefix)) return;
         string = string.substring(prefix.length());
         ServerPlayer player = this.getPlayer();
-        MinecraftServer server = player.getServer();
+        MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
         handle.accept(server, player, string);
     }
 }

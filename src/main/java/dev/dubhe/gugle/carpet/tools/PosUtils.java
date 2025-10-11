@@ -1,5 +1,6 @@
 package dev.dubhe.gugle.carpet.tools;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -78,10 +79,13 @@ public class PosUtils {
         player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0, true, false));
         Vec3 position = player.position();
         ResourceKey<Level> dimension = player.level().dimension();
-        String name = player.getGameProfile().getName();
+        ImmutableList.Builder<MutableComponent> builder = ImmutableList.builder();
         List<MutableComponent> pos = PosUtils.pos("Shared Location", position.x, position.y, position.z, dimension);
-        MutableComponent component = Component.literal("%s at".formatted(name)).append(" ").append(pos.get(0));
-        if (pos.size() > 2) component.append("->").append(pos.get(2));
-        return List.of(component, pos.get(1));
+        GameProfileHelper.prasePlayerGameProfile(player, (profile, name, uuid) -> {
+            MutableComponent component = Component.literal("%s at".formatted(name)).append(" ").append(pos.getFirst());
+            if (pos.size() > 2) component.append("->").append(pos.get(2));
+            builder.add(component, pos.get(1));
+        });
+        return builder.build();
     }
 }

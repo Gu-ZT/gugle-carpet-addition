@@ -18,6 +18,7 @@ import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
 import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
@@ -77,12 +78,14 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onPlayerLoggedIn(@NotNull ServerPlayer player) {
-        Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(player.getGameProfile().getName());
-        if (consumer != null) consumer.accept(player);
-        if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
-        if (player instanceof EntityPlayerMPFake fakePlayer) {
-            RESIDENT_PLAYERS.add(fakePlayer);
-        }
+        GameProfileHelper.prasePlayerGameProfile(player, (profile, name, uuid) -> {
+            Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(name);
+            if (consumer != null) consumer.accept(player);
+            if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
+            if (player instanceof EntityPlayerMPFake fakePlayer) {
+                RESIDENT_PLAYERS.add(fakePlayer);
+            }
+        });
     }
 
     @Override
@@ -126,8 +129,10 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
                     if (tag.contains("gca.NoResident")) {
                         continue;
                     }
-                    String username = player.getGameProfile().getName();
-                    fakePlayerList.add(username, FakePlayerResident.save(player));
+                    GameProfileHelper.prasePlayerGameProfile(
+                        player,
+                        (profile, name, uuid) -> fakePlayerList.add(name, FakePlayerResident.save(player))
+                    );
                 }
                 File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();
                 // 文件不需要存在
