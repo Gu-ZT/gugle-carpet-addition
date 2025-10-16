@@ -46,11 +46,13 @@ abstract class WanderingTraderMixin {
     private int spawnChance;
 
     @Inject(method = "tick", at = @At("HEAD"))
-    //#if MC >= 12105
+    //#if MC >= 12109
+    //$$ private void spawn(ServerLevel serverLevel, boolean bl, CallbackInfo ci) {
+    //#elseif MC >= 12105
     //$$ private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfo ci) {
     //#else
     private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cir) {
-        //#endif
+    //#endif
         this.gca$server = serverLevel.getServer();
         this.gca$llama = 0;
     }
