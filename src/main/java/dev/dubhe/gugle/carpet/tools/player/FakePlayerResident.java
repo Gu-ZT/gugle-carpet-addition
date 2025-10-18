@@ -5,6 +5,7 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
@@ -24,6 +25,8 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -49,10 +52,27 @@ public class FakePlayerResident {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
             fakePlayer.add("actions", FakePlayerSerializer.actionPackToJson(actionPack));
         }
+        //#if MC>=12109
+        //$$ JsonArray pos = new JsonArray();
+        //$$ Vec3 position = player.position();
+        //$$ Vec2 rotation = player.getRotationVector();
+        //$$ pos.add(position.x);
+        //$$ pos.add(position.y);
+        //$$ pos.add(position.z);
+        //$$ pos.add(rotation.x);
+        //$$ pos.add(rotation.y);
+        //$$ fakePlayer.add("pos", pos);
+        //#endif
         return fakePlayer;
     }
 
-    public static void createFake(String username, @NotNull MinecraftServer server, final JsonObject actions) {
+    public static void createFake(
+        String username,
+        @NotNull MinecraftServer server,
+        final JsonObject actions,
+        Vec3 position,
+        Vec2 rotation
+    ) {
         //#if MC<12109
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile;
@@ -106,8 +126,18 @@ public class FakePlayerResident {
                 //$$ GameProfile current = p;
                 //#endif
                 EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.respawnFake(server, server.overworld(), current, ClientInformation.createDefault());
-                server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), playerMPFake,
-                    new CommonListenerCookie(current, 0, playerMPFake.clientInformation(), false));
+                server.getPlayerList().placeNewPlayer(
+                    new FakeClientConnection(PacketFlow.SERVERBOUND),
+                    playerMPFake,
+                    new CommonListenerCookie(current, 0, playerMPFake.clientInformation(), false)
+                );
+                if (position != null) {
+                    playerMPFake.moveTo(position);
+                }
+                if (rotation != null) {
+                    playerMPFake.setXRot(rotation.x);
+                    playerMPFake.setYRot(rotation.y);
+                }
                 playerMPFake.setHealth(20.0F);
                 AttributeInstance attribute = playerMPFake.getAttribute(Attributes.STEP_HEIGHT);
                 if (attribute != null) attribute.setBaseValue(0.6F);
@@ -142,6 +172,22 @@ public class FakePlayerResident {
         if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
             actions = fakePlayer.get("actions").getAsJsonObject();
         }
-        FakePlayerResident.createFake(username, server, actions);
+        Vec3 position = null;
+        Vec2 rotation = null;
+        if (fakePlayer.has("pos")) {
+            JsonArray pos = fakePlayer.get("pos").getAsJsonArray();
+            position = new Vec3(pos.get(0).getAsDouble(), pos.get(1).getAsDouble(), pos.get(2).getAsDouble());
+            if (pos.size() > 3) {
+                rotation = new Vec2(pos.get(3).getAsFloat(), pos.get(4).getAsFloat());
+            }
+        }
+        GcaExtension.LOGGER.info(
+            "Load fake player {} at [{}, {}, {}]",
+            username,
+            position == null ? "null" : position.x,
+            position == null ? "null" : position.y,
+            position == null ? "null" : position.z
+        );
+        FakePlayerResident.createFake(username, server, actions, position, rotation);
     }
 }
