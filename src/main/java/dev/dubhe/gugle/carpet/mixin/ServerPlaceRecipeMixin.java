@@ -2,36 +2,44 @@ package dev.dubhe.gugle.carpet.mixin;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.recipebook.ServerPlaceRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 //#if MC>=12102
-//$$ import org.spongepowered.asm.mixin.injection.Inject;
-//$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+//$$ import com.llamalad7.mixinextras.sugar.Cancellable;
+//$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+//$$ import org.spongepowered.asm.mixin.Final;
+//$$ import org.spongepowered.asm.mixin.Shadow;
 //#elseif MC>=12100
 import net.minecraft.world.item.crafting.RecipeHolder;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.entity.player.StackedContents;
 import org.jetbrains.annotations.NotNull;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 //#else
 //$$ import net.minecraft.world.item.crafting.Recipe;
 //$$ import it.unimi.dsi.fastutil.ints.IntList;
 //$$ import net.minecraft.world.entity.player.StackedContents;
 //$$ import org.jetbrains.annotations.NotNull;
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-//$$ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 //#endif
 
 @Mixin(ServerPlaceRecipe.class)
 abstract class ServerPlaceRecipeMixin {
     //#if MC>=12102
-    //$$ @Inject(method = "calculateAmountToCraft", at = @At("RETURN"), cancellable = true)
-    //$$ private void calculateAmountToCraft(int i, boolean bl, CallbackInfoReturnable<Integer> cir) {
-    //$$     if (GcaSetting.betterQuickCrafting) cir.setReturnValue(cir.getReturnValueI() - 1);
-    //$$ }
+//$$    @Shadow @Final private boolean useMaxItems;
+//$$    @WrapOperation(method = "placeRecipe(Lnet/minecraft/world/item/crafting/RecipeHolder;Lnet/minecraft/world/entity/player/StackedItemContents;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/recipebook/ServerPlaceRecipe;calculateAmountToCraft(IZ)I"))
+//$$    private int calculateAmountToCraft(ServerPlaceRecipe<?> instance, int i, boolean bl, Operation<Integer> original, @Cancellable CallbackInfo cir) {
+//$$        if (GcaSetting.betterQuickCrafting && this.useMaxItems) {
+//$$            if (i <= 1) {
+//$$                cir.cancel();
+//$$                return 0;
+//$$            }
+//$$            i--;
+//$$        }
+//$$        return original.call(instance, i, bl);
+//$$    }
     //#elseif MC>=12100
     @WrapOperation(method = "handleRecipeClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/StackedContents;getBiggestCraftableStack(Lnet/minecraft/world/item/crafting/RecipeHolder;Lit/unimi/dsi/fastutil/ints/IntList;)I"))
     private int handleRecipeClicked(StackedContents instance, RecipeHolder<?> recipeHolder, IntList intList, @NotNull Operation<Integer> original) {
