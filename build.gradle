@@ -16,9 +16,9 @@ preprocess {
 
     mc12001.link(mc12101, null)
     mc12102.link(mc12101, null)
-    mc12103.link(mc12101, null)
-    mc12104.link(mc12101, null)
-    mc12105.link(mc12101, null)
-    mc12107.link(mc12101, null)
-    mc12110.link(mc12101, null)
+    mc12103.link(mc12102, null)
+    mc12104.link(mc12103, null)
+    mc12105.link(mc12104, null)
+    mc12107.link(mc12105, null)
+    mc12110.link(mc12107, null)
 }
