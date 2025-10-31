@@ -108,7 +108,7 @@ public class FakePlayerResident {
             playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
 
             FakePlayerSerializer.applyActionPackFromJson(actions, playerMPFake);
-            ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
+            ((EntityInvoker) playerMPFake).invokeUnsetRemoved();
         }, server);
         //#else
         //$$ EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.respawnFake(server, server.overworld(), gameprofile);

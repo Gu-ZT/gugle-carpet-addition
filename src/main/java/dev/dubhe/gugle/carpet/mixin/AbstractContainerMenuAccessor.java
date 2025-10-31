@@ -7,6 +7,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 
 @Mixin(AbstractContainerMenu.class)
 public interface AbstractContainerMenuAccessor {
-    @Invoker("moveItemStackTo")
-    boolean invokerMoveItemStackTo(ItemStack itemStack, int i, int j, boolean bl);
+    @Invoker
+    boolean invokeMoveItemStackTo(ItemStack itemStack, int i, int j, boolean bl);
 }

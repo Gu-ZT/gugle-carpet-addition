@@ -580,7 +580,7 @@ public class BotCommand {
                         instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
                         //#endif
                         instance.setHealth(20.0F);
-                        ((EntityInvoker) instance).invokerUnsetRemoved();
+                        ((EntityInvoker) instance).invokeUnsetRemoved();
                         AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
                         if (attribute != null) attribute.setBaseValue(0.6000000238418579);
                         instance.gameMode.changeGameModeForPlayer(botInfo.mode);

@@ -42,7 +42,7 @@ public class PlayerInventoryMenu extends ChestMenu {
             remainingItem = slotStack.copy();
             if (slotIndex < 54) {
                 AbstractContainerMenuAccessor accessor = (AbstractContainerMenuAccessor) (chestMenu);
-                if (!accessor.invokerMoveItemStackTo(slotStack, 54, chestMenu.slots.size(), true)) {
+                if (!accessor.invokeMoveItemStackTo(slotStack, 54, chestMenu.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             } else if ((ordinal = getArmorOrdinal(slotStack)) >= 0) {
@@ -69,7 +69,7 @@ public class PlayerInventoryMenu extends ChestMenu {
             } else if (moveToInventory(chestMenu, slotStack)) {
                 // 物品栏没有剩余空间了，移动到盔甲和副手
                 AbstractContainerMenuAccessor accessor = (AbstractContainerMenuAccessor) (chestMenu);
-                if (accessor.invokerMoveItemStackTo(slotStack, 1, 8, false)) {
+                if (accessor.invokeMoveItemStackTo(slotStack, 1, 8, false)) {
                     return ItemStack.EMPTY;
                 }
                 // 其它物品移动的物品栏中
@@ -110,18 +110,18 @@ public class PlayerInventoryMenu extends ChestMenu {
     // 移动到副手
     private static boolean moveToOffHand(ChestMenu chestMenu, ItemStack slotStack) {
         AbstractContainerMenuAccessor accessor = (AbstractContainerMenuAccessor) (chestMenu);
-        return accessor.invokerMoveItemStackTo(slotStack, 7, 8, false);
+        return accessor.invokeMoveItemStackTo(slotStack, 7, 8, false);
     }
 
     // 移动到盔甲槽
     private static boolean moveToArmor(ChestMenu chestMenu, ItemStack slotStack, int ordinal) {
         AbstractContainerMenuAccessor accessor = (AbstractContainerMenuAccessor) (chestMenu);
-        return accessor.invokerMoveItemStackTo(slotStack, ordinal + 1, ordinal + 2, false);
+        return accessor.invokeMoveItemStackTo(slotStack, ordinal + 1, ordinal + 2, false);
     }
 
     // 将物品移动的物品栏
     private static boolean moveToInventory(ChestMenu chestMenu, ItemStack slotStack) {
         AbstractContainerMenuAccessor accessor = (AbstractContainerMenuAccessor) (chestMenu);
-        return !accessor.invokerMoveItemStackTo(slotStack, 18, 54, false);
+        return !accessor.invokeMoveItemStackTo(slotStack, 18, 54, false);
     }
 }
