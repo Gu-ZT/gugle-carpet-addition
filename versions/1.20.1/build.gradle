@@ -37,6 +37,10 @@ repositories {
         url 'https://repo1.maven.org/maven2/'
     }
     maven {
+        name 'MasaMaven'
+        url 'https://masa.dy.fi/maven'
+    }
+    maven {
         name 'CjsahMaven'
         url 'https://server.cjsah.net:1002/maven/'
     }
@@ -79,7 +83,7 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // fabric-carpet
-    modImplementation("curse.maven:carpet-349239:${project.carpet_core_version}")
+    modImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
     // jep
     include(implementation 'jep:jep:2.24')
     // mixin-extras
