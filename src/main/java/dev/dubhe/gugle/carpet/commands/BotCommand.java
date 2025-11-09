@@ -601,7 +601,7 @@ public class BotCommand {
                 //$$ BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
                 //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
                 //$$ instance.setHealth(20.0F);
-                //$$ ((EntityInvoker) instance).invokerUnsetRemoved();
+                //$$ ((EntityInvoker) instance).invokeUnsetRemoved();
                 //$$ instance.setMaxUpStep(0.6F);
                 //$$ instance.gameMode.changeGameModeForPlayer(botInfo.mode);
                 //$$ BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte)((int)(instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);

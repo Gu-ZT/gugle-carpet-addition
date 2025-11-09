@@ -119,7 +119,7 @@ public class FakePlayerResident {
         //$$ server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(playerMPFake), playerMPFake.level().dimension());
         //$$ playerMPFake.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
         //$$ FakePlayerSerializer.applyActionPackFromJson(actions, playerMPFake);
-        //$$ ((EntityInvoker) playerMPFake).invokerUnsetRemoved();
+        //$$ ((EntityInvoker) playerMPFake).invokeUnsetRemoved();
         //#endif
     }
 
