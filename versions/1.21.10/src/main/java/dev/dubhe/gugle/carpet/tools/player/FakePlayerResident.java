@@ -4,7 +4,6 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import dev.dubhe.gugle.carpet.GcaSetting;
@@ -12,13 +11,15 @@ import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -36,19 +37,21 @@ public class FakePlayerResident {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
             fakePlayer.add("actions", FakePlayerSerializer.actionPackToJson(actionPack));
         }
+        fakePlayer.addProperty("dimension", player.level().dimension().location().toString());
         return fakePlayer;
     }
 
     public static void createFake(
         String username,
         @NotNull MinecraftServer server,
+        ServerLevel level,
         final JsonObject actions
     ) {
         GameProfileHelper.fetchGameProfile(server, username)
             .thenAcceptAsync((profile) -> {
                 EntityPlayerMPFake playerMPFake = EntityPlayerMPFake.respawnFake(
                     server,
-                    server.overworld(),
+                    level,
                     profile,
                     ClientInformation.createDefault()
                 );
@@ -80,6 +83,11 @@ public class FakePlayerResident {
         if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
             actions = fakePlayer.get("actions").getAsJsonObject();
         }
-        FakePlayerResident.createFake(username, server, actions);
+        ServerLevel level = server.overworld();
+        if (fakePlayer.has("dimension")) {
+            ResourceLocation dimensionLocation = ResourceLocation.parse(fakePlayer.get("dimension").getAsString());
+            level = server.getLevel(ResourceKey.create(Registries.DIMENSION, dimensionLocation));
+        }
+        FakePlayerResident.createFake(username, server, level, actions);
     }
 }
