@@ -54,9 +54,9 @@ loom {
     accessWidenerPath = file("gca.accesswidener")
 }
 
-remapJar {
-    remapperIsolation = true
-}
+//remapJar {
+//    remapperIsolation = true
+//}
 
 JavaVersion SOURCE_JAVA_VERSION
 JavaVersion TARGET_JAVA_VERSION
