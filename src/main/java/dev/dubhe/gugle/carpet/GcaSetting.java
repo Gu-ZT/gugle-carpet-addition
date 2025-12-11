@@ -223,4 +223,18 @@ public class GcaSetting {
     //#else
     //#endif
     public static boolean commandTransfer = false;
+
+    //#if MC>=12106
+    // 假人定位条
+    //$$ @Rule(
+    //$$     categories = {
+    //$$         GCA,
+    //$$         COMMAND,
+    //$$         BOT
+    //$$     },
+    //$$     validators = dev.dubhe.gugle.carpet.tools.validator.LocatorBar.class
+    //$$ )
+    //$$ public static boolean fakePlayerLocatorBar = true;
+    //#else
+    //#endif
 }

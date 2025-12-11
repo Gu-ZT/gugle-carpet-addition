@@ -29,7 +29,6 @@
     "SlotMixin",
     "TransferCommandMixin",
     "WanderingTraderMixin",
-    "EntityPlayerMPFakeInvoker",
     "LocatorBarMixin"
   ],
   "server": [

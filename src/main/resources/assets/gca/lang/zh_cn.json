@@ -107,6 +107,9 @@
   "carpet.rule.wanderingTraderSpawnRemind.desc": "流浪商人生成提醒",
   "carpet.rule.wanderingTraderSpawnRemind.tip": "流浪商人生成成功，位置为 %s ，同时生成了 %s 只行商羊驼",
 
+  "carpet.rule.fakePlayerLocatorBar.name": "假人定位条",
+  "carpet.rule.fakePlayerLocatorBar.desc": "在定位条上显示假玩家位置",
+
   "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",
   "gca.action.attack.continuous": "一直左键： %s",
   "gca.action.use.continuous": "一直右键：%s",
