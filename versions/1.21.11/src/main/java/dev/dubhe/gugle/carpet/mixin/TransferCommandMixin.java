@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.function.Predicate;
 
 @Mixin(TransferCommand.class)
-public class TransferCommandMixin {
+abstract class TransferCommandMixin {
     @WrapOperation(
         method = "register",
         at = @At(

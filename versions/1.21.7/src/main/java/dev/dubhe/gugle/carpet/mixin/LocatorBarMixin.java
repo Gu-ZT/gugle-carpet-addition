@@ -12,13 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ServerWaypointManager.class)
-public class LocatorBarMixin {
+abstract class LocatorBarMixin {
     @Inject(
         method = "trackWaypoint(Lnet/minecraft/world/waypoints/WaypointTransmitter;)V",
         at = @At("HEAD"),
         cancellable = true
     )
-    public void trackWaypoint(WaypointTransmitter waypointTransmitter, CallbackInfo ci) {
+    private void trackWaypoint(WaypointTransmitter waypointTransmitter, CallbackInfo ci) {
         if (
             !GcaSetting.fakePlayerLocatorBar
             && waypointTransmitter instanceof ServerPlayer serverPlayer
