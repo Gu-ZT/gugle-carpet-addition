@@ -31,11 +31,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 //#if MC>=12106
 //$$ import net.minecraft.util.ProblemReporter;
 //$$ import net.minecraft.world.level.storage.TagValueOutput;
 //#endif
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -78,14 +80,21 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onPlayerLoggedIn(@NotNull ServerPlayer player) {
-        GameProfileHelper.prasePlayerGameProfile(player, (profile, name, uuid) -> {
-            Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(name);
-            if (consumer != null) consumer.accept(player);
-            if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
-            if (player instanceof EntityPlayerMPFake fakePlayer) {
-                RESIDENT_PLAYERS.add(fakePlayer);
+        GameProfileHelper.prasePlayerGameProfile(
+            player, (profile, name, uuid) -> {
+                Level level = player.level();
+                MinecraftServer server = level instanceof ServerLevel serverLevel ? serverLevel.getServer() : null;
+                if (server != null && server.isSingleplayer() && server.isSingleplayerOwner(profile)) {
+                    loadSavedPlayer(server);
+                }
+                Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(name);
+                if (consumer != null) consumer.accept(player);
+                if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
+                if (player instanceof EntityPlayerMPFake fakePlayer) {
+                    RESIDENT_PLAYERS.add(fakePlayer);
+                }
             }
-        });
+        );
     }
 
     @Override
@@ -148,7 +157,12 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     }
 
     @Override
-    public void onServerLoadedWorlds(MinecraftServer server) {
+    public void onServerLoadedWorlds(@NotNull MinecraftServer server) {
+        if (server.isSingleplayer()) return;
+        loadSavedPlayer(server);
+    }
+
+    public void loadSavedPlayer(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
             File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();
             if (!file.isFile()) {
