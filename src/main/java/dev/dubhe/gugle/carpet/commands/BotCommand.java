@@ -71,6 +71,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 //#if MC>=12109
 //$$ import net.minecraft.server.players.NameAndId;
 //#endif
+//#if MC>=12110
+//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
+//#endif
 
 public class BotCommand {
     public static final FilesUtil.MapFile<String, BotInfo> BOT_INFO = new FilesUtil.MapFile<>("bot", Object::toString, BotInfo.class);
@@ -589,6 +592,9 @@ public class BotCommand {
                         //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
                         //#else
                         BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
+                        //#endif
+                        //#if MC>=12110
+                        //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
                         //#endif
                         instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
                         instance.getAbilities().flying = botInfo.flying;
