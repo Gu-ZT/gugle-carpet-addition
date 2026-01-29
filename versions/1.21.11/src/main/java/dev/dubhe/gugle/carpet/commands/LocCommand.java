@@ -36,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
 public class LocCommand {
     public static final FilesUtil.MapFile<Long, LocPoint> LOC_POINT = new FilesUtil.MapFile<>("loc", Long::decode, LocPoint.class);
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "loc")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandLoc))
@@ -75,7 +75,7 @@ public class LocCommand {
         );
     }
 
-    private static @NotNull CompletableFuture<Suggestions> suggestId(
+    private static CompletableFuture<Suggestions> suggestId(
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
@@ -160,7 +160,7 @@ public class LocCommand {
         return 1;
     }
 
-    private static @NotNull MutableComponent locToComponent(@NotNull LocPoint locPoint) {
+    private static MutableComponent locToComponent(LocPoint locPoint) {
         MutableComponent component = Component.literal(locPoint.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -199,7 +199,7 @@ public class LocCommand {
         return 1;
     }
 
-    public static @NotNull List<Component> info(@NotNull LocPoint point) {
+    public static List<Component> info(LocPoint point) {
         MutableComponent desc = Component.literal(point.desc);
         MutableComponent dimType;
         if (point.dimType == Level.NETHER) {

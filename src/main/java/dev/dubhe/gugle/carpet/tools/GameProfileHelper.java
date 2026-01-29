@@ -10,6 +10,7 @@ import net.minecraft.server.players.GameProfileCache;
 import com.mojang.authlib.GameProfile;
 
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 public class GameProfileHelper {
     public static String prasePlayerGameName(ServerPlayer player) {
@@ -39,11 +40,11 @@ public class GameProfileHelper {
         }
     }
 
-    public static MinecraftServer getServerPlayerServer(ServerPlayer player) {
+    public static @Nullable MinecraftServer getServerPlayerServer(ServerPlayer player) {
         return player.getServer();
     }
 
-    public static GameProfileCache getProfileCache(MinecraftServer server) {
+    public static @Nullable GameProfileCache getProfileCache(MinecraftServer server) {
         return server.getProfileCache();
     }
 }

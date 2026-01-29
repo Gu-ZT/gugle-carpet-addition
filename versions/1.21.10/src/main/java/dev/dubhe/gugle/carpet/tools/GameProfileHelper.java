@@ -7,28 +7,28 @@ import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.CachedUserNameToIdResolver;
-import org.jetbrains.annotations.NotNull;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.server.players.NameAndId;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.UUID;
 
 public class GameProfileHelper {
-    public static String prasePlayerGameName(@NotNull ServerPlayer player) {
+    public static String prasePlayerGameName(ServerPlayer player) {
         return player.nameAndId().name();
     }
 
-    public static UUID prasePlayerGameID(@NotNull ServerPlayer player) {
+    public static UUID prasePlayerGameID(ServerPlayer player) {
         return player.nameAndId().id();
     }
 
-    public static @NotNull NameAndId prasePlayerGameProfile(@NotNull ServerPlayer player) {
+    public static NameAndId prasePlayerGameProfile(ServerPlayer player) {
         return player.nameAndId();
     }
 
-    public static void prasePlayerGameProfile(@NotNull ServerPlayer player, @NotNull TriConsumer<NameAndId, String, UUID> consumer) {
+    public static void prasePlayerGameProfile(ServerPlayer player, TriConsumer<NameAndId, String, UUID> consumer) {
         NameAndId profile = player.nameAndId();
         consumer.accept(profile, profile.name(), profile.id());
     }
@@ -39,20 +39,20 @@ public class GameProfileHelper {
         }
     }
 
-    public static MinecraftServer getServerPlayerServer(@NotNull ServerPlayer player) {
+    public static MinecraftServer getServerPlayerServer(ServerPlayer player) {
         return player.level().getServer();
     }
 
-    public static CachedUserNameToIdResolver getProfileCache(@NotNull MinecraftServer server) {
+    public static @Nullable CachedUserNameToIdResolver getProfileCache(MinecraftServer server) {
         return (CachedUserNameToIdResolver) server.services().nameToIdCache();
     }
 
-    public static CompletableFuture<GameProfile> fetchGameProfile(@NotNull MinecraftServer server, UUID name) {
+    public static CompletableFuture<GameProfile> fetchGameProfile(MinecraftServer server, UUID name) {
         ResolvableProfile resolvableProfile = ResolvableProfile.createUnresolved(name);
         return resolvableProfile.resolveProfile(server.services().profileResolver());
     }
 
-    public static CompletableFuture<GameProfile> fetchGameProfile(@NotNull MinecraftServer server, String name) {
+    public static CompletableFuture<GameProfile> fetchGameProfile(MinecraftServer server, String name) {
         ResolvableProfile resolvableProfile = ResolvableProfile.createUnresolved(name);
         return resolvableProfile.resolveProfile(server.services().profileResolver());
     }

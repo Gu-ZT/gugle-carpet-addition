@@ -45,10 +45,10 @@ abstract class TransferCommandMixin {
             ordinal = 2
         )
     )
-    private static <T> @NotNull RequiredArgumentBuilder<CommandSourceStack, T> register(
+    private static <T> RequiredArgumentBuilder<CommandSourceStack, T> register(
         String string,
         ArgumentType<T> argumentType,
-        @NotNull Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original
+        Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original
     ) {
         return original.call(string, argumentType).requires(Commands.hasPermission(Commands.LEVEL_ADMINS));
     }

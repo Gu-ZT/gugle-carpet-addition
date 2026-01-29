@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(TransferCommand.class)
 abstract class TransferCommandMixin {
     @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;hasPermission(I)Lnet/minecraft/server/commands/PermissionCheck;"))
-    private static @NotNull PermissionCheck<CommandSourceStack> registerPermission(int i, @NotNull Operation<PermissionCheck<CommandSourceStack>> original) {
+    private static PermissionCheck<CommandSourceStack> registerPermission(int i, Operation<PermissionCheck<CommandSourceStack>> original) {
         final PermissionCheck<CommandSourceStack> call = original.call(i);
         return new PermissionCheck<>() {
             @Override
@@ -30,7 +30,7 @@ abstract class TransferCommandMixin {
         };
     }
     @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;argument(Ljava/lang/String;Lcom/mojang/brigadier/arguments/ArgumentType;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;", ordinal = 2))
-    private static <T> @NotNull RequiredArgumentBuilder<CommandSourceStack, T> register(String string, ArgumentType<T> argumentType, @NotNull Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original) {
+    private static <T> RequiredArgumentBuilder<CommandSourceStack, T> register(String string, ArgumentType<T> argumentType, Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original) {
         return original.call(string, argumentType).requires(Commands.hasPermission(3));
     }
 }

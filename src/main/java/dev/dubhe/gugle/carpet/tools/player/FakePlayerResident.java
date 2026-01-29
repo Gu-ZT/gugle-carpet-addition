@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
-import carpet.CarpetSettings;
+import
+    carpet.CarpetSettings;
 import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
@@ -42,6 +43,8 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 //#else
 //#endif
 
+import javax.annotation.Nullable;
+
 @FieldsAreNonnullByDefault
 public class FakePlayerResident {
     public static JsonObject save(Player player) {
@@ -57,8 +60,8 @@ public class FakePlayerResident {
         String username,
         MinecraftServer server,
         final JsonObject actions,
-        Vec3 position,
-        Vec2 rotation
+        @Nullable Vec3 position,
+        @Nullable Vec2 rotation
     ) {
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile;

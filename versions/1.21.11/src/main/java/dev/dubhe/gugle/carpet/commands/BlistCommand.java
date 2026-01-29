@@ -28,7 +28,7 @@ public class BlistCommand {
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable("commands.pardon.failed"));
     public static final FilesUtil.MapFile<String, Boolean> PERMISSION = new FilesUtil.MapFile<>("blist", Object::toString, Boolean.class);
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "blist")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBlist) && WlistCommand.hasPermission(PERMISSION, stack))
@@ -73,7 +73,7 @@ public class BlistCommand {
         );
     }
 
-    public static int add(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList userBanList = source.getServer().getPlayerList().getBans();
         AtomicInteger i = new AtomicInteger();
@@ -103,7 +103,7 @@ public class BlistCommand {
         }
     }
 
-    public static int remove(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList userBanList = source.getServer().getPlayerList().getBans();
         AtomicInteger i = new AtomicInteger();
@@ -123,7 +123,7 @@ public class BlistCommand {
         }
     }
 
-    public static int list(@NotNull CommandContext<CommandSourceStack> context) {
+    public static int list(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         Collection<UserBanListEntry> collection = source.getServer().getPlayerList().getBans().getEntries();
         if (collection.isEmpty()) {

@@ -27,7 +27,7 @@ public class WlistCommand {
     private static final SimpleCommandExceptionType ERROR_ALREADY_WHITELISTED = new SimpleCommandExceptionType(Component.translatable("commands.whitelist.add.failed"));
     private static final SimpleCommandExceptionType ERROR_NOT_WHITELISTED = new SimpleCommandExceptionType(Component.translatable("commands.whitelist.remove.failed"));
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "wlist")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandWlist) && WlistCommand.hasPermission(PERMISSION, stack))
@@ -78,7 +78,7 @@ public class WlistCommand {
         );
     }
 
-    public static int add(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList userWhiteList = source.getServer().getPlayerList().getWhiteList();
         AtomicInteger i = new AtomicInteger();
@@ -94,7 +94,7 @@ public class WlistCommand {
         else return i.get();
     }
 
-    public static int remove(@NotNull CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList userWhiteList = source.getServer().getPlayerList().getWhiteList();
         AtomicInteger i = new AtomicInteger();
@@ -114,7 +114,7 @@ public class WlistCommand {
         }
     }
 
-    public static int list(@NotNull CommandContext<CommandSourceStack> context) {
+    public static int list(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         String[] strings = source.getServer().getPlayerList().getWhiteListNames();
         if (strings.length == 0) {
@@ -125,7 +125,7 @@ public class WlistCommand {
         return strings.length;
     }
 
-    public static boolean hasPermission(FilesUtil.MapFile<String, Boolean> permission, @NotNull CommandSourceStack stack) {
+    public static boolean hasPermission(FilesUtil.MapFile<String, Boolean> permission, CommandSourceStack stack) {
         if (Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(stack)) return true;
         if (stack.isPlayer()) {
             ServerPlayer player = stack.getPlayer();

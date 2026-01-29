@@ -31,7 +31,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class FakePlayerResident {
-    public static @NotNull JsonObject save(Player player) {
+    public static JsonObject save(Player player) {
         JsonObject fakePlayer = new JsonObject();
         if (GcaSetting.fakePlayerReloadAction) {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
@@ -43,7 +43,7 @@ public class FakePlayerResident {
 
     public static void createFake(
         String username,
-        @NotNull MinecraftServer server,
+        MinecraftServer server,
         ServerLevel level,
         final JsonObject actions
     ) {
@@ -76,7 +76,7 @@ public class FakePlayerResident {
             }, server);
     }
 
-    public static void load(Map.@NotNull Entry<String, JsonElement> entry, MinecraftServer server) {
+    public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
         String username = entry.getKey();
         JsonObject fakePlayer = entry.getValue().getAsJsonObject();
         JsonObject actions = new JsonObject();
