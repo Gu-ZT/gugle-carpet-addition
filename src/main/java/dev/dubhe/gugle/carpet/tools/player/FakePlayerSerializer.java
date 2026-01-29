@@ -6,11 +6,11 @@ import com.google.gson.JsonObject;
 import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.ActionAccessor;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
+
 
 public class FakePlayerSerializer {
 
-    public static @NotNull JsonObject actionPackToJson(EntityPlayerActionPack actionPack) {
+    public static JsonObject actionPackToJson(EntityPlayerActionPack actionPack) {
         JsonObject object = new JsonObject();
         EntityPlayerActionPack.Action attack = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.ATTACK);
         EntityPlayerActionPack.Action use = ((APAccessor) actionPack).getActions().get(EntityPlayerActionPack.ActionType.USE);

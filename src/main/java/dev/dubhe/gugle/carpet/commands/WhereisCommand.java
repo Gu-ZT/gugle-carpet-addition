@@ -12,10 +12,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
 
 public class WhereisCommand {
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "whereis")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandWhereis))

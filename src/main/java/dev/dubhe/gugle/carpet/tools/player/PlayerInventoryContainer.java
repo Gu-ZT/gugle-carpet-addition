@@ -14,7 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -89,7 +89,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
         }
     }
 
-    private static @NotNull RadioList createHotbarButton(BiConsumer<Integer, Button> adder, PlayerInventoryContainer container) {
+    private static RadioList createHotbarButton(BiConsumer<Integer, Button> adder, PlayerInventoryContainer container) {
         List<Button> hotBarList = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
             Component hotBarComponent = ComponentTranslate.trans(

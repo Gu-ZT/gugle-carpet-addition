@@ -4,9 +4,9 @@ import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import javax.annotation.Nullable;
 
 public class ClientUtils {
     private static @Nullable PlayerInfo getPlayerInfo(UUID uuid) {

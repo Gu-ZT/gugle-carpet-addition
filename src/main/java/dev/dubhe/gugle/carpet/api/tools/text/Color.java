@@ -2,9 +2,7 @@ package dev.dubhe.gugle.carpet.api.tools.text;
 
 import net.minecraft.network.chat.TextColor;
 
-@SuppressWarnings("unused")
 public class Color {
-
     public static final TextColor BLACK = Color.color("#000000");
 
     public static final TextColor DARK_BLUE = Color.color("#0000AA");

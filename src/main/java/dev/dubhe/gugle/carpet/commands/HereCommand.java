@@ -8,14 +8,12 @@ import dev.dubhe.gugle.carpet.GcaValidators;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.tools.PosUtils;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
 
 public class HereCommand {
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         if (GcaValidators.CARPET_AMS_ADDITION) {
             return;
         }
@@ -26,7 +24,7 @@ public class HereCommand {
         );
     }
 
-    public static int execute(@NotNull CommandContext<CommandSourceStack> context) {
+    public static int execute(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = context.getSource().getServer();
         CommandSourceStack source = context.getSource();
         if (!source.isPlayer()) return 0;

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.function.Predicate;
 //#if MC>=12005
@@ -15,21 +15,20 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Enchantment;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.Holder;
-
 //#else
 //$$ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 //$$ import net.minecraft.world.item.enchantment.Enchantments;
 //$$ import java.util.Optional;
 //#endif
-public class FakePlayerAutoReplaceTool {
 
+public class FakePlayerAutoReplaceTool {
     @SuppressWarnings("UnnecessaryReturnStatement")
     //#if MC>=12100
-    public static void autoReplaceTool(@NotNull Player fakePlayer, Item item, EquipmentSlot equipmentSlot) {
+    public static void autoReplaceTool(Player fakePlayer, Item item, EquipmentSlot equipmentSlot) {
         ItemStack itemStack = fakePlayer.getItemBySlot(equipmentSlot);
-        //#else
-        //$$ public static void autoReplaceTool(@NotNull Player fakePlayer, Item item, ItemStack itemStack) {
-        //#endif
+    //#else
+    //$$ public static void autoReplaceTool(Player fakePlayer, Item item, ItemStack itemStack) {
+    //#endif
         Predicate<ItemStack> isDamageItem = itemDamagePredicate();
         if (isDamageItem.test(itemStack)) {
             //#if MC>=12100
@@ -54,7 +53,7 @@ public class FakePlayerAutoReplaceTool {
     }
 
     //#if MC<12100
-    //$$ private static Optional<EquipmentSlot> getEquipmentSlot(@NotNull Player fakePlayer, ItemStack itemStack) {
+    //$$ private static Optional<EquipmentSlot> getEquipmentSlot(Player fakePlayer, ItemStack itemStack) {
     //$$     for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
     //$$         if (fakePlayer.getItemBySlot(equipmentSlot) == itemStack) {
     //$$             return Optional.of(equipmentSlot);
@@ -64,7 +63,7 @@ public class FakePlayerAutoReplaceTool {
     //$$ }
     //#endif
 
-    public static boolean replaceTool(EquipmentSlot slot, Predicate<ItemStack> predicate, @NotNull Player fakePlayer) {
+    public static boolean replaceTool(EquipmentSlot slot, Predicate<ItemStack> predicate, Player fakePlayer) {
         if (predicate.test(fakePlayer.getItemBySlot(slot))) {
             return true;
         }

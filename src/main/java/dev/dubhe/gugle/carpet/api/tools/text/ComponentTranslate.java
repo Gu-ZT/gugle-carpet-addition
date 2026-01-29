@@ -10,27 +10,26 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import org.apache.commons.io.IOUtils;
-import org.jetbrains.annotations.Nullable;
+import javax.annotation.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
-@SuppressWarnings("unused")
 public class ComponentTranslate {
 
-    private final Map<String, String> lang = getTranslations(CarpetSettings.language);
+    private final @Nullable Map<String, String> lang = ComponentTranslate.getTranslations(CarpetSettings.language);
 
     public static Component trans(String key, Object... args) {
         return trans(key, null, args);
     }
 
-    public static Component trans(String key, TextColor color, Object... args) {
+    public static Component trans(String key, @Nullable TextColor color, Object... args) {
         return trans(key, color, Style.EMPTY, args);
     }
 
-    public static Component trans(String key, TextColor color, Style style, Object... args) {
+    public static Component trans(String key, @Nullable TextColor color, Style style, Object... args) {
         ComponentTranslate componentTranslate = new ComponentTranslate();
         if (color != null) style = style.withColor(color);
         if (componentTranslate.lang != null) {
@@ -71,7 +70,9 @@ public class ComponentTranslate {
             }
         }
         Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-        return gson.fromJson(dataJSON, new TypeToken<Map<String, String>>() {
-        }.getType());
+        return gson.fromJson(
+            dataJSON, new TypeToken<Map<String, String>>() {
+            }.getType()
+        );
     }
 }

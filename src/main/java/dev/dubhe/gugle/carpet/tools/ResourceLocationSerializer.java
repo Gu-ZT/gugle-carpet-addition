@@ -9,7 +9,6 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Type;
 
@@ -17,7 +16,11 @@ public class ResourceLocationSerializer implements JsonDeserializer<ResourceLoca
     public ResourceLocationSerializer() {
     }
 
-    public ResourceLocation deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
+    public ResourceLocation deserialize(
+        JsonElement jsonElement,
+        Type type,
+        JsonDeserializationContext jsonDeserializationContext
+    ) throws JsonParseException {
         //#if MC < 12100
         //$$ return new ResourceLocation(GsonHelper.convertToString(jsonElement, "location"));
         //#else
@@ -25,7 +28,7 @@ public class ResourceLocationSerializer implements JsonDeserializer<ResourceLoca
         //#endif
     }
 
-    public JsonElement serialize(@NotNull ResourceLocation resourceLocation, Type type, JsonSerializationContext jsonSerializationContext) {
+    public JsonElement serialize(ResourceLocation resourceLocation, Type type, JsonSerializationContext jsonSerializationContext) {
         return new JsonPrimitive(resourceLocation.toString());
     }
 }

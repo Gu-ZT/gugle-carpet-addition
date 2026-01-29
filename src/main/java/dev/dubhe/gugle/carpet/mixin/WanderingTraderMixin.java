@@ -20,8 +20,7 @@ import net.minecraft.world.entity.npc.WanderingTrader;
 import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -32,6 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 
 @Mixin(WanderingTraderSpawner.class)
@@ -49,16 +49,16 @@ abstract class WanderingTraderMixin {
     //#if MC >= 12109
     //$$ private void spawn(ServerLevel serverLevel, boolean bl, CallbackInfo ci) {
     //#elseif MC >= 12105
-    //$$ private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfo ci) {
+    //$$ private void spawn(ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfo ci) {
     //#else
-    private void spawn(@NotNull ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cir) {
+    private void spawn(ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cir) {
     //#endif
         this.gca$server = serverLevel.getServer();
         this.gca$llama = 0;
     }
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private int spawn0(RandomSource instance, int i, @NotNull Operation<Integer> original) {
+    private int spawn0(RandomSource instance, int i, Operation<Integer> original) {
         int result = original.call(instance, i);
         if (result > this.spawnChance) {
             this.gca$sendMsg(
@@ -75,7 +75,7 @@ abstract class WanderingTraderMixin {
     }
 
     @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private int spawn1(RandomSource instance, int i, @NotNull Operation<Integer> original) {
+    private int spawn1(RandomSource instance, int i, Operation<Integer> original) {
         int result = original.call(instance, i);
         if (result != 0) {
             this.gca$sendMsg(
@@ -92,7 +92,7 @@ abstract class WanderingTraderMixin {
     }
 
     @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;getRandomPlayer()Lnet/minecraft/server/level/ServerPlayer;"))
-    private @Nullable ServerPlayer getRandomPlayer(ServerLevel instance, @NotNull Operation<ServerPlayer> original) {
+    private @Nullable ServerPlayer getRandomPlayer(ServerLevel instance, Operation<ServerPlayer> original) {
         this.gca$player = original.call(instance);
         return this.gca$player;
     }

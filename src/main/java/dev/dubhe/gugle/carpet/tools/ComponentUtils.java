@@ -2,7 +2,6 @@ package dev.dubhe.gugle.carpet.tools;
 
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
-import org.jetbrains.annotations.NotNull;
 //#if MC > 12104
 //$$ import net.minecraft.network.chat.Component;
 //$$ import net.minecraft.world.item.ItemStack;
@@ -15,15 +14,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class ComponentUtils {
     //#if MC <= 12104
-    public static <T> @NotNull HoverEvent createHoverEvent(HoverEvent.Action<T> action, T object) {
+    public static <T> HoverEvent createHoverEvent(HoverEvent.Action<T> action, T object) {
         return new HoverEvent(action, object);
     }
 
-    public static @NotNull ClickEvent createClickEvent(ClickEvent.Action action, String string) {
+    public static ClickEvent createClickEvent(ClickEvent.Action action, String string) {
         return new ClickEvent(action, string);
     }
     //#else
-    //$$ public static <T> @NotNull HoverEvent createHoverEvent(@NotNull HoverEvent.Action action, T object) {
+    //$$ public static <T> HoverEvent createHoverEvent(HoverEvent.Action action, T object) {
     //$$     try {
     //$$         return switch (action) {
     //$$             case SHOW_ITEM -> new HoverEvent.ShowItem((ItemStack) object);
@@ -35,7 +34,7 @@ public class ComponentUtils {
     //$$     }
     //$$ }
     //$$
-    //$$ public static @NotNull ClickEvent createClickEvent(ClickEvent.Action action, String string) {
+    //$$ public static ClickEvent createClickEvent(ClickEvent.Action action, String string) {
     //$$     try {
     //$$         return switch (action) {
     //$$             case OPEN_URL -> new ClickEvent.OpenUrl(new URI(string));

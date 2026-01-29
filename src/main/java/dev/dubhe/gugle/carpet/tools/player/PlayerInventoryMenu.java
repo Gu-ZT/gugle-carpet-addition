@@ -10,7 +10,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
+
 
 //#if MC>=12102
 //$$ import net.minecraft.world.item.equipment.Equippable;
@@ -29,11 +29,11 @@ public class PlayerInventoryMenu extends ChestMenu {
     }
 
     @Override
-    public @NotNull ItemStack quickMoveStack(@NotNull Player player, int slotIndex) {
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
         return quickMove(this, slotIndex);
     }
 
-    public static ItemStack quickMove(@NotNull ChestMenu chestMenu, int slotIndex) {
+    public static ItemStack quickMove(ChestMenu chestMenu, int slotIndex) {
         ItemStack remainingItem = ItemStack.EMPTY;
         Slot slot = chestMenu.slots.get(slotIndex);
         int ordinal;
@@ -84,7 +84,7 @@ public class PlayerInventoryMenu extends ChestMenu {
         return remainingItem;
     }
 
-    private static int getArmorOrdinal(@NotNull ItemStack stack) {
+    private static int getArmorOrdinal(ItemStack stack) {
         int ordinal = -1;
         Item item = stack.getItem();
         //#if MC>=12102

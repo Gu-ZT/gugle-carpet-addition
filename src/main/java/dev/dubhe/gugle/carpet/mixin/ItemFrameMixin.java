@@ -17,7 +17,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -42,11 +41,13 @@ abstract class ItemFrameMixin extends Entity {
             //$$ "dropItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Z)V",
             //#else
             "dropItem(Lnet/minecraft/world/entity/Entity;Z)V",
-            //#endif
-        at = {@At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;setItem(Lnet/minecraft/world/item/ItemStack;)V"
-        )},
+        //#endif
+        at = {
+            @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/entity/decoration/ItemFrame;setItem(Lnet/minecraft/world/item/ItemStack;)V"
+            )
+        },
         cancellable = true
     )
     private void dropItem(
@@ -68,15 +69,20 @@ abstract class ItemFrameMixin extends Entity {
 
     @Inject(
         method = {"interact"},
-        at = {@At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/decoration/ItemFrame;setRotation(I)V"
-        )},
+        at = {
+            @At(
+                value = "INVOKE",
+                target = "Lnet/minecraft/world/entity/decoration/ItemFrame;setRotation(I)V"
+            )
+        },
         cancellable = true
     )
     private void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (GcaSetting.betterItemFrameInteraction) {
-            if ((!player.getMainHandItem().is(Items.CACTUS) || !player.getOffhandItem().is(this::gca$isGlass)) && (!player.getOffhandItem().is(Items.CACTUS) || !player.getMainHandItem().is(this::gca$isGlass))) {
+            if ((!player.getMainHandItem().is(Items.CACTUS) || !player.getOffhandItem().is(this::gca$isGlass)) && (
+                !player.getOffhandItem()
+                    .is(Items.CACTUS) || !player.getMainHandItem().is(this::gca$isGlass)
+            )) {
                 if (!player.getMainHandItem().is(Items.CACTUS) && !player.getOffhandItem().is(Items.CACTUS)) {
                     Level level = this.level();
                     Direction direction = this.getDirection();
@@ -98,7 +104,7 @@ abstract class ItemFrameMixin extends Entity {
     }
 
     @Unique
-    private boolean gca$isGlass(@NotNull Holder<Item> itemHolder) {
+    private boolean gca$isGlass(Holder<Item> itemHolder) {
         return itemHolder.is(BuiltInRegistries.ITEM.getKey(Items.GLASS)) || itemHolder.is(BuiltInRegistries.ITEM.getKey(Items.GLASS_PANE));
     }
 }

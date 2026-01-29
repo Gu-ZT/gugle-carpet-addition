@@ -39,7 +39,6 @@ import net.minecraft.server.level.ServerPlayer;
 //#endif
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,6 +54,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import javax.annotation.Nullable;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
     private static final HashSet<EntityPlayerMPFake> RESIDENT_PLAYERS = new HashSet<>();
@@ -70,7 +70,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
     public static final List<Map.Entry<Long, Runnable>> PLAN_FUNCTION = new ArrayList<>();
 
-    public static @NotNull ResourceLocation id(String path) {
+    public static ResourceLocation id(String path) {
         //#if MC>=12100
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
         //#else
@@ -79,7 +79,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     }
 
     @Override
-    public void onPlayerLoggedIn(@NotNull ServerPlayer player) {
+    public void onPlayerLoggedIn(ServerPlayer player) {
         GameProfileHelper.prasePlayerGameProfile(
             player, (profile, name, uuid) -> {
                 Level level = player.level();
@@ -157,7 +157,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     }
 
     @Override
-    public void onServerLoadedWorlds(@NotNull MinecraftServer server) {
+    public void onServerLoadedWorlds(MinecraftServer server) {
         if (server.isSingleplayer()) return;
         loadSavedPlayer(server);
     }
@@ -199,7 +199,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     }
 
     @Override
-    public Map<String, String> canHasTranslations(String lang) {
+    public @Nullable Map<String, String> canHasTranslations(String lang) {
         return ComponentTranslate.getTranslations(lang);
     }
 
@@ -208,7 +208,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         CarpetServer.manageExtension(this);
     }
 
-    public static @NotNull ResourceLocation parseLocation(String string) {
+    public static ResourceLocation parseLocation(String string) {
         //#if MC>=12100
         return ResourceLocation.parse(string);
         //#else

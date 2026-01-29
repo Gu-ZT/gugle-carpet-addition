@@ -16,7 +16,6 @@ import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,8 +43,14 @@ abstract class PlayerMixin {
         }
     }
 
-    @WrapOperation(method = "interactOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult interactOn(Entity entity, @NotNull Player player, InteractionHand hand, Operation<InteractionResult> original) {
+    @WrapOperation(
+        method = "interactOn",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
+        )
+    )
+    private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
             if (entity instanceof Player otherPlayer && ClientUtils.isFakePlayer(otherPlayer)) {
@@ -65,7 +70,7 @@ abstract class PlayerMixin {
     }
 
     @Unique
-    private InteractionResult openInventory(@NotNull ServerPlayer player, @NotNull ServerPlayer otherPlayer) {
+    private InteractionResult openInventory(ServerPlayer player, ServerPlayer otherPlayer) {
         SimpleMenuProvider provider;
         if (!(otherPlayer instanceof IGcaPlayer gcaPlayer)) return InteractionResult.PASS;
         if (player.isShiftKeyDown() && gca$hasPremission(player, otherPlayer)) {
@@ -105,7 +110,7 @@ abstract class PlayerMixin {
     }
 
     @Unique
-    private static boolean gca$hasPremission(@NotNull ServerPlayer player, @NotNull ServerPlayer otherPlayer) {
+    private static boolean gca$hasPremission(ServerPlayer player, ServerPlayer otherPlayer) {
         //#if MC>=12104
         //$$ if(!(player.level() instanceof ServerLevel serverLevel)) return otherPlayer instanceof EntityPlayerMPFake;
         //$$ CommandSourceStack stack = player.createCommandSourceStackForNameResolution(serverLevel);

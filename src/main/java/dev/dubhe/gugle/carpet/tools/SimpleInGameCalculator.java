@@ -3,16 +3,15 @@ package dev.dubhe.gugle.carpet.tools;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import org.jetbrains.annotations.NotNull;
 import org.nfunk.jep.JEP;
 
 public class SimpleInGameCalculator {
-    public static void handleChat(@NotNull MinecraftServer server, @NotNull String msg) {
+    public static void handleChat(MinecraftServer server, String msg) {
         if (msg.startsWith("=")) return;
         server.getPlayerList().broadcastSystemMessage(SimpleInGameCalculator.calculate(msg), false);
     }
 
-    public static @NotNull Component calculate(@NotNull String expression) {
+    public static Component calculate(String expression) {
         if (expression.startsWith("==")) expression = expression.substring(2);
         JEP jep = new JEP();
         // 添加常用函数

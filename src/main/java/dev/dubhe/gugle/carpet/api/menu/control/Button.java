@@ -9,7 +9,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,18 +19,15 @@ import net.minecraft.world.item.component.CustomData;
 //#else
 //#endif
 
-@SuppressWarnings("unused")
 public class Button {
-    private boolean init = false;
-    private boolean flag;
+    public static final String GCA_CLEAR = "GcaClear";
     private final ItemStack onItem;
     private final ItemStack offItem;
-    CompoundTag compoundTag = new CompoundTag();
-    public static final String GCA_CLEAR = "GcaClear";
-
     private final List<Runnable> turnOnRunnableList = new ArrayList<>();
-
     private final List<Runnable> turnOffRunnableList = new ArrayList<>();
+    CompoundTag compoundTag = new CompoundTag();
+    private boolean init = false;
+    private boolean flag;
 
     public Button() {
         this(true, Items.BARRIER, Items.STRUCTURE_VOID);
@@ -54,9 +50,20 @@ public class Button {
     }
 
     public Button(boolean defaultState, String key) {
-        this(defaultState, Items.BARRIER, Items.STRUCTURE_VOID, 1,
-                ComponentTranslate.trans(key, Color.GREEN, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.on")),
-                ComponentTranslate.trans(key, Color.RED, Style.EMPTY.withBold(true).withItalic(false), ComponentTranslate.trans("gca.button.off"))
+        this(
+            defaultState, Items.BARRIER, Items.STRUCTURE_VOID, 1,
+            ComponentTranslate.trans(
+                key,
+                Color.GREEN,
+                Style.EMPTY.withBold(true).withItalic(false),
+                ComponentTranslate.trans("gca.button.on")
+            ),
+            ComponentTranslate.trans(
+                key,
+                Color.RED,
+                Style.EMPTY.withBold(true).withItalic(false),
+                ComponentTranslate.trans("gca.button.off")
+            )
         );
     }
 
@@ -65,9 +72,10 @@ public class Button {
     }
 
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount) {
-        this(defaultState, onItem, offItem, itemCount,
-                ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
-                ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
+        this(
+            defaultState, onItem, offItem, itemCount,
+            ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
+            ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
         );
     }
 
@@ -87,7 +95,7 @@ public class Button {
         this.offItem = offItemStack;
     }
 
-    public Button(boolean defaultState, @NotNull ItemStack onItem, @NotNull ItemStack offItem) {
+    public Button(boolean defaultState, ItemStack onItem, ItemStack offItem) {
         this.flag = defaultState;
         this.compoundTag.putBoolean(GCA_CLEAR, true);
 
@@ -112,7 +120,7 @@ public class Button {
     //$$     offItemStack.setHoverName(offText);
     //$$     this.offItem = offItemStack;
     //$$ }
-    //$$ public Button(boolean defaultState, @NotNull ItemStack onItem, @NotNull ItemStack offItem) {
+    //$$ public Button(boolean defaultState, ItemStack onItem, ItemStack offItem) {
     //$$     this.flag = defaultState;
     //$$     this.compoundTag.putBoolean("GcaClear", true);
     //$$     ItemStack onItemStack = onItem.copy();
@@ -146,11 +154,11 @@ public class Button {
         updateButton(container, slot, onItemStack, offItemStack);
     }
 
-    public void updateButton(@NotNull Container container, int slot, @NotNull ItemStack onItemStack, ItemStack offItemStack) {
+    public void updateButton(Container container, int slot, ItemStack onItemStack, ItemStack offItemStack) {
         if (!(
-                container.getItem(slot).is(onItemStack.getItem()) ||
-                        container.getItem(slot).is(offItemStack.getItem()) ||
-                        container.getItem(slot).isEmpty()
+            container.getItem(slot).is(onItemStack.getItem()) ||
+            container.getItem(slot).is(offItemStack.getItem()) ||
+            container.getItem(slot).isEmpty()
         )) {
             return;
         }

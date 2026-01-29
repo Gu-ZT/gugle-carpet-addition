@@ -6,7 +6,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,13 +28,13 @@ abstract class AbstractContainerMenuMixin {
     //#elseif MC < 12105
     @Unique
     @SuppressWarnings("SameParameterValue")
-    private boolean gca$getBoolean(@NotNull CustomData data, String string) {
+    private boolean gca$getBoolean(CustomData data, String string) {
         return data.copyTag().getBoolean(string);
     }
     //#else
     //$$ @Unique
     //$$ @SuppressWarnings("SameParameterValue")
-    //$$ private boolean gca$getBoolean(@NotNull CustomData data, String string) {
+    //$$ private boolean gca$getBoolean(CustomData data, String string) {
     //$$     return data.copyTag().getBoolean(string).orElse(false);
     //$$ }
     //#endif

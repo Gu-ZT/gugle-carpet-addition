@@ -8,7 +8,6 @@ import dev.dubhe.gugle.carpet.GcaExtension;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -29,16 +28,16 @@ public abstract class FilesUtil {
         this.gcaJson = "%s.gca.json".formatted(jsonPrefix);
     }
 
-    public void init(@NotNull CommandContext<CommandSourceStack> context) {
+    public void init(CommandContext<CommandSourceStack> context) {
         MinecraftServer server1 = context.getSource().getServer();
         this.init(server1);
     }
 
-    protected abstract void createDefault(@NotNull File file) throws IOException;
+    protected abstract void createDefault(File file) throws IOException;
 
-    protected abstract void init(@NotNull BufferedReader bfr);
+    protected abstract void init(BufferedReader bfr);
 
-    public void init(@NotNull MinecraftServer server1) {
+    public void init(MinecraftServer server1) {
         if (server1 == server) return;
         this.server = server1;
         File file = this.server.getWorldPath(LevelResource.ROOT).resolve(this.gcaJson).toFile();
@@ -55,7 +54,7 @@ public abstract class FilesUtil {
         }
     }
 
-    protected abstract void save(@NotNull BufferedWriter bw);
+    protected abstract void save(BufferedWriter bw);
 
     public void save() {
         if (this.server == null) return;
@@ -79,14 +78,14 @@ public abstract class FilesUtil {
         }
 
         @Override
-        protected void createDefault(@NotNull File file) throws IOException {
+        protected void createDefault(File file) throws IOException {
             try (BufferedWriter bw = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
                 this.save(bw);
             }
         }
 
         @Override
-        protected void init(@NotNull BufferedReader bfr) {
+        protected void init(BufferedReader bfr) {
             this.map.clear();
             for (Map.Entry<String, JsonElement> entry : FilesUtil.GSON.fromJson(bfr, JsonObject.class).entrySet()) {
                 this.map.put(keyCodec.apply(entry.getKey()), FilesUtil.GSON.fromJson(entry.getValue(), this.vClass));
@@ -94,7 +93,7 @@ public abstract class FilesUtil {
         }
 
         @Override
-        protected void save(@NotNull BufferedWriter bw) {
+        protected void save(BufferedWriter bw) {
             FilesUtil.GSON.toJson(this.map, bw);
         }
     }
@@ -108,20 +107,20 @@ public abstract class FilesUtil {
         }
 
         @Override
-        protected void createDefault(@NotNull File file) throws IOException {
+        protected void createDefault(File file) throws IOException {
             try (BufferedWriter bw = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
                 this.save(bw);
             }
         }
 
         @Override
-        protected void init(@NotNull BufferedReader bfr) {
+        protected void init(BufferedReader bfr) {
             //noinspection unchecked
             this.obj = (T) FilesUtil.GSON.fromJson(bfr, this.obj.getClass());
         }
 
         @Override
-        protected void save(@NotNull BufferedWriter bw) {
+        protected void save(BufferedWriter bw) {
             FilesUtil.GSON.toJson(this.obj, bw);
         }
     }

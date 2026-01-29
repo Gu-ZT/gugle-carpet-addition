@@ -8,7 +8,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.commands.TransferCommand;
-import org.jetbrains.annotations.NotNull;
+
 import org.spongepowered.asm.mixin.injection.At;
 
 @Mixin(TransferCommand.class)
@@ -19,7 +19,7 @@ abstract class TransferCommandMixin {
     }
 
     @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lnet/minecraft/commands/Commands;argument(Ljava/lang/String;Lcom/mojang/brigadier/arguments/ArgumentType;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;", ordinal = 2))
-    private static <T> @NotNull RequiredArgumentBuilder<CommandSourceStack, T> register(String string, ArgumentType<T> argumentType, @NotNull Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original) {
+    private static <T> RequiredArgumentBuilder<CommandSourceStack, T> register(String string, ArgumentType<T> argumentType, Operation<RequiredArgumentBuilder<CommandSourceStack, T>> original) {
         return original.call(string, argumentType).requires(stack -> stack.hasPermission(3));
     }
 }

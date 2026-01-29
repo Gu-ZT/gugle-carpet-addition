@@ -52,7 +52,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,9 +76,13 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class BotCommand {
     public static final FilesUtil.MapFile<String, BotInfo> BOT_INFO = new FilesUtil.MapFile<>("bot", Object::toString, BotInfo.class);
-    public static final FilesUtil.MapFile<String, BotGroupInfo> BOT_GROUP_INFO = new FilesUtil.MapFile<>("botGroup", Object::toString, BotGroupInfo.class);
+    public static final FilesUtil.MapFile<String, BotGroupInfo> BOT_GROUP_INFO = new FilesUtil.MapFile<>(
+        "botGroup",
+        Object::toString,
+        BotGroupInfo.class
+    );
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "bot")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBot))
@@ -478,7 +481,7 @@ public class BotCommand {
         return 1;
     }
 
-    private static @NotNull MutableComponent botGroupToComponent(@NotNull BotGroupInfo botGroupInfo) {
+    private static MutableComponent botGroupToComponent(BotGroupInfo botGroupInfo) {
         MutableComponent name = Component.literal(botGroupInfo.name).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -488,25 +491,37 @@ public class BotCommand {
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot group load %s".formatted(botGroupInfo.name)))
+                .withClickEvent(ComponentUtils.createClickEvent(
+                    ClickEvent.Action.RUN_COMMAND,
+                    "/bot group load %s".formatted(botGroupInfo.name)
+                ))
         );
         MutableComponent remove = Component.literal("[↓]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot group unload %s".formatted(botGroupInfo.name)))
+                .withClickEvent(ComponentUtils.createClickEvent(
+                    ClickEvent.Action.RUN_COMMAND,
+                    "/bot group unload %s".formatted(botGroupInfo.name)
+                ))
         );
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot group info %s".formatted(botGroupInfo.name)))
+                .withClickEvent(ComponentUtils.createClickEvent(
+                    ClickEvent.Action.RUN_COMMAND,
+                    "/bot group info %s".formatted(botGroupInfo.name)
+                ))
         );
         MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Bot Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bot group remove %s".formatted(botGroupInfo.name)))
+                .withClickEvent(ComponentUtils.createClickEvent(
+                    ClickEvent.Action.SUGGEST_COMMAND,
+                    "/bot group remove %s".formatted(botGroupInfo.name)
+                ))
         );
         MutableComponent component = Component.literal("▶ ").append(name);
         component.append(" ").append(load);
@@ -564,42 +579,66 @@ public class BotCommand {
                     //#else
                     //$$ GameProfileHelper.fetchGameProfile(BOT_INFO.server, gameprofile.id())
                     //#endif
-                    .thenAcceptAsync((p) -> {
-                        //#if MC<12109
-                        GameProfile current = finalGameprofile;
-                        if (p.isPresent()) {
-                            current = p.get();
-                        }
-                        //#else
-                        //$$ GameProfile current = p;
-                        //#endif
-                        if (worldIn == null) return;
-                        EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, current, ClientInformation.createDefault());
-                        instance.fixStartingPosition = () -> instance.moveTo(botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
-                        BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(current, 0, instance.clientInformation(), false));
-                        //#if MC>=12102
-                        //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
-                        //#else
-                        instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
-                        //#endif
-                        instance.setHealth(20.0F);
-                        ((EntityInvoker) instance).invokeUnsetRemoved();
-                        AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
-                        if (attribute != null) attribute.setBaseValue(0.6000000238418579);
-                        instance.gameMode.changeGameModeForPlayer(botInfo.mode);
-                        BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);
-                        //#if MC>=12102
-                        //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
-                        //#else
-                        BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
-                        //#endif
-                        //#if MC>=12110
-                        //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
-                        //#endif
-                        instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
-                        instance.getAbilities().flying = botInfo.flying;
-                        FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);
-                    }, BOT_INFO.server);
+                    .thenAcceptAsync(
+                        (p) -> {
+                            //#if MC<12109
+                            GameProfile current = finalGameprofile;
+                            if (p.isPresent()) {
+                                current = p.get();
+                            }
+                            //#else
+                            //$$ GameProfile current = p;
+                            //#endif
+                            if (worldIn == null) return;
+                            EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(
+                                BOT_INFO.server,
+                                worldIn,
+                                current,
+                                ClientInformation.createDefault()
+                            );
+                            instance.fixStartingPosition = () -> instance.moveTo(
+                                botInfo.pos.x,
+                                botInfo.pos.y,
+                                botInfo.pos.z,
+                                botInfo.facing.y,
+                                botInfo.facing.x
+                            );
+                            BOT_INFO.server.getPlayerList()
+                                .placeNewPlayer(
+                                    new FakeClientConnection(PacketFlow.SERVERBOUND),
+                                    instance,
+                                    new CommonListenerCookie(current, 0, instance.clientInformation(), false)
+                                );
+                            //#if MC>=12102
+                            //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
+                            //#else
+                            instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
+                            //#endif
+                            instance.setHealth(20.0F);
+                            ((EntityInvoker) instance).invokeUnsetRemoved();
+                            AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
+                            if (attribute != null) attribute.setBaseValue(0.6000000238418579);
+                            instance.gameMode.changeGameModeForPlayer(botInfo.mode);
+                            BOT_INFO.server.getPlayerList()
+                                .broadcastAll(
+                                    new ClientboundRotateHeadPacket(
+                                        instance,
+                                        (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))
+                                    ), botInfo.dimType
+                                );
+                            //#if MC>=12102
+                            //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
+                            //#else
+                            BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
+                            //#endif
+                            //#if MC>=12110
+                            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
+                            //#endif
+                            instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
+                            instance.getAbilities().flying = botInfo.flying;
+                            FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);
+                        }, BOT_INFO.server
+                    );
                 //#else
                 //$$ if (worldIn == null) return false;
                 //$$ EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, gameprofile);
@@ -654,9 +693,9 @@ public class BotCommand {
         String name =
             //#if MC<12109
             player.getGameProfile().getName();
-            //#else
-            //$$ player.getGameProfile().name();
-            //#endif
+        //#else
+        //$$ player.getGameProfile().name();
+        //#endif
         if (BOT_INFO.map.containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
@@ -719,7 +758,7 @@ public class BotCommand {
         return 1;
     }
 
-    private static @NotNull MutableComponent botToComponent(@NotNull BotInfo botInfo) {
+    private static MutableComponent botToComponent(BotInfo botInfo) {
         MutableComponent desc = Component.literal(botInfo.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -742,7 +781,10 @@ public class BotCommand {
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/bot remove %s".formatted(botInfo.name)))
+                .withClickEvent(ComponentUtils.createClickEvent(
+                    ClickEvent.Action.SUGGEST_COMMAND,
+                    "/bot remove %s".formatted(botInfo.name)
+                ))
         );
         MutableComponent component = Component.literal("▶ ")
             .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
@@ -752,21 +794,27 @@ public class BotCommand {
         return component.append(" ").append(delete);
     }
 
-    private static void listComponent(@NotNull CommandContext<CommandSourceStack> context, int page, int maxPage, String command) {
+    private static void listComponent(CommandContext<CommandSourceStack> context, int page, int maxPage, String command) {
         Component prevPage = page <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + (page - 1)))
-            );
+                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
+                             Component.literal("<<<").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         command + " " + (page - 1)
+                                     ))
+                             );
         Component nextPage = page >= maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, command + " " + (page + 1)))
-            );
+                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
+                             Component.literal(">>>").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         command + " " + (page + 1)
+                                     ))
+                             );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
                 .withStyle(ChatFormatting.YELLOW)
@@ -781,11 +829,17 @@ public class BotCommand {
         );
     }
 
-    private static @NotNull CompletableFuture<Suggestions> suggestPlayer(final CommandContext<CommandSourceStack> context, final SuggestionsBuilder builder) {
+    private static CompletableFuture<Suggestions> suggestPlayer(
+        final CommandContext<CommandSourceStack> context,
+        final SuggestionsBuilder builder
+    ) {
         return SharedSuggestionProvider.suggest(BOT_INFO.map.keySet(), builder);
     }
 
-    private static @NotNull CompletableFuture<Suggestions> suggestGroup(final CommandContext<CommandSourceStack> context, final SuggestionsBuilder builder) {
+    private static CompletableFuture<Suggestions> suggestGroup(
+        final CommandContext<CommandSourceStack> context,
+        final SuggestionsBuilder builder
+    ) {
         return SharedSuggestionProvider.suggest(BOT_GROUP_INFO.map.keySet(), builder);
     }
 

@@ -23,14 +23,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public class TodoCommand {
     public static final FilesUtil.MapFile<Long, Todo> TODO = new FilesUtil.MapFile<>("todo", Long::decode, Todo.class);
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "todo")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandTodo))
@@ -73,7 +72,7 @@ public class TodoCommand {
         );
     }
 
-    private static @NotNull CompletableFuture<Suggestions> suggestId(
+    private static CompletableFuture<Suggestions> suggestId(
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
@@ -122,7 +121,8 @@ public class TodoCommand {
         todo.success = success;
         TODO.save();
         boolean finalSuccess = success;
-        context.getSource().sendSuccess(() -> Component.literal("Todo %s has be %s.".formatted(todo.desc, finalSuccess ? "done" : "undone")), false);
+        context.getSource()
+            .sendSuccess(() -> Component.literal("Todo %s has be %s.".formatted(todo.desc, finalSuccess ? "done" : "undone")), false);
         return 1;
     }
 
@@ -150,19 +150,25 @@ public class TodoCommand {
             context.getSource().sendSystemMessage(TodoToComponent(todos[i]));
         }
         Component prevPage = page <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo list " + (page - 1)))
-            );
+                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
+                             Component.literal("<<<").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         "/todo list " + (page - 1)
+                                     ))
+                             );
         Component nextPage = page >= maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo list " + (page + 1)))
-            );
+                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
+                             Component.literal(">>>").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         "/todo list " + (page + 1)
+                                     ))
+                             );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
                 .withStyle(ChatFormatting.YELLOW)
@@ -178,7 +184,7 @@ public class TodoCommand {
         return 1;
     }
 
-    private static @NotNull MutableComponent TodoToComponent(Todo todo) {
+    private static MutableComponent TodoToComponent(Todo todo) {
         MutableComponent component = Component.literal(todo.desc).withStyle(
             Style.EMPTY
                 .withStrikethrough(todo.success)

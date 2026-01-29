@@ -1,7 +1,7 @@
 @FieldsAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-package dev.dubhe.gugle.carpet.api.tools;
+package dev.dubhe.gugle.carpet.api.tools.text;
 
 import dev.dubhe.gugle.carpet.api.annotations.FieldsAreNonnullByDefault;
 import dev.dubhe.gugle.carpet.api.annotations.MethodsReturnNonnullByDefault;

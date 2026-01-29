@@ -27,7 +27,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,7 @@ import java.util.concurrent.CompletableFuture;
 public class LocCommand {
     public static final FilesUtil.MapFile<Long, LocPoint> LOC_POINT = new FilesUtil.MapFile<>("loc", Long::decode, LocPoint.class);
 
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "loc")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandLoc))
@@ -75,7 +74,7 @@ public class LocCommand {
         );
     }
 
-    private static @NotNull CompletableFuture<Suggestions> suggestId(
+    private static CompletableFuture<Suggestions> suggestId(
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
@@ -132,19 +131,25 @@ public class LocCommand {
             context.getSource().sendSystemMessage(locToComponent(locPoints[i]));
         }
         Component prevPage = page <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page - 1)))
-            );
+                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
+                             Component.literal("<<<").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         "/loc list " + (page - 1)
+                                     ))
+                             );
         Component nextPage = page >= maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page + 1)))
-            );
+                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
+                             Component.literal(">>>").withStyle(
+                                 Style.EMPTY
+                                     .applyFormat(ChatFormatting.GREEN)
+                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                         ClickEvent.Action.RUN_COMMAND,
+                                         "/loc list " + (page + 1)
+                                     ))
+                             );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
                 .withStyle(ChatFormatting.YELLOW)
@@ -160,7 +165,7 @@ public class LocCommand {
         return 1;
     }
 
-    private static @NotNull MutableComponent locToComponent(@NotNull LocPoint locPoint) {
+    private static MutableComponent locToComponent(LocPoint locPoint) {
         MutableComponent component = Component.literal(locPoint.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -170,7 +175,10 @@ public class LocCommand {
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.YELLOW)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("View loc point information")))
+                .withHoverEvent(ComponentUtils.createHoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Component.literal("View loc point information")
+                ))
                 .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(locPoint.id)))
         );
         MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
@@ -199,7 +207,7 @@ public class LocCommand {
         return 1;
     }
 
-    public static @NotNull List<Component> info(@NotNull LocPoint point) {
+    public static List<Component> info(LocPoint point) {
         MutableComponent desc = Component.literal(point.desc);
         MutableComponent dimType;
         if (point.dimType == Level.NETHER) {

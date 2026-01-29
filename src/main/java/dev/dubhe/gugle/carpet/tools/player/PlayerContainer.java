@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ public abstract class PlayerContainer extends CustomMenu {
     }
 
     @Override
-    public @NotNull ItemStack getItem(int slot) {
+    public ItemStack getItem(int slot) {
         Map.Entry<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         if (pair != null) {
             return pair.getKey().get(pair.getValue());
@@ -34,7 +34,7 @@ public abstract class PlayerContainer extends CustomMenu {
     public abstract Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot);
 
     @Override
-    public @NotNull ItemStack removeItem(int slot, int amount) {
+    public ItemStack removeItem(int slot, int amount) {
         Map.Entry<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
         if (pair != null) {
@@ -48,7 +48,7 @@ public abstract class PlayerContainer extends CustomMenu {
     }
 
     @Override
-    public @NotNull ItemStack removeItemNoUpdate(int slot) {
+    public ItemStack removeItemNoUpdate(int slot) {
         Map.Entry<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
         if (pair != null) {
@@ -64,7 +64,7 @@ public abstract class PlayerContainer extends CustomMenu {
     }
 
     @Override
-    public void setItem(int slot, @NotNull ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         Map.Entry<NonNullList<ItemStack>, Integer> pair = getItemSlot(slot);
         NonNullList<ItemStack> list = null;
         if (pair != null) {
@@ -81,7 +81,7 @@ public abstract class PlayerContainer extends CustomMenu {
     }
 
     @Override
-    public boolean stillValid(@NotNull Player player) {
+    public boolean stillValid(Player player) {
         return this.player.isAlive() && player.distanceToSqr(this.player) <= 64.0;
     }
 }

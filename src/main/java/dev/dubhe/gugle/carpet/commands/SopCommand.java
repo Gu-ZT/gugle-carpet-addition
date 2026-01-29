@@ -10,10 +10,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import org.jetbrains.annotations.NotNull;
 
 public class SopCommand {
-    public static void register(@NotNull CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "sop")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandSop))
@@ -21,18 +20,20 @@ public class SopCommand {
         );
     }
 
-    public static int sop(@NotNull CommandContext<CommandSourceStack> context) {
+    public static int sop(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
         if (!source.isPlayer()) return 0;
         PlayerList playerList = source.getServer().getPlayerList();
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
-        GameProfileHelper.prasePlayerGameProfile(player, (profile, name, uuid) -> {
-            if (!playerList.isOp(profile)) {
-                playerList.op(profile);
-                source.sendSuccess(() -> Component.translatable("commands.op.success", name), true);
+        GameProfileHelper.prasePlayerGameProfile(
+            player, (profile, name, uuid) -> {
+                if (!playerList.isOp(profile)) {
+                    playerList.op(profile);
+                    source.sendSuccess(() -> Component.translatable("commands.op.success", name), true);
+                }
             }
-        });
+        );
         return 1;
     }
 }

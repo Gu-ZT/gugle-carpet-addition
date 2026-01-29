@@ -12,16 +12,14 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
 public class PosUtils {
-    public static @NotNull MutableComponent xaero(String desc, double x, double y, double z, @NotNull ResourceKey<Level> dimType) {
+    public static MutableComponent xaero(String desc, double x, double y, double z, ResourceKey<Level> dimType) {
         int color = dimType == Level.OVERWORLD ? 10 :
-            dimType == Level.NETHER ? 12 :
-                dimType == Level.END ? 13 : 11;
+                    dimType == Level.NETHER ? 12 :
+                    dimType == Level.END ? 13 : 11;
         return Component.literal(
             "xaero-waypoint:%s:%s:%.0f:%.0f:%.0f:%d:false:0:Internal-%s-waypoints"
                 .formatted(
@@ -36,19 +34,22 @@ public class PosUtils {
         );
     }
 
-    public static @NotNull @Unmodifiable List<MutableComponent> pos(String desc, double x, double y, double z, @NotNull ResourceKey<Level> dimension) {
+    public static List<MutableComponent> pos(String desc, double x, double y, double z, ResourceKey<Level> dimension) {
         MutableComponent pos = Component.literal("[%.1f, %.1f, %.1f]".formatted(x, y, z)).withStyle(
             Style.EMPTY
                 .applyFormat(
                     dimension == Level.OVERWORLD ?
-                        ChatFormatting.GREEN :
-                        dimension == Level.NETHER ?
-                            ChatFormatting.RED :
-                            dimension == Level.END ?
-                                ChatFormatting.LIGHT_PURPLE :
-                                ChatFormatting.AQUA
+                    ChatFormatting.GREEN :
+                    dimension == Level.NETHER ?
+                    ChatFormatting.RED :
+                    dimension == Level.END ?
+                    ChatFormatting.LIGHT_PURPLE :
+                    ChatFormatting.AQUA
                 )
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(dimension.location().toString())))
+                .withHoverEvent(ComponentUtils.createHoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Component.literal(dimension.location().toString())
+                ))
         );
         double scale = 0;
         ResourceKey<Level> toDimension = Level.END;
@@ -63,29 +64,34 @@ public class PosUtils {
             Style.EMPTY
                 .applyFormat(
                     dimension == Level.OVERWORLD ?
-                        ChatFormatting.RED :
-                        dimension == Level.NETHER ?
-                            ChatFormatting.GREEN :
-                            ChatFormatting.AQUA
+                    ChatFormatting.RED :
+                    dimension == Level.NETHER ?
+                    ChatFormatting.GREEN :
+                    ChatFormatting.AQUA
                 )
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(toDimension.location().toString())))
+                .withHoverEvent(ComponentUtils.createHoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    Component.literal(toDimension.location().toString())
+                ))
         );
         return scale > 0 ?
-            List.of(pos, xaero(desc, x, y, z, dimension), toPos, xaero(desc, x * scale, y, z * scale, toDimension)) :
-            List.of(pos, xaero(desc, x, y, z, dimension));
+               List.of(pos, xaero(desc, x, y, z, dimension), toPos, xaero(desc, x * scale, y, z * scale, toDimension)) :
+               List.of(pos, xaero(desc, x, y, z, dimension));
     }
 
-    public static @NotNull @Unmodifiable List<MutableComponent> playerPos(@NotNull ServerPlayer player) {
+    public static List<MutableComponent> playerPos(ServerPlayer player) {
         player.addEffect(new MobEffectInstance(MobEffects.GLOWING, 200, 0, true, false));
         Vec3 position = player.position();
         ResourceKey<Level> dimension = player.level().dimension();
         ImmutableList.Builder<MutableComponent> builder = ImmutableList.builder();
         List<MutableComponent> pos = PosUtils.pos("Shared Location", position.x, position.y, position.z, dimension);
-        GameProfileHelper.prasePlayerGameProfile(player, (profile, name, uuid) -> {
-            MutableComponent component = Component.literal("%s at".formatted(name)).append(" ").append(pos.getFirst());
-            if (pos.size() > 2) component.append("->").append(pos.get(2));
-            builder.add(component, pos.get(1));
-        });
+        GameProfileHelper.prasePlayerGameProfile(
+            player, (profile, name, uuid) -> {
+                MutableComponent component = Component.literal("%s at".formatted(name)).append(" ").append(pos.getFirst());
+                if (pos.size() > 2) component.append("->").append(pos.get(2));
+                builder.add(component, pos.get(1));
+            }
+        );
         return builder.build();
     }
 }

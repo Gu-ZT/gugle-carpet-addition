@@ -86,6 +86,8 @@ dependencies {
     modImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
     // jep
     include(implementation 'jep:jep:2.24')
+    // jsr305
+    implementation 'com.google.code.findbugs:jsr305:3.0.2'
     // mixin-extras
     if (mcVersion < 12100) {
         include(modImplementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))

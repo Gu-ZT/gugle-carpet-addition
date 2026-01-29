@@ -3,7 +3,6 @@ package dev.dubhe.gugle.carpet.tools;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 //#if MC >= 12105
 //$$ import net.minecraft.world.entity.EquipmentSlot;
@@ -11,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 //#endif
 
 public class InventoryUtil {
-    public static @NotNull NonNullList<ItemStack> getItems(@NotNull Player player) {
+    public static NonNullList<ItemStack> getItems(Player player) {
         //#if MC < 12105
         return player.getInventory().items;
         //#else
@@ -19,7 +18,7 @@ public class InventoryUtil {
         //#endif
     }
 
-    public static @NotNull NonNullList<ItemStack> getArmor(@NotNull Player player) {
+    public static NonNullList<ItemStack> getArmor(Player player) {
         //#if MC < 12105
         return player.getInventory().armor;
         //#else
@@ -33,7 +32,7 @@ public class InventoryUtil {
         //$$     ItemStack.EMPTY
         //$$ ) {
         //$$     @Override
-        //$$     public @NotNull ItemStack get(int index) {
+        //$$     public ItemStack get(int index) {
         //$$         return switch (index) {
         //$$             case 3 -> player.getItemBySlot(EquipmentSlot.HEAD);
         //$$             case 2 -> player.getItemBySlot(EquipmentSlot.CHEST);
@@ -44,7 +43,7 @@ public class InventoryUtil {
         //$$     }
         //$$
         //$$     @Override
-        //$$     public @NotNull ItemStack set(int index, @NotNull ItemStack stack) {
+        //$$     public ItemStack set(int index, ItemStack stack) {
         //$$         switch (index) {
         //$$             case 3 -> player.setItemSlot(EquipmentSlot.HEAD, stack);
         //$$             case 2 -> player.setItemSlot(EquipmentSlot.CHEST, stack);
@@ -57,7 +56,7 @@ public class InventoryUtil {
         //#endif
     }
 
-    public static @NotNull NonNullList<ItemStack> getOffHand(@NotNull Player player) {
+    public static NonNullList<ItemStack> getOffHand(Player player) {
         //#if MC < 12105
         return player.getInventory().offhand;
         //#else
@@ -66,12 +65,12 @@ public class InventoryUtil {
         //$$     ItemStack.EMPTY
         //$$ ) {
         //$$     @Override
-        //$$     public @NotNull ItemStack get(int index) {
+        //$$     public ItemStack get(int index) {
         //$$         return index == 0 ? player.getItemBySlot(EquipmentSlot.OFFHAND) : ItemStack.EMPTY;
         //$$     }
         //$$
         //$$     @Override
-        //$$     public @NotNull ItemStack set(int index, @NotNull ItemStack stack) {
+        //$$     public ItemStack set(int index, ItemStack stack) {
         //$$         if (index == 0) {
         //$$             player.setItemSlot(EquipmentSlot.OFFHAND, stack);
         //$$         }
@@ -81,7 +80,7 @@ public class InventoryUtil {
         //#endif
     }
 
-    public static int getSelected(@NotNull Player player) {
+    public static int getSelected(Player player) {
         //#if MC < 12105
         return player.getInventory().selected;
         //#else
