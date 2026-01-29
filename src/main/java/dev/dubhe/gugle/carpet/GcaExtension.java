@@ -17,8 +17,8 @@ import dev.dubhe.gugle.carpet.commands.SopCommand;
 import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
-import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
@@ -164,6 +164,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     public void loadSavedPlayer(MinecraftServer server) {
         if (GcaSetting.fakePlayerResident) {
+            File oldFile = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.old.json").toFile();
             File file = server.getWorldPath(LevelResource.ROOT).resolve("fake_player.gca.json").toFile();
             if (!file.isFile()) {
                 return;
@@ -176,8 +177,12 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
             } catch (IOException e) {
                 GcaExtension.LOGGER.error(e.getMessage(), e);
             }
+            if (oldFile.isFile()) {
+                //noinspection ResultOfMethodCallIgnored
+                oldFile.delete();
+            }
             //noinspection ResultOfMethodCallIgnored
-            file.delete();
+            file.renameTo(oldFile);
         }
     }
 
