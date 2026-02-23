@@ -547,7 +547,7 @@ public class BotCommand {
                     if (!CarpetSettings.allowSpawningOfflinePlayers) return false;
                     gameprofile = new NameAndId(UUIDUtil.createOfflinePlayerUUID(username), username);
                 }
-                GameProfileHelper.fetchGameProfile(BOT_INFO.server, gameprofile.id())
+                GameProfileHelper.fetchGameProfile(BOT_INFO.server, gameprofile.name())
                     .thenAcceptAsync(
                         (current) -> {
                             if (worldIn == null) return;
@@ -570,6 +570,7 @@ public class BotCommand {
                                     instance,
                                     new CommonListenerCookie(current, 0, instance.clientInformation(), false)
                                 );
+                            EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
                             instance.teleportTo(
                                 worldIn,
                                 botInfo.pos.x,
@@ -592,9 +593,7 @@ public class BotCommand {
                                         (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))
                                     ), botInfo.dimType
                                 );
-                            EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
                             BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
-                            EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
                             instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
                             instance.getAbilities().flying = botInfo.flying;
                             FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);

@@ -64,15 +64,8 @@ import net.minecraft.server.level.ClientInformation;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-//#else
 //#endif
 
-//#if MC>=12109
-//$$ import net.minecraft.server.players.NameAndId;
-//#endif
-//#if MC>=12110
-//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
-//#endif
 
 public class BotCommand {
     public static final FilesUtil.MapFile<String, BotInfo> BOT_INFO = new FilesUtil.MapFile<>("bot", Object::toString, BotInfo.class);
@@ -543,42 +536,22 @@ public class BotCommand {
         boolean success = false;
         try {
             ServerLevel worldIn = BOT_INFO.server.getLevel(botInfo.dimType);
-            //#if MC<12109
             GameProfileCache.setUsesAuthentication(false);
             GameProfile gameprofile;
-            //#else
-            //$$ NameAndId gameprofile;
-            //#endif
             try {
                 GameProfileCache profileCache = GameProfileHelper.getProfileCache(BOT_INFO.server);
                 if (profileCache == null) {
                     gameprofile = null;
                 } else {
-                    //#if MC<12109
                     gameprofile = profileCache.get(username).orElse(null);
-                    //#else
-                    //$$ profileCache.resolveOfflineUsers(true);
-                    //$$ gameprofile = profileCache.get(username).orElse(null);
-                    //$$ profileCache.resolveOfflineUsers(BOT_INFO.server.isDedicatedServer() && BOT_INFO.server.usesAuthentication());
-                    //#endif
                 }
                 if (gameprofile == null) {
                     if (!CarpetSettings.allowSpawningOfflinePlayers) return false;
-                    //#if MC<12109
                     gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username);
-                    //#else
-                    //$$ gameprofile = new NameAndId(UUIDUtil.createOfflinePlayerUUID(username), username);
-                    //#endif
                 }
                 //#if MC>=12100
-                    //#if MC<12109
                     GameProfile finalGameprofile = gameprofile;
-                    //#endif
-                    //#if MC<12109
                     SkullBlockEntity.fetchGameProfile(gameprofile.getName())
-                    //#else
-                    //$$ GameProfileHelper.fetchGameProfile(BOT_INFO.server, gameprofile.id())
-                    //#endif
                         .thenAcceptAsync(
                             (p) -> {
                                 //#if MC<12109
@@ -657,9 +630,7 @@ public class BotCommand {
                 //#endif
                 success = true;
             } finally {
-                //#if MC<12109
                 GameProfileCache.setUsesAuthentication(BOT_INFO.server.isDedicatedServer() && BOT_INFO.server.usesAuthentication());
-                //#endif
             }
         } catch (Exception e) {
             GcaExtension.LOGGER.error(e.getMessage(), e);
@@ -682,20 +653,12 @@ public class BotCommand {
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
             source.sendFailure(Component.literal("%s is not a fake player.".formatted(
-                //#if MC<12109
                 p.getGameProfile().getName()
-                //#else
-                //$$ p.getGameProfile().name()
-                //#endif
             )));
             return 0;
         }
         String name =
-            //#if MC<12109
             player.getGameProfile().getName();
-            //#else
-            //$$ player.getGameProfile().name();
-            //#endif
         if (BOT_INFO.map.containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
