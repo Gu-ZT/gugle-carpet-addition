@@ -1,45 +1,113 @@
 package dev.dubhe.gugle.carpet.config;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.entry.IWithName;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class GcaConfig {
+public class GcaConfig<T extends IWithName> {
+    public static final Map<String, GcaConfig<?>> CONFIGS = new LinkedHashMap<>();
+
+    private final Map<String, T> contents = new LinkedHashMap<>();
     private MinecraftServer server;
     private final String filename;
+    private final Codec<Map<String, T>> codec;
 
-    public GcaConfig(String name) {
-        this.filename = name + ".gca.json";
+    private GcaConfig(String name, Codec<T> codec) {
+        this.filename = name + ".json";
+        this.codec = Codec.unboundedMap(Codec.STRING, codec);
     }
 
-    public void init(CommandContext<CommandSourceStack> context) {
+    @SuppressWarnings("unchecked")
+    public static <T extends IWithName> GcaConfig<T> create(String name, Codec<T> codec) {
+        return (GcaConfig<T>) CONFIGS.computeIfAbsent(name, key -> new GcaConfig<>(name, codec));
+    }
+
+    public void update(T value) {
+        this.contents.put(value.name(), value);
+        this.setDirty();
+    }
+
+    public void remove(String name) {
+        if (!this.contents.containsKey(name)) return;
+        this.contents.remove(name);
+        this.setDirty();
+    }
+
+    public Map<String, T> getContents() {
+        return this.contents;
+    }
+
+    public void tryInit(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = context.getSource().getServer();
-        this.init(server);
+        this.tryInit(server);
     }
 
-    public void init(MinecraftServer server) {
+    public void tryInit(MinecraftServer server) {
         if (server == this.server) return;
         this.server = server;
-        File file = this.server.getWorldPath(LevelResource.ROOT).resolve(this.filename).toFile();
-//        try {
-//            if (!file.exists()) {
-//                this.createDefault(file);
-//                return;
-//            }
-//            try (BufferedReader bfr = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
-//                this.init(bfr);
-//            }
-//        } catch (IOException e) {
-//            GcaExtension.LOGGER.error(e.getMessage(), e);
-//        }
+        this.contents.clear();
 
+        Path path = this.server.getWorldPath(LevelResource.ROOT)
+            .resolve("serverconfig")
+            .resolve(GcaExtension.MOD_ID)
+            .resolve(this.filename);
+
+        try {
+            String json = this.getOrCreateFile(path);
+            this.codec.parse(JsonOps.INSTANCE, JsonParser.parseString(json))
+                .result()
+                .ifPresent(this.contents::putAll);
+        } catch (IOException e) {
+            GcaExtension.LOGGER.error("Failed to create config file: {}", this.filename, e);
+        }
+    }
+
+    public String getOrCreateFile(Path path) throws IOException {
+        File file = path.toFile();
+        if (!file.exists() || !file.isFile()) {
+            file.getParentFile().mkdirs();
+            Files.writeString(path, "{}", StandardCharsets.UTF_8);
+            return "{}";
+        }
+        return Files.readString(file.toPath(), StandardCharsets.UTF_8);
+    }
+
+    public void setDirty() {
+        if (this.server == null) return;
+
+        Path path = this.server.getWorldPath(LevelResource.ROOT)
+            .resolve("serverconfig")
+            .resolve(GcaExtension.MOD_ID)
+            .resolve(this.filename);
+
+        try {
+            path.toFile().getParentFile().mkdirs();
+            DataResult<JsonElement> result = this.codec.encodeStart(JsonOps.INSTANCE, this.contents);
+            if (result.error().isPresent()) {
+                GcaExtension.LOGGER.error("Failed to encode config: {}", result.error().get().message());
+                return;
+            }
+
+            JsonElement json = result.result().orElseThrow();
+            Files.writeString(path, GcaExtension.GSON.toJson(json), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            GcaExtension.LOGGER.error("Failed to save config file: {}", this.filename, e);
+        }
     }
 }

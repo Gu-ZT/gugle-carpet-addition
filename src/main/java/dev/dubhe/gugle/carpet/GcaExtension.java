@@ -17,6 +17,7 @@ import dev.dubhe.gugle.carpet.commands.SopCommand;
 import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
@@ -111,8 +112,10 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onServerLoaded(MinecraftServer server) {
+        GcaConfig.CONFIGS.values().forEach(it -> it.tryInit(server));
+
         BlistCommand.PERMISSION.init(server);
-        BotCommand.BOT_INFO.init(server);
+        BotCommand.BOT_CONFIG.tryInit(server);
         LocCommand.LOC_POINT.init(server);
         TodoCommand.TODO.init(server);
         WlistCommand.PERMISSION.init(server);

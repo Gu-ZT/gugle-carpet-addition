@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Function;
 
+@Deprecated
 public abstract class FilesUtil {
     private static final Gson GSON = GcaExtension.GSON;
     public MinecraftServer server = null;
