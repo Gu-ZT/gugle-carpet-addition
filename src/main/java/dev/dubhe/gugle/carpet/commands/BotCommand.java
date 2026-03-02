@@ -7,6 +7,7 @@ import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import carpet.utils.CommandHelper;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -39,21 +40,18 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-//#if MC>=12102
-//$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
-//$$ import java.util.Set;
-//#endif
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.PlayerList;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import org.jetbrains.annotations.Nullable;
 
 //#if MC>=12100
 import net.minecraft.server.network.CommonListenerCookie;
@@ -63,6 +61,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 //#endif
 
+//#if MC>=12102
+//$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
+//$$ import java.util.Set;
+//#endif
 
 public class BotCommand {
     public static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
@@ -197,283 +199,209 @@ public class BotCommand {
         );
     }
 
-    private static void initConfig(CommandContext<CommandSourceStack> context) {
+    private static void tryInit(CommandContext<CommandSourceStack> context) {
         BOT_CONFIG.tryInit(context);
         BOT_GROUP_CONFIG.tryInit(context);
     }
 
-    private static boolean groupInit(CommandContext<CommandSourceStack> context) {
-        initConfig(context);
-        CommandSourceStack source = context.getSource();
-        String groupName = StringArgumentType.getString(context, "group");
-        Map<String, BotGroupInfo> groupContents = BOT_GROUP_CONFIG.getContents();
-        Set<String> botContents = BOT_CONFIG.getContents().keySet();
-        BotGroupInfo groupInfo = groupContents.get(groupName);
-        if (groupInfo == null) {
-            source.sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
-            return true;
-        }
-        List<String> botNames = groupInfo.bots().stream().filter(botContents::contains).toList();
-        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, botNames));
-        return false;
-    }
-
-    private static boolean groupInit(CommandContext<CommandSourceStack> context, String groupName) {
-        initConfig(context);
-        Map<String, BotGroupInfo> groupContents = BOT_GROUP_CONFIG.getContents();
-        Set<String> botContents = BOT_CONFIG.getContents().keySet();
-        BotGroupInfo groupInfo = groupContents.get(groupName);
+    @Nullable
+    private static GroupNode getGroupNode(CommandContext<CommandSourceStack> context, String groupName) {
+        tryInit(context);
+        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
+        BotGroupInfo groupInfo = BOT_GROUP_CONFIG.getContents().get(groupName);
         if (groupInfo == null) {
             context.getSource().sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
-            return true;
+            return null;
         }
-        List<String> botNames = groupInfo.bots().stream().filter(botContents::contains).toList();
-        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, botNames));
-        return false;
+        List<BotInfo> bots = groupInfo.bots().stream()
+            .map(botContents::get)
+            .filter(Objects::nonNull)
+            .toList();
+        if (bots.size() != groupInfo.bots().size()) {
+            BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots.stream().map(BotInfo::name).toList()));
+        }
+        return new GroupNode(groupInfo, bots);
+    }
+
+    private static int getPage(CommandContext<CommandSourceStack> context) {
+        try {
+            return IntegerArgumentType.getInteger(context, "page");
+        } catch (IllegalArgumentException ignored) {
+            return 1;
+        }
     }
 
     private static int groupInfo(CommandContext<CommandSourceStack> context) {
         String groupName = StringArgumentType.getString(context, "group");
-        if (groupInit(context)) return 0;
-        int page;
-        try {
-            page = IntegerArgumentType.getInteger(context, "page");
-        } catch (IllegalArgumentException ignored) {
-            page = 1;
-        }
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
         final int pageSize = 8;
-        int size = BOT_GROUP_CONFIG.map.get(groupName).bots().size();
+        int page = getPage(context);
+        int size = group.bots().size();
         int maxPage = size / pageSize + 1;
         if (page > maxPage) {
             context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
             return 0;
-        }
-        ArrayList<BotInfo> botInfos = new ArrayList<>();
-        for (String botName : BOT_GROUP_CONFIG.map.get(groupName).bots()) {
-            botInfos.add(BOT_CONFIG.map.get(botName));
         }
         context.getSource().sendSystemMessage(
             Component.literal("======= Bot Group %s (Page %s/%s) =======".formatted(groupName, page, maxPage))
                 .withStyle(ChatFormatting.YELLOW)
         );
         for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botToComponent(botInfos.get(i)));
+            context.getSource().sendSystemMessage(botToComponent(group.bots.get(i)));
         }
         listComponent(context, page, maxPage, "/bot group show");
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupUnloadBot(CommandContext<CommandSourceStack> context) {
         String groupName = StringArgumentType.getString(context, "group");
-        if (groupInit(context)) return 0;
-        CommandSourceStack source = context.getSource();
-        List<String> botNames = BOT_GROUP_CONFIG.map.get(groupName).bots();
-        for (String botName : botNames) {
-            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(botName);
-            if (player == null) continue;
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        PlayerList players = context.getSource().getServer().getPlayerList();
+        for (BotInfo bot : group.bots) {
+            ServerPlayer player = players.getPlayerByName(bot.name());
             if (!(player instanceof EntityPlayerMPFake fake)) continue;
             fake.kill(Component.literal("Killed"));
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupLoadBot(CommandContext<CommandSourceStack> context) {
-        initConfig(context);
-        CommandSourceStack source = context.getSource();
         String groupName = StringArgumentType.getString(context, "group");
-        if (!BOT_GROUP_CONFIG.map.containsKey(groupName)) {
-            source.sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
-            return 0;
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        CommandSourceStack source = context.getSource();
+        for (BotInfo bot : group.bots) {
+            load(source, bot);
         }
-        List<String> botNames = BOT_GROUP_CONFIG.map.get(groupName).bots();
-        List<String> failedBots = new ArrayList<>();
-        for (String botName : new ArrayList<>(botNames)) {
-            if (!BOT_CONFIG.map.containsKey(botName)) {
-                failedBots.add(botName);
-                continue;
-            }
-            load(botName, source::sendFailure);
-        }
-        botNames.removeAll(failedBots);
-        BOT_GROUP_CONFIG.map.put(
-            groupName,
-            new BotGroupInfo(groupName, botNames)
-        );
-        BOT_GROUP_CONFIG.save();
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupRemoveBot(CommandContext<CommandSourceStack> context) {
-        BOT_GROUP_CONFIG.tryInit(context);
-        CommandSourceStack source = context.getSource();
         String groupName = StringArgumentType.getString(context, "group");
         String botName = StringArgumentType.getString(context, "bot");
-        if (!BOT_GROUP_CONFIG.map.containsKey(groupName)) {
-            source.sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
-            return 0;
-        }
-        List<String> botNames = BOT_GROUP_CONFIG.map.get(groupName).bots();
-        if (!botNames.contains(botName)) {
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        CommandSourceStack source = context.getSource();
+        List<String> bots = group.group.bots();
+        if (!bots.remove(botName)) {
             source.sendFailure(Component.literal("Bot %s is not found in the %s.".formatted(botName, groupName)));
             return 0;
         }
-        botNames.remove(botName);
-        BotCommand.BOT_GROUP_CONFIG.map.put(
-            groupName,
-            new BotGroupInfo(
-                groupName,
-                botNames
-            )
-        );
-        BOT_GROUP_CONFIG.save();
+        BOT_GROUP_CONFIG.update(group.group);
         source.sendSuccess(() -> Component.literal("Bot %s is removed from %s successfully.".formatted(botName, groupName)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupAddBot(CommandContext<CommandSourceStack> context) {
-        BOT_GROUP_CONFIG.tryInit(context);
-        BOT_CONFIG.tryInit(context);
-        CommandSourceStack source = context.getSource();
         String groupName = StringArgumentType.getString(context, "group");
         String botName = StringArgumentType.getString(context, "bot");
-        if (!BOT_CONFIG.map.containsKey(botName)) {
-            source.sendFailure(Component.literal("Bot %s is not found.".formatted(botName)));
-            return 0;
-        }
-        if (!BOT_GROUP_CONFIG.map.containsKey(groupName)) {
-            source.sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
-            return 0;
-        }
-        List<String> botNames = BOT_GROUP_CONFIG.map.get(groupName).bots();
-        if (botNames.contains(botName)) {
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        CommandSourceStack source = context.getSource();
+        List<String> bots = group.group.bots();
+        if (bots.contains(botName)) {
             source.sendFailure(Component.literal("Bot %s is already added.".formatted(botName)));
             return 0;
         }
-        botNames.add(botName);
-        BotCommand.BOT_GROUP_CONFIG.map.put(
-            groupName,
-            new BotGroupInfo(
-                groupName,
-                botNames
-            )
-        );
-        BOT_GROUP_CONFIG.save();
+        bots.add(botName);
+        BOT_GROUP_CONFIG.update(group.group);
         source.sendSuccess(() -> Component.literal("Bot %s is added to %s successfully.".formatted(botName, groupName)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupGenerated(CommandContext<CommandSourceStack> context) {
-        BOT_CONFIG.tryInit(context);
-        BOT_GROUP_CONFIG.tryInit(context);
-        CommandSourceStack source = context.getSource();
+        tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         int groupCount = IntegerArgumentType.getInteger(context, "count");
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
-        if (BOT_GROUP_CONFIG.map.containsKey(groupName)) {
+        CommandSourceStack source = context.getSource();
+        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
             source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
             return 0;
         }
-        BotGroupInfo groupInfo = new BotGroupInfo(groupName, new ArrayList<>());
-        BOT_GROUP_CONFIG.map.put(groupName, groupInfo);
         ServerPlayer player = source.getPlayer();
         if (player == null) {
             source.sendFailure(Component.literal("Command source must be player."));
             return 0;
         }
-        int result = 0;
+
+        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
+        List<BotInfo> bots = new ArrayList<>();
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
-            if (BOT_CONFIG.map.containsKey(botName)) {
+            if (botContents.containsKey(botName)) {
                 source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
                 continue;
             }
-            BotCommand.BOT_CONFIG.map.put(
+            BotInfo bot = new BotInfo(
                 botName,
-                new BotInfo(
-                    botName,
-                    botName,
-                    player.position(),
-                    player.getRotationVector(),
-                    player.level().dimension(),
-                    player.gameMode.getGameModeForPlayer(),
-                    player.getAbilities().flying,
-                    FakePlayerSerializer.actionPackToJson(new EntityPlayerActionPack(player))
-                )
+                botName,
+                player.position(),
+                player.getRotationVector(),
+                player.level().dimension(),
+                player.gameMode.getGameModeForPlayer(),
+                player.getAbilities().flying,
+                FakePlayerSerializer.actionPackToJson(new EntityPlayerActionPack(player))
             );
-            List<String> botNames = groupInfo.bots();
-            botNames.add(botName);
-            result++;
+            BOT_CONFIG.update(bot, false);
+            bots.add(bot);
         }
-        BOT_CONFIG.save();
-        BOT_GROUP_CONFIG.save();
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots.stream().map(BotInfo::name).toList()));
         if (groupLoad) {
-            List<String> botNames = groupInfo.bots();
-            for (String botName : new ArrayList<>(botNames)) {
-                if (!BOT_CONFIG.map.containsKey(botName)) {
-                    continue;
-                }
-                load(botName, source::sendFailure);
+            for (BotInfo bot : bots) {
+                load(source, bot);
             }
         }
         source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
-        return result;
+        return bots.size();
     }
 
     private static int groupCreate(CommandContext<CommandSourceStack> context) {
-        BOT_GROUP_CONFIG.tryInit(context);
-        CommandSourceStack source = context.getSource();
+        tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
-        if (BOT_GROUP_CONFIG.map.containsKey(groupName)) {
+        CommandSourceStack source = context.getSource();
+        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
             source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
             return 0;
         }
-        BOT_GROUP_CONFIG.map.put(
-            groupName,
-            new BotGroupInfo(groupName, new ArrayList<>())
-        );
-        BOT_GROUP_CONFIG.save();
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
         source.sendSuccess(() -> Component.literal("Group %s created successfully.".formatted(groupName)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupRemove(CommandContext<CommandSourceStack> context) {
-        BOT_GROUP_CONFIG.tryInit(context);
-        String name = StringArgumentType.getString(context, "name");
-        BotGroupInfo remove = BotCommand.BOT_GROUP_CONFIG.map.remove(name);
-        if (remove == null) {
-            context.getSource().sendFailure(Component.literal("Bot Group %s is not exist.".formatted(name)));
+        tryInit(context);
+        String groupName = StringArgumentType.getString(context, "name");
+        if (BOT_GROUP_CONFIG.remove(groupName) == null) {
+            context.getSource().sendFailure(Component.literal("Bot Group %s is not exist.".formatted(groupName)));
             return 0;
         }
-        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(name)), false);
-        BOT_GROUP_CONFIG.save();
-        return 1;
+        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(groupName)), false);
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int groupList(CommandContext<CommandSourceStack> context) {
-        BOT_GROUP_CONFIG.tryInit(context);
-        int page;
-        try {
-            page = IntegerArgumentType.getInteger(context, "page");
-        } catch (IllegalArgumentException ignored) {
-            page = 1;
-        }
+        tryInit(context);
+        List<BotGroupInfo> groupInfos = BOT_GROUP_CONFIG.getContents().values().stream().toList();
         final int pageSize = 8;
-        int size = BOT_GROUP_CONFIG.map.size();
+        int page = getPage(context);
+        int size = groupInfos.size();
         int maxPage = size / pageSize + 1;
         if (page > maxPage) {
             context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
             return 0;
         }
-        BotGroupInfo[] botGroupInfos = BOT_GROUP_CONFIG.map.values().toArray(new BotGroupInfo[0]);
         context.getSource().sendSystemMessage(
             Component.literal("======= Bot Group List (Page %s/%s) =======".formatted(page, maxPage))
                 .withStyle(ChatFormatting.YELLOW)
         );
         for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botGroupToComponent(botGroupInfos[i]));
+            context.getSource().sendSystemMessage(botGroupToComponent(groupInfos.get(i)));
         }
         listComponent(context, page, maxPage, "/bot group list");
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static MutableComponent botGroupToComponent(BotGroupInfo botGroupInfo) {
@@ -525,132 +453,131 @@ public class BotCommand {
         return component.append(" ").append(delete);
     }
 
-    private static boolean load(String username, Consumer<Component> failure) {
-        if (BOT_CONFIG.server.getPlayerList().getPlayerByName(username) != null) {
-            failure.accept(Component.literal("player %s is already exist.".formatted(username)));
+    private static boolean load(CommandSourceStack source, @Nullable BotInfo bot) {
+        if (bot == null) {
+            source.sendFailure(Component.literal("%s is not exist."));
             return false;
         }
-        BotInfo botInfo = BOT_CONFIG.map.getOrDefault(username, null);
-        if (botInfo == null) {
-            failure.accept(Component.literal("%s is not exist."));
+
+        if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
+            source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
             return false;
         }
-        boolean success = false;
+        source.getServer().getLevel(bot.dimType());
         try {
-            ServerLevel worldIn = BOT_CONFIG.server.getLevel(botInfo.dimType());
+            ServerLevel worldIn = source.getServer().getLevel(bot.dimType());
             GameProfileCache.setUsesAuthentication(false);
-            GameProfile gameprofile;
             try {
-                GameProfileCache profileCache = GameProfileHelper.getProfileCache(BOT_CONFIG.server);
-                if (profileCache == null) {
-                    gameprofile = null;
-                } else {
-                    gameprofile = profileCache.get(username).orElse(null);
-                }
-                if (gameprofile == null) {
-                    if (!CarpetSettings.allowSpawningOfflinePlayers) return false;
-                    gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(username), username);
-                }
+                GameProfileCache profileCache = GameProfileHelper.getProfileCache(source.getServer());
+                GameProfile gameprofile = getGameProfile(profileCache, bot.name());
+                if (gameprofile == null) return false;
                 //#if MC>=12100
-                    GameProfile finalGameprofile = gameprofile;
-                    SkullBlockEntity.fetchGameProfile(gameprofile.getName())
-                        .thenAcceptAsync(
-                            (p) -> {
-                                //#if MC<12109
-                                GameProfile current = finalGameprofile;
-                                if (p.isPresent()) {
-                                    current = p.get();
-                                }
-                                //#else
-                                //$$ GameProfile current = p;
-                                //#endif
-                                if (worldIn == null) return;
-                                EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(
-                                    BOT_CONFIG.server,
-                                    worldIn,
-                                    current,
-                                    ClientInformation.createDefault()
+                SkullBlockEntity.fetchGameProfile(gameprofile.getName())
+                    .thenAcceptAsync(
+                        (p) -> {
+                            //#if MC<12109
+                            GameProfile current = gameprofile;
+                            if (p.isPresent()) {
+                                current = p.get();
+                            }
+                            //#else
+                            //$$ GameProfile current = p;
+                            //#endif
+                            if (worldIn == null) return;
+                            EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(
+                                source.getServer(),
+                                worldIn,
+                                current,
+                                ClientInformation.createDefault()
+                            );
+                            instance.fixStartingPosition = () -> instance.moveTo(
+                                bot.pos().x,
+                                bot.pos().y,
+                                bot.pos().z,
+                                bot.facing().y,
+                                bot.facing().x
+                            );
+                            source.getServer().getPlayerList()
+                                .placeNewPlayer(
+                                    new FakeClientConnection(PacketFlow.SERVERBOUND),
+                                    instance,
+                                    new CommonListenerCookie(current, 0, instance.clientInformation(), false)
                                 );
-                                instance.fixStartingPosition = () -> instance.moveTo(
-                                    botInfo.pos().x,
-                                    botInfo.pos().y,
-                                    botInfo.pos().z,
-                                    botInfo.facing().y,
-                                    botInfo.facing().x
-                                );
-                                BOT_CONFIG.server.getPlayerList()
-                                    .placeNewPlayer(
-                                        new FakeClientConnection(PacketFlow.SERVERBOUND),
+                            //#if MC>=12102
+                            //$$ instance.teleportTo(worldIn, bot.pos().x, bot.pos().y, bot.pos().z, Set.of(), bot.facing().y, bot.facing().x, true);
+                            //#else
+                            instance.teleportTo(worldIn, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
+                            //#endif
+                            instance.setHealth(20.0F);
+                            ((EntityInvoker) instance).invokeUnsetRemoved();
+                            AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
+                            if (attribute != null) attribute.setBaseValue(0.6000000238418579);
+                            instance.gameMode.changeGameModeForPlayer(bot.mode());
+                            source.getServer().getPlayerList()
+                                .broadcastAll(
+                                    new ClientboundRotateHeadPacket(
                                         instance,
-                                        new CommonListenerCookie(current, 0, instance.clientInformation(), false)
-                                    );
-                                //#if MC>=12102
-                                //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, Set.of(), botInfo.facing.y, botInfo.facing.x, true);
-                                //#else
-                                instance.teleportTo(worldIn, botInfo.pos().x, botInfo.pos().y, botInfo.pos().z, botInfo.facing().y, botInfo.facing().x);
-                                //#endif
-                                instance.setHealth(20.0F);
-                                ((EntityInvoker) instance).invokeUnsetRemoved();
-                                AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
-                                if (attribute != null) attribute.setBaseValue(0.6000000238418579);
-                                instance.gameMode.changeGameModeForPlayer(botInfo.mode());
-                                BOT_CONFIG.server.getPlayerList()
-                                    .broadcastAll(
-                                        new ClientboundRotateHeadPacket(
-                                            instance,
-                                            (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))
-                                        ), botInfo.dimType()
-                                    );
-                                //#if MC>=12102
-                                //$$ BOT_INFO.server.getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), botInfo.dimType);
-                                //#else
-                                BOT_CONFIG.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType());
-                                //#endif
-                                //#if MC>=12110
-                                //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
-                                //#endif
-                                instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
-                                instance.getAbilities().flying = botInfo.flying();
-                                FakePlayerSerializer.applyActionPackFromJson(botInfo.actions(), instance);
-                            }, BOT_CONFIG.server
-                        );
+                                        (byte) ((int) (instance.yHeadRot * 256.0F / 360.0F))
+                                    ), bot.dimType()
+                                );
+                            //#if MC>=12102
+                            //$$ source.getServer().getPlayerList().broadcastAll(ClientboundEntityPositionSyncPacket.of(instance), bot.dimType());
+                            //#else
+                            source.getServer().getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), bot.dimType());
+                            //#endif
+                            //#if MC>=12110
+                            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
+                            //#endif
+                            instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
+                            instance.getAbilities().flying = bot.flying();
+                            FakePlayerSerializer.applyActionPackFromJson(bot.actions(), instance);
+                        }, source.getServer()
+                    );
                 //#else
                 //$$ if (worldIn == null) return false;
-                //$$ EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(BOT_INFO.server, worldIn, gameprofile);
-                //$$ instance.fixStartingPosition = () -> instance.moveTo(botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
-                //$$ BOT_INFO.server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
-                //$$ instance.teleportTo(worldIn, botInfo.pos.x, botInfo.pos.y, botInfo.pos.z, botInfo.facing.y, botInfo.facing.x);
+                //$$ EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(source.getServer(), worldIn, gameprofile);
+                //$$ instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
+                //$$ source.getServer().getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
+                //$$ instance.teleportTo(worldIn, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
                 //$$ instance.setHealth(20.0F);
                 //$$ ((EntityInvoker) instance).invokeUnsetRemoved();
                 //$$ instance.setMaxUpStep(0.6F);
-                //$$ instance.gameMode.changeGameModeForPlayer(botInfo.mode);
-                //$$ BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte)((int)(instance.yHeadRot * 256.0F / 360.0F))), botInfo.dimType);
-                //$$ BOT_INFO.server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), botInfo.dimType);
+                //$$ instance.gameMode.changeGameModeForPlayer(bot.mode());
+                //$$ source.getServer().getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte)((int)(instance.yHeadRot * 256.0F / 360.0F))), bot.dimType());
+                //$$ source.getServer().getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), bot.dimType());
                 //$$ instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte)127);
-                //$$ instance.getAbilities().flying = botInfo.flying;
-                //$$ FakePlayerSerializer.applyActionPackFromJson(botInfo.actions, instance);
+                //$$ instance.getAbilities().flying = bot.flying();
+                //$$ FakePlayerSerializer.applyActionPackFromJson(bot.actions(), instance);
                 //#endif
-                success = true;
             } finally {
-                GameProfileCache.setUsesAuthentication(BOT_CONFIG.server.isDedicatedServer() && BOT_CONFIG.server.usesAuthentication());
+                GameProfileCache.setUsesAuthentication(source.getServer().isDedicatedServer() && source.getServer().usesAuthentication());
             }
+            return true;
         } catch (Exception e) {
-            GcaExtension.LOGGER.error(e.getMessage(), e);
+            GcaExtension.LOGGER.error("Failed to load bot: {}", bot.name(), e);
+            source.sendFailure(Component.literal("%s is not loaded.".formatted(bot.name())));
+            return false;
         }
-        if (!success) failure.accept(Component.literal("%s is not loaded.".formatted(username)));
-        return success;
+    }
+
+    @Nullable
+    private static GameProfile getGameProfile(@Nullable GameProfileCache cache, String name) {
+        GameProfile gameprofile = cache == null ? null : cache.get(name).orElse(null);
+        if (gameprofile == null && CarpetSettings.allowSpawningOfflinePlayers) {
+            gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
+        }
+        return gameprofile;
     }
 
     private static int load(CommandContext<CommandSourceStack> context) {
-        BOT_CONFIG.tryInit(context);
-        CommandSourceStack source = context.getSource();
+        tryInit(context);
         String name = StringArgumentType.getString(context, "player");
-        boolean success = load(name, source::sendFailure);
-        return success ? 1 : 0;
+        BotInfo bot = BOT_CONFIG.getContents().get(name);
+        return load(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
     }
 
     private static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        BOT_CONFIG.tryInit(context);
+        tryInit(context);
         CommandSourceStack source = context.getSource();
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
@@ -659,68 +586,56 @@ public class BotCommand {
             )));
             return 0;
         }
-        String name =
-            player.getGameProfile().getName();
-        if (BOT_CONFIG.map.containsKey(name)) {
+        String name = player.getGameProfile().getName();
+        if (BOT_CONFIG.getContents().containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
         }
-        BotCommand.BOT_CONFIG.map.put(
+        BOT_CONFIG.update(new BotInfo(
             name,
-            new BotInfo(
-                name,
-                StringArgumentType.getString(context, "desc"),
-                player.position(),
-                player.getRotationVector(),
-                player.level().dimension(),
-                player.gameMode.getGameModeForPlayer(),
-                player.getAbilities().flying,
-                FakePlayerSerializer.actionPackToJson(((ServerPlayerInterface) player).getActionPack())
-            )
-        );
-        BOT_CONFIG.save();
+            StringArgumentType.getString(context, "desc"),
+            player.position(),
+            player.getRotationVector(),
+            player.level().dimension(),
+            player.gameMode.getGameModeForPlayer(),
+            player.getAbilities().flying,
+            FakePlayerSerializer.actionPackToJson(((ServerPlayerInterface) player).getActionPack())
+        ));
         source.sendSuccess(() -> Component.literal("%s is added.".formatted(name)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int remove(CommandContext<CommandSourceStack> context) {
-        BOT_CONFIG.tryInit(context);
+        tryInit(context);
         String name = StringArgumentType.getString(context, "player");
-        BotInfo remove = BotCommand.BOT_CONFIG.map.remove(name);
-        if (remove == null) {
+        if (BOT_CONFIG.remove(name) == null) {
             context.getSource().sendFailure(Component.literal("Bot %s is not exist.".formatted(name)));
             return 0;
         }
         context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(name)), false);
-        BOT_CONFIG.save();
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static int list(CommandContext<CommandSourceStack> context) {
-        BOT_CONFIG.tryInit(context);
-        int page;
-        try {
-            page = IntegerArgumentType.getInteger(context, "page");
-        } catch (IllegalArgumentException ignored) {
-            page = 1;
-        }
+        tryInit(context);
+        List<BotInfo> bots = BOT_CONFIG.getContents().values().stream().toList();
         final int pageSize = 8;
-        int size = BOT_CONFIG.map.size();
+        int page = getPage(context);
+        int size = bots.size();
         int maxPage = size / pageSize + 1;
         if (page > maxPage) {
             context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
             return 0;
         }
-        BotInfo[] botInfos = BOT_CONFIG.map.values().toArray(new BotInfo[0]);
         context.getSource().sendSystemMessage(
             Component.literal("======= Bot List (Page %s/%s) =======".formatted(page, maxPage))
                 .withStyle(ChatFormatting.YELLOW)
         );
         for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botToComponent(botInfos[i]));
+            context.getSource().sendSystemMessage(botToComponent(bots.get(i)));
         }
         listComponent(context, page, maxPage, "/bot list");
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     private static MutableComponent botToComponent(BotInfo botInfo) {
@@ -729,7 +644,7 @@ public class BotCommand {
                 .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botInfo.name())))
         );
-        boolean notOnline = BOT_CONFIG.server.getPlayerList().getPlayerByName(botInfo.name()) == null;
+        boolean notOnline = BOT_CONFIG.getServer().getPlayerList().getPlayerByName(botInfo.name()) == null;
         MutableComponent load = Component.literal("[↑]").withStyle(
             Style.EMPTY
                 .applyFormat(notOnline ? ChatFormatting.GREEN : ChatFormatting.GRAY)
@@ -798,13 +713,16 @@ public class BotCommand {
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
-        return SharedSuggestionProvider.suggest(BOT_CONFIG.map.keySet(), builder);
+        return SharedSuggestionProvider.suggest(BOT_CONFIG.getContents().keySet(), builder);
     }
 
     private static CompletableFuture<Suggestions> suggestGroup(
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
-        return SharedSuggestionProvider.suggest(BOT_GROUP_CONFIG.map.keySet(), builder);
+        return SharedSuggestionProvider.suggest(BOT_GROUP_CONFIG.getContents().keySet(), builder);
+    }
+
+    record GroupNode(BotGroupInfo group, List<BotInfo> bots) {
     }
 }

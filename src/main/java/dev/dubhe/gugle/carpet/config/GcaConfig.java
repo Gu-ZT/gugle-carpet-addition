@@ -39,18 +39,27 @@ public class GcaConfig<T extends IWithName> {
     }
 
     public void update(T value) {
-        this.contents.put(value.name(), value);
-        this.setDirty();
+        this.update(value, true);
     }
 
-    public void remove(String name) {
-        if (!this.contents.containsKey(name)) return;
-        this.contents.remove(name);
+    public void update(T value, boolean dirty) {
+        this.contents.put(value.name(), value);
+        if (dirty) this.setDirty();
+    }
+
+    public T remove(String name) {
+        if (!this.contents.containsKey(name)) return null;
+        T removed = this.contents.remove(name);
         this.setDirty();
+        return removed;
     }
 
     public Map<String, T> getContents() {
         return this.contents;
+    }
+
+    public MinecraftServer getServer() {
+        return this.server;
     }
 
     public void tryInit(CommandContext<CommandSourceStack> context) {

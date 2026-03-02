@@ -115,7 +115,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         GcaConfig.CONFIGS.values().forEach(it -> it.tryInit(server));
 
         BlistCommand.PERMISSION.init(server);
-        BotCommand.BOT_CONFIG.tryInit(server);
         LocCommand.LOC_POINT.init(server);
         TodoCommand.TODO.init(server);
         WlistCommand.PERMISSION.init(server);
