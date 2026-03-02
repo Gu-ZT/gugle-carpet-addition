@@ -60,7 +60,6 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 //#endif
-
 //#if MC>=12102
 //$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 //$$ import java.util.Set;
@@ -476,10 +475,7 @@ public class BotCommand {
                     .thenAcceptAsync(
                         (p) -> {
                             //#if MC<12109
-                            GameProfile current = gameprofile;
-                            if (p.isPresent()) {
-                                current = p.get();
-                            }
+                            GameProfile current = p.orElse(gameprofile);
                             //#else
                             //$$ GameProfile current = p;
                             //#endif
