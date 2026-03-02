@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.entry;
 
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
@@ -17,7 +16,7 @@ public record BotInfo(
     String desc,
     Vec3 pos,
     Vec2 facing,
-    @SerializedName("dim_type") ResourceKey<Level> dimType,
+    ResourceKey<Level> dimType,
     GameType mode,
     boolean flying,
     JsonObject actions

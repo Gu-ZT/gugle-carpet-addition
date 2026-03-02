@@ -8,6 +8,8 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
@@ -19,6 +21,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -28,6 +31,9 @@ public class BlistCommand {
         "commands.ban.failed"));
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable(
         "commands.pardon.failed"));
+    private static final GcaConfig<NameBooleanInfo> BLACK_LIST_CONFIG = GcaConfig.create("blist", NameBooleanInfo.CODEC);
+
+
     public static final FilesUtil.MapFile<String, Boolean> PERMISSION = new FilesUtil.MapFile<>("blist", Object::toString, Boolean.class);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -62,7 +68,7 @@ public class BlistCommand {
                             Commands.argument("targets", GameProfileArgument.gameProfile())
                                 .executes(BlistCommand::add)
                                 .then(
-                                    Commands.argument("reson", StringArgumentType.greedyString())
+                                    Commands.argument("reason", StringArgumentType.greedyString())
                                         .executes(BlistCommand::add)
                                 )
                         )
@@ -84,10 +90,21 @@ public class BlistCommand {
         );
     }
 
+    @Nullable
+    public static Component getReason(CommandContext<CommandSourceStack> context) {
+        try {
+            return Component.literal(StringArgumentType.getString(context, "reason"));
+        } catch (IllegalArgumentException ignored) {
+        }
+        return null;
+    }
+
     public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList userBanList = source.getServer().getPlayerList().getBans();
         AtomicInteger i = new AtomicInteger();
+//        Component reason = getReason(context).getString();
+
         Component component = null;
         try {
             component = Component.literal(StringArgumentType.getString(context, "reson"));
