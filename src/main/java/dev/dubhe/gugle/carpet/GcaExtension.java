@@ -114,9 +114,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     public void onServerLoaded(MinecraftServer server) {
         GcaConfig.CONFIGS.values().forEach(it -> it.tryInit(server));
 
-        LocCommand.LOC_POINT.init(server);
-        TodoCommand.TODO.init(server);
-        WlistCommand.PERMISSION.init(server);
         WelcomeMessage.WELCOME_MESSAGE.init(server);
     }
 
