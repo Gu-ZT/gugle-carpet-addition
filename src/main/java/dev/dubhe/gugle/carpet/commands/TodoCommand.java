@@ -12,7 +12,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
-import dev.dubhe.gugle.carpet.tools.IdGenerator;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -83,7 +83,7 @@ public class TodoCommand {
     public static int add(CommandContext<CommandSourceStack> context) {
         TODO.init(context);
         CommandSourceStack source = context.getSource();
-        long id = IdGenerator.nextId();
+        long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
         TODO.map.put(id, new Todo(id, desc, false));
         TODO.save();

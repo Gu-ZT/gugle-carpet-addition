@@ -24,11 +24,11 @@ public record BotInfo(
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
         Codec.STRING.fieldOf("desc").forGetter(BotInfo::desc),
-        Vec3.CODEC.fieldOf("pos").forGetter(bot -> bot.pos),
-        CustomCodec.VEC2_CODEC.fieldOf("facing").forGetter(bot -> bot.facing),
+        Vec3.CODEC.fieldOf("pos").forGetter(BotInfo::pos),
+        CustomCodec.VEC2_CODEC.fieldOf("facing").forGetter(BotInfo::facing),
         ResourceKey.codec(Registries.DIMENSION).fieldOf("dim_type").forGetter(BotInfo::dimType),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
-        CustomCodec.JSON_CODEC.fieldOf("actions").forGetter(bot -> bot.actions)
+        CustomCodec.JSON_CODEC.fieldOf("actions").forGetter(BotInfo::actions)
     ).apply(instance, BotInfo::new));
 }
