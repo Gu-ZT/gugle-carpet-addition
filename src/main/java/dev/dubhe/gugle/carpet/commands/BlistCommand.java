@@ -89,11 +89,10 @@ public class BlistCommand {
     }
 
     @Nullable
-    public static String getReason(CommandContext<CommandSourceStack> context) {
+    private static String getReason(CommandContext<CommandSourceStack> context) {
         try {
             return StringArgumentType.getString(context, "reason");
-        } catch (IllegalArgumentException ignored) {
-        }
+        } catch (IllegalArgumentException ignored) { }
         return null;
     }
 
