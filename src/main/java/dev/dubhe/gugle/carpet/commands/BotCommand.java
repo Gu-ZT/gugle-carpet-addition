@@ -17,8 +17,8 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
+import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
-import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
@@ -204,22 +204,16 @@ public class BotCommand {
         String groupName = StringArgumentType.getString(context, "group");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
-        final int pageSize = 8;
-        int page = CommandUtil.getPage(context);
-        int size = group.bots().size();
-        int maxPage = size / pageSize + 1;
-        if (page > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
-            return 0;
-        }
+        PageInfo<BotInfo> page = PageInfo.of(context, group.bots);
+        if (page == null) return 0;
         context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group %s (Page %s/%s) =======".formatted(groupName, page, maxPage))
+            Component.literal("======= Bot Group %s (Page %s/%s) =======".formatted(groupName, page.pageNum(), page.maxPage()))
                 .withStyle(ChatFormatting.YELLOW)
         );
-        for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botToComponent(group.bots.get(i)));
+        for (BotInfo bot : page.page()) {
+            context.getSource().sendSystemMessage(botToComponent(bot));
         }
-        listComponent(context, page, maxPage, "/bot group show");
+        listComponent(context, page.pageNum(), page.maxPage(), "/bot group show");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -353,23 +347,16 @@ public class BotCommand {
 
     private static int groupList(CommandContext<CommandSourceStack> context) {
         tryInit(context);
-        List<BotGroupInfo> groupInfos = BOT_GROUP_CONFIG.getContents().values().stream().toList();
-        final int pageSize = 8;
-        int page = CommandUtil.getPage(context);
-        int size = groupInfos.size();
-        int maxPage = size / pageSize + 1;
-        if (page > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
-            return 0;
-        }
+        PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
+        if (page == null) return 0;
         context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group List (Page %s/%s) =======".formatted(page, maxPage))
+            Component.literal("======= Bot Group List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
                 .withStyle(ChatFormatting.YELLOW)
         );
-        for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botGroupToComponent(groupInfos.get(i)));
+        for (BotGroupInfo group : page.page()) {
+            context.getSource().sendSystemMessage(botGroupToComponent(group));
         }
-        listComponent(context, page, maxPage, "/bot group list");
+        listComponent(context, page.pageNum(), page.maxPage(), "/bot group list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -481,23 +468,16 @@ public class BotCommand {
 
     private static int list(CommandContext<CommandSourceStack> context) {
         tryInit(context);
-        List<BotInfo> bots = BOT_CONFIG.getContents().values().stream().toList();
-        final int pageSize = 8;
-        int page = CommandUtil.getPage(context);
-        int size = bots.size();
-        int maxPage = size / pageSize + 1;
-        if (page > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
-            return 0;
-        }
+        PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
+        if (page == null) return 0;
         context.getSource().sendSystemMessage(
-            Component.literal("======= Bot List (Page %s/%s) =======".formatted(page, maxPage))
+            Component.literal("======= Bot List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
                 .withStyle(ChatFormatting.YELLOW)
         );
-        for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(botToComponent(bots.get(i)));
+        for (BotInfo bot : page.page()) {
+            context.getSource().sendSystemMessage(botToComponent(bot));
         }
-        listComponent(context, page, maxPage, "/bot list");
+        listComponent(context, page.pageNum(), page.maxPage(), "/bot list");
         return Command.SINGLE_SUCCESS;
     }
 

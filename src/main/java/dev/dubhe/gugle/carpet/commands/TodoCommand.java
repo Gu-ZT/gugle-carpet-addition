@@ -27,6 +27,8 @@ import net.minecraft.network.chat.Style;
 import java.util.concurrent.CompletableFuture;
 
 public class TodoCommand {
+
+
     public static final FilesUtil.MapFile<Long, Todo> TODO = new FilesUtil.MapFile<>("todo", Long::decode, Todo.class);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -214,7 +216,6 @@ public class TodoCommand {
             .append(" ").append(todo.success ? unSuccess : success)
             .append(" ").append(remove);
     }
-
 
     public static class Todo {
         public final Long id;

@@ -2,7 +2,6 @@ package dev.dubhe.gugle.carpet.entry;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import dev.dubhe.gugle.carpet.util.CommandUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
