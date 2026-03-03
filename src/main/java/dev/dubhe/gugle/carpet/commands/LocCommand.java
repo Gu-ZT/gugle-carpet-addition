@@ -81,8 +81,7 @@ public class LocCommand {
         final SuggestionsBuilder builder
     ) {
         LOCATION_CONFIG.tryInit(context);
-        List<String> keys = LOCATION_CONFIG.getContents().keySet().stream().toList();
-        return SharedSuggestionProvider.suggest(keys, builder);
+        return SharedSuggestionProvider.suggest(LOCATION_CONFIG.getContents().keySet(), builder);
     }
 
     public static int add(CommandContext<CommandSourceStack> context) {
@@ -99,7 +98,7 @@ public class LocCommand {
 
     public static int remove(CommandContext<CommandSourceStack> context) {
         LOCATION_CONFIG.tryInit(context);
-        Long id = LongArgumentType.getLong(context, "id");
+        long id = LongArgumentType.getLong(context, "id");
         LocationInfo removed = LOCATION_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
             context.getSource().sendFailure(Component.literal("No such loc id %s".formatted(id)));
@@ -185,7 +184,7 @@ public class LocCommand {
 
     public static int info(CommandContext<CommandSourceStack> context) {
         LOCATION_CONFIG.tryInit(context);
-        Long id = LongArgumentType.getLong(context, "id");
+        long id = LongArgumentType.getLong(context, "id");
         LocationInfo location = LOCATION_CONFIG.getContents().get(String.valueOf(id));
         if (location == null) {
             context.getSource().sendFailure(Component.literal("No such loc id %s".formatted(id)));

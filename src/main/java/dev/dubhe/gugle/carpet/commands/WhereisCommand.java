@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -38,6 +39,6 @@ public class WhereisCommand {
         for (MutableComponent component : PosUtil.playerPos(player)) {
             context.getSource().sendSuccess(() -> component, false);
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 }

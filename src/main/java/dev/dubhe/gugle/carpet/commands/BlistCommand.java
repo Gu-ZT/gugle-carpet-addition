@@ -31,6 +31,7 @@ public class BlistCommand {
         "commands.ban.failed"));
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable(
         "commands.pardon.failed"));
+
     private static final GcaConfig<NameBooleanInfo> BLIST_PERMISSION_CONFIG = GcaConfig.create("blist", NameBooleanInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

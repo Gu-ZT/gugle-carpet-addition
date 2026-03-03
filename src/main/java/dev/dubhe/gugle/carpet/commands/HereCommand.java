@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
@@ -33,6 +34,6 @@ public class HereCommand {
         for (MutableComponent component : PosUtil.playerPos(player)) {
             server.getPlayerList().broadcastSystemMessage(component, false);
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 }
