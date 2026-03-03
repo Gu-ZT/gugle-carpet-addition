@@ -18,13 +18,14 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
-import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
-import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
+import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
+import dev.dubhe.gugle.carpet.tools.ComponentUtils;
+import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -37,15 +38,17 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.PacketFlow;
-import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
-
-import java.util.Set;
-
+import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.CachedUserNameToIdResolver;
+import net.minecraft.server.players.NameAndId;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -53,16 +56,9 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-
-import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.level.ClientInformation;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
-
-import net.minecraft.server.players.NameAndId;
-import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 
 public class BotCommand {
     public static final FilesUtil.MapFile<String, BotInfo> BOT_INFO = new FilesUtil.MapFile<>("bot", Object::toString, BotInfo.class);
