@@ -11,9 +11,9 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
-import dev.dubhe.gugle.carpet.tools.IdGenerator;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import dev.dubhe.gugle.carpet.util.PosUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,7 +27,6 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +84,7 @@ public class LocCommand {
     public static int add(CommandContext<CommandSourceStack> context) {
         LOC_POINT.init(context);
         CommandSourceStack source = context.getSource();
-        long id = IdGenerator.nextId();
+        long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
         Vec3 pos = source.getPosition();
         ResourceKey<Level> dim = source.getLevel().dimension();

@@ -113,8 +113,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     @Override
     public void onServerLoaded(MinecraftServer server) {
         GcaConfig.CONFIGS.values().forEach(it -> it.tryInit(server));
-
-        WelcomeMessage.WELCOME_MESSAGE.init(server);
     }
 
     @Override
