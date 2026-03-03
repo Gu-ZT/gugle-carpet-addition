@@ -10,7 +10,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.tools.IdGenerator;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
@@ -154,7 +154,7 @@ public class TodoCommand {
                              Component.literal("<<<").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
                                          "/todo list " + (page - 1)
                                      ))
@@ -164,7 +164,7 @@ public class TodoCommand {
                              Component.literal(">>>").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
                                          "/todo list " + (page + 1)
                                      ))
@@ -189,25 +189,25 @@ public class TodoCommand {
             Style.EMPTY
                 .withStrikethrough(todo.success)
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(todo.id))))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(todo.id))))
         );
         MutableComponent success = Component.literal("[✔]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(todo.id)))
         );
         MutableComponent unSuccess = Component.literal("[❌]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(todo.id)))
         );
         MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove todo")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/todo remove %s".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove todo")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/todo remove %s".formatted(todo.id)))
         );
         return Component.literal(todo.success ? "☑" : "☐")
             .append(" ").append(component)

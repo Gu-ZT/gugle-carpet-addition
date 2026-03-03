@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.entity.player.Player;

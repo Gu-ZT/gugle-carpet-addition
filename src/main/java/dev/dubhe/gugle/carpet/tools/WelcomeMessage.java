@@ -9,6 +9,7 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -196,16 +197,16 @@ public class WelcomeMessage {
                 MutableComponent component1 = Component.literal(name);
                 Style style = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
                     .withHoverEvent(
-                        ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
+                        ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
                     );
                 //#if MC>=12100
                 style = style.withClickEvent(
                     host.contains(":") ?
-                    ComponentUtils.createClickEvent(
+                    ComponentUtil.createClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
                         "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])
                     ) :
-                    ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
+                    ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
                 );
                 //#else
                 //#endif

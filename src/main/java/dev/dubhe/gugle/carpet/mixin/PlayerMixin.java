@@ -4,10 +4,11 @@ import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
-import dev.dubhe.gugle.carpet.tools.*;
 import dev.dubhe.gugle.carpet.tools.player.IClientMenuTick;
 import dev.dubhe.gugle.carpet.tools.player.IGcaPlayer;
 import dev.dubhe.gugle.carpet.tools.player.PlayerInventoryMenu;
+import dev.dubhe.gugle.carpet.util.ClientUtil;
+import dev.dubhe.gugle.carpet.util.SettingUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -53,11 +54,11 @@ abstract class PlayerMixin {
     private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
-            if (entity instanceof Player otherPlayer && ClientUtils.isFakePlayer(otherPlayer)) {
+            if (entity instanceof Player otherPlayer && ClientUtil.isFakePlayer(otherPlayer)) {
                 return InteractionResult.CONSUME;
             }
         } else if (player instanceof ServerPlayer serverPlayer) {
-            if ((GcaSetting.openFakePlayerInventory || SettingUtils.openFakePlayerEnderChest(player)) && entity instanceof ServerPlayer otherPlayer) {
+            if ((GcaSetting.openFakePlayerInventory || SettingUtil.openFakePlayerEnderChest(player)) && entity instanceof ServerPlayer otherPlayer) {
                 // 打开物品栏
                 InteractionResult result = this.openInventory(serverPlayer, otherPlayer);
                 if (result != InteractionResult.PASS) {
@@ -75,7 +76,7 @@ abstract class PlayerMixin {
         if (!(otherPlayer instanceof IGcaPlayer gcaPlayer)) return InteractionResult.PASS;
         if (player.isShiftKeyDown() && gca$hasPremission(player, otherPlayer)) {
             // 打开末影箱
-            if (SettingUtils.openFakePlayerEnderChest(player)) {
+            if (SettingUtil.openFakePlayerEnderChest(player)) {
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.sixRows(
                         i, inventory,

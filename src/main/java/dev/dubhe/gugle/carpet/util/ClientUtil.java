@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.client.Minecraft;
@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.UUID;
 import javax.annotation.Nullable;
 
-public class ClientUtils {
+public class ClientUtil {
     private static @Nullable PlayerInfo getPlayerInfo(UUID uuid) {
         if (Minecraft.getInstance().getConnection() != null) {
             return Minecraft.getInstance().getConnection().getPlayerInfo(uuid);

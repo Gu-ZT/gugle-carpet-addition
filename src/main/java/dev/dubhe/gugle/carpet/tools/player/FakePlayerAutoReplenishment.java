@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.InventoryUtil;
+import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;

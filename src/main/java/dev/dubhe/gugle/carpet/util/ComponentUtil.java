@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.HoverEvent;
@@ -12,7 +12,7 @@ import net.minecraft.network.chat.HoverEvent;
 //$$ import java.util.Optional;
 //#endif
 
-public class ComponentUtils {
+public class ComponentUtil {
     //#if MC <= 12104
     public static <T> HoverEvent createHoverEvent(HoverEvent.Action<T> action, T object) {
         return new HoverEvent(action, object);

@@ -21,7 +21,7 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
@@ -40,7 +40,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.GameProfileCache;
@@ -51,18 +50,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
 import org.jetbrains.annotations.Nullable;
 
 //#if MC>=12100
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.level.ClientInformation;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 //#endif
 //#if MC>=12102
 //$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 //$$ import java.util.Set;
+//#else
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+//#endif
+//#if MC>=12110
+//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
+//$$ import net.minecraft.server.players.NameAndId;
+//#elseif MC>=12100
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 //#endif
 
 public class BotCommand {
@@ -407,13 +414,13 @@ public class BotCommand {
         MutableComponent name = Component.literal(botGroupInfo.name()).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botGroupInfo.name())))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botGroupInfo.name())))
         );
         MutableComponent load = Component.literal("[↑]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load Group")))
+                .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group load %s".formatted(botGroupInfo.name())
                 ))
@@ -421,8 +428,8 @@ public class BotCommand {
         MutableComponent remove = Component.literal("[↓]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload Group")))
+                .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group unload %s".formatted(botGroupInfo.name())
                 ))
@@ -430,8 +437,8 @@ public class BotCommand {
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
-                .withClickEvent(ComponentUtils.createClickEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
+                .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group info %s".formatted(botGroupInfo.name())
                 ))
@@ -439,8 +446,8 @@ public class BotCommand {
         MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Bot Group")))
-                .withClickEvent(ComponentUtils.createClickEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Bot Group")))
+                .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.SUGGEST_COMMAND,
                     "/bot group remove %s".formatted(botGroupInfo.name())
                 ))
@@ -465,19 +472,34 @@ public class BotCommand {
         source.getServer().getLevel(bot.dimType());
         try {
             ServerLevel worldIn = source.getServer().getLevel(bot.dimType());
+            //#if MC < 12110
             GameProfileCache.setUsesAuthentication(false);
             try {
+                //#endif
                 GameProfileCache profileCache = GameProfileHelper.getProfileCache(source.getServer());
-                GameProfile gameprofile = getGameProfile(profileCache, bot.name());
+                //#if MC >= 12110
+                //$$ NameAndId
+                //#else
+                GameProfile
+                    //#endif
+                    gameprofile = getGameProfile(profileCache, bot.name());
                 if (gameprofile == null) return false;
                 //#if MC>=12100
+                //#if MC>=12110
+                //$$ GameProfileHelper.fetchGameProfile(source.getServer(), gameprofile.name())
+                //#elseif MC>=12100
                 SkullBlockEntity.fetchGameProfile(gameprofile.getName())
+                //#endif
                     .thenAcceptAsync(
-                        (p) -> {
-                            //#if MC<12109
-                            GameProfile current = p.orElse(gameprofile);
+                        (
+                            //#if MC >= 12110
+                            //$$ current
                             //#else
-                            //$$ GameProfile current = p;
+                            p
+                                //#endif
+                        ) -> {
+                            //#if MC<12110
+                            GameProfile current = p.orElse(gameprofile);
                             //#endif
                             if (worldIn == null) return;
                             EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(
@@ -499,6 +521,9 @@ public class BotCommand {
                                     instance,
                                     new CommonListenerCookie(current, 0, instance.clientInformation(), false)
                                 );
+                            //#if MC>=12110
+                            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
+                            //#endif
                             //#if MC>=12102
                             //$$ instance.teleportTo(worldIn, bot.pos().x, bot.pos().y, bot.pos().z, Set.of(), bot.facing().y, bot.facing().x, true);
                             //#else
@@ -521,9 +546,6 @@ public class BotCommand {
                             //#else
                             source.getServer().getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), bot.dimType());
                             //#endif
-                            //#if MC>=12110
-                            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
-                            //#endif
                             instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 127);
                             instance.getAbilities().flying = bot.flying();
                             FakePlayerSerializer.applyActionPackFromJson(bot.actions(), instance);
@@ -545,9 +567,11 @@ public class BotCommand {
                 //$$ instance.getAbilities().flying = bot.flying();
                 //$$ FakePlayerSerializer.applyActionPackFromJson(bot.actions(), instance);
                 //#endif
+                //#if MC < 12110
             } finally {
                 GameProfileCache.setUsesAuthentication(source.getServer().isDedicatedServer() && source.getServer().usesAuthentication());
             }
+            //#endif
             return true;
         } catch (Exception e) {
             GcaExtension.LOGGER.error("Failed to load bot: {}", bot.name(), e);
@@ -556,6 +580,21 @@ public class BotCommand {
         }
     }
 
+    //#if MC>=12110
+    //$$ @Nullable
+    //$$ private static NameAndId getGameProfile(@Nullable CachedUserNameToIdResolver cache, String name) {
+    //$$     NameAndId profile = null;
+    //$$     if (cache != null) {
+    //$$         cache.resolveOfflineUsers(true);
+    //$$         profile = cache.get(name).orElse(null);
+    //$$         cache.resolveOfflineUsers(BOT_CONFIG.getServer().isDedicatedServer() && BOT_CONFIG.getServer().usesAuthentication());
+    //$$     }
+    //$$     if (profile == null && CarpetSettings.allowSpawningOfflinePlayers) {
+    //$$         profile = new NameAndId(UUIDUtil.createOfflinePlayerUUID(name), name);
+    //$$     }
+    //$$     return profile;
+    //$$ }
+    //#else
     @Nullable
     private static GameProfile getGameProfile(@Nullable GameProfileCache cache, String name) {
         GameProfile gameprofile = cache == null ? null : cache.get(name).orElse(null);
@@ -564,6 +603,7 @@ public class BotCommand {
         }
         return gameprofile;
     }
+    //#endif
 
     private static int load(CommandContext<CommandSourceStack> context) {
         tryInit(context);
@@ -578,11 +618,21 @@ public class BotCommand {
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
             source.sendFailure(Component.literal("%s is not a fake player.".formatted(
-                p.getGameProfile().getName()
+                p.getGameProfile()
+                    //#if MC>=12110
+                    //$$ .name()
+                    //#else
+                    .getName()
+                    //#endif
             )));
             return 0;
         }
-        String name = player.getGameProfile().getName();
+        String name = player.getGameProfile()
+            //#if MC>=12110
+            //$$ .name();
+            //#else
+            .getName();
+            //#endif
         if (BOT_CONFIG.getContents().containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
@@ -638,26 +688,26 @@ public class BotCommand {
         MutableComponent desc = Component.literal(botInfo.desc()).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botInfo.name())))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botInfo.name())))
         );
         boolean notOnline = BOT_CONFIG.getServer().getPlayerList().getPlayerByName(botInfo.name()) == null;
         MutableComponent load = Component.literal("[↑]").withStyle(
             Style.EMPTY
                 .applyFormat(notOnline ? ChatFormatting.GREEN : ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load bot")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot load %s".formatted(botInfo.name())))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load bot")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot load %s".formatted(botInfo.name())))
         );
         MutableComponent remove = Component.literal("[↓]").withStyle(
             Style.EMPTY
                 .applyFormat(notOnline ? ChatFormatting.GRAY : ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload bot")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/player %s kill".formatted(botInfo.name())))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload bot")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/player %s kill".formatted(botInfo.name())))
         );
         MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
-                .withClickEvent(ComponentUtils.createClickEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
+                .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.SUGGEST_COMMAND,
                     "/bot remove %s".formatted(botInfo.name())
                 ))
@@ -672,25 +722,25 @@ public class BotCommand {
 
     private static void listComponent(CommandContext<CommandSourceStack> context, int page, int maxPage, String command) {
         Component prevPage = page <= 1 ?
-                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-                             Component.literal("<<<").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         command + " " + (page - 1)
-                                     ))
-                             );
+            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
+            Component.literal("<<<").withStyle(
+                Style.EMPTY
+                    .applyFormat(ChatFormatting.GREEN)
+                    .withClickEvent(ComponentUtil.createClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        command + " " + (page - 1)
+                    ))
+            );
         Component nextPage = page >= maxPage ?
-                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-                             Component.literal(">>>").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         command + " " + (page + 1)
-                                     ))
-                             );
+            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
+            Component.literal(">>>").withStyle(
+                Style.EMPTY
+                    .applyFormat(ChatFormatting.GREEN)
+                    .withClickEvent(ComponentUtil.createClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        command + " " + (page + 1)
+                    ))
+            );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
                 .withStyle(ChatFormatting.YELLOW)

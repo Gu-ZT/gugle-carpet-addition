@@ -8,7 +8,7 @@ import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import dev.dubhe.gugle.carpet.api.menu.control.RadioList;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
-import dev.dubhe.gugle.carpet.tools.InventoryUtil;
+import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;

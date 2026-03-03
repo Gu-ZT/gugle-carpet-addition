@@ -10,11 +10,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
 import dev.dubhe.gugle.carpet.tools.FilesUtil;
 import dev.dubhe.gugle.carpet.tools.IdGenerator;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import dev.dubhe.gugle.carpet.tools.PosUtils;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import dev.dubhe.gugle.carpet.util.PosUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -136,14 +136,14 @@ public class LocCommand {
             Component.literal("<<<").withStyle(
                 Style.EMPTY
                     .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page - 1)))
+                    .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page - 1)))
             );
         Component nextPage = page >= maxPage ?
             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
             Component.literal(">>>").withStyle(
                 Style.EMPTY
                     .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page + 1)))
+                    .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc list " + (page + 1)))
             );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
@@ -164,20 +164,20 @@ public class LocCommand {
         MutableComponent component = Component.literal(locPoint.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(locPoint.id))))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(locPoint.id))))
         );
-        List<MutableComponent> pos = PosUtils.pos(locPoint.desc, locPoint.x, locPoint.y, locPoint.z, locPoint.dimType);
+        List<MutableComponent> pos = PosUtil.pos(locPoint.desc, locPoint.x, locPoint.y, locPoint.z, locPoint.dimType);
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.YELLOW)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("View loc point information")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(locPoint.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("View loc point information")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(locPoint.id)))
         );
         MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove loc point")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/loc remove %s".formatted(locPoint.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove loc point")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/loc remove %s".formatted(locPoint.id)))
         );
         return Component.literal("▶ ").append(component)
             .append(" ").append(pos.getFirst())
@@ -211,7 +211,7 @@ public class LocCommand {
         } else {
             dimType = Component.literal(point.dimType.identifier().toString());
         }
-        List<MutableComponent> pos = PosUtils.pos(point.desc, point.x, point.y, point.z, point.dimType);
+        List<MutableComponent> pos = PosUtil.pos(point.desc, point.x, point.y, point.z, point.dimType);
         List<Component> result = new ArrayList<>();
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         result.add(Component.literal("Loc Point: ").append(desc));
