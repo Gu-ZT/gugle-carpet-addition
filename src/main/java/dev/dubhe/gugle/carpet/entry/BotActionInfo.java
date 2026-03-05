@@ -9,34 +9,34 @@ import dev.dubhe.gugle.carpet.mixin.ActionAccessor;
 import net.minecraft.server.level.ServerPlayer;
 
 public record BotActionInfo(
-    int attack,
-    int use,
-    int jump,
     boolean sneaking,
     boolean sprinting,
     float forward,
-    float strafing
+    float strafing,
+    int attack,
+    int use,
+    int jump
 ) {
     public static final Codec<BotActionInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.INT.fieldOf("attack").forGetter(BotActionInfo::attack),
-        Codec.INT.fieldOf("use").forGetter(BotActionInfo::use),
-        Codec.INT.fieldOf("jump").forGetter(BotActionInfo::jump),
-        Codec.BOOL.fieldOf("sneaking").forGetter(BotActionInfo::sneaking),
-        Codec.BOOL.fieldOf("sprinting").forGetter(BotActionInfo::sprinting),
-        Codec.FLOAT.fieldOf("forward").forGetter(BotActionInfo::forward),
-        Codec.FLOAT.fieldOf("strafing").forGetter(BotActionInfo::strafing)
+        Codec.BOOL.optionalFieldOf("sneaking", false).forGetter(BotActionInfo::sneaking),
+        Codec.BOOL.optionalFieldOf("sprinting", false).forGetter(BotActionInfo::sprinting),
+        Codec.FLOAT.optionalFieldOf("forward", 0F).forGetter(BotActionInfo::forward),
+        Codec.FLOAT.optionalFieldOf("strafing", 0F).forGetter(BotActionInfo::strafing),
+        Codec.INT.optionalFieldOf("attack", 0).forGetter(BotActionInfo::attack),
+        Codec.INT.optionalFieldOf("use", 0).forGetter(BotActionInfo::use),
+        Codec.INT.optionalFieldOf("jump", 0).forGetter(BotActionInfo::jump)
     ).apply(instance, BotActionInfo::new));
 
     public static BotActionInfo fromActionPack(EntityPlayerActionPack pack) {
         APAccessor accessor = (APAccessor) pack;
         return new BotActionInfo(
-            getActionInterval(accessor, EntityPlayerActionPack.ActionType.ATTACK),
-            getActionInterval(accessor, EntityPlayerActionPack.ActionType.USE),
-            getActionInterval(accessor, EntityPlayerActionPack.ActionType.JUMP),
             accessor.getSneaking(),
             accessor.getSprinting(),
             accessor.getForward(),
-            accessor.getStrafing()
+            accessor.getStrafing(),
+            getActionInterval(accessor, EntityPlayerActionPack.ActionType.ATTACK),
+            getActionInterval(accessor, EntityPlayerActionPack.ActionType.USE),
+            getActionInterval(accessor, EntityPlayerActionPack.ActionType.JUMP)
         );
     }
 
@@ -65,5 +65,5 @@ public record BotActionInfo(
             EntityPlayerActionPack.Action.interval(interval);
         ap.start(type, action);
     }
-    
+
 }

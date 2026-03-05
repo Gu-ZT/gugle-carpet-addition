@@ -69,6 +69,7 @@ public class GcaConfig<T extends IWithName> {
 
     public void tryInit(MinecraftServer server) {
         if (server == this.server) return;
+        GcaExtension.LOGGER.info("Initializing config: {}", this.filename);
         this.server = server;
         this.contents.clear();
 

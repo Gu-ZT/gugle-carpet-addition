@@ -425,8 +425,8 @@ public class BotCommand {
             bot.name(),
             source.getServer(),
             bot.pos(),
-            bot.facing().x,
             bot.facing().y,
+            bot.facing().x,
             bot.dimType(),
             bot.mode(),
             bot.flying()
@@ -435,6 +435,8 @@ public class BotCommand {
             //$$ != null
             //#endif
             ;
+        System.out.println(success);
+
         if (success) {
             ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(bot.name());
             if (player != null) bot.actions().applyAction(player);
