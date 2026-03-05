@@ -15,12 +15,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
-import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
-import dev.dubhe.gugle.carpet.tools.player.FakePlayerSerializer;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -235,10 +234,7 @@ public class BotCommand {
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
         CommandSourceStack source = context.getSource();
-        for (BotInfo bot : group.bots) {
-            BotUtil.spawnBot(source, bot);
-        }
-        return Command.SINGLE_SUCCESS;
+        return (int) group.bots.stream().filter(it -> spawnBot(source, it)).count();
     }
 
     private static int groupRemoveBot(CommandContext<CommandSourceStack> context) {
@@ -306,7 +302,7 @@ public class BotCommand {
                 player.level().dimension(),
                 player.gameMode.getGameModeForPlayer(),
                 player.getAbilities().flying,
-                FakePlayerSerializer.actionPackToJson(new EntityPlayerActionPack(player))
+                BotActionInfo.fromActionPack(new EntityPlayerActionPack(player))
             );
             BOT_CONFIG.update(bot, false);
             bots.add(bot);
@@ -314,7 +310,7 @@ public class BotCommand {
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots.stream().map(BotInfo::name).toList()));
         if (groupLoad) {
             for (BotInfo bot : bots) {
-                BotUtil.spawnBot(source, bot);
+                spawnBot(source, bot);
             }
         }
         source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
@@ -413,7 +409,40 @@ public class BotCommand {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.getContents().get(name);
-        return BotUtil.spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
+        return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
+    }
+
+    private static boolean spawnBot(CommandSourceStack source, @Nullable BotInfo bot) {
+        if (bot == null) {
+            source.sendFailure(Component.literal("%s is not exist."));
+            return false;
+        }
+        if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
+            source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
+            return false;
+        }
+        boolean success = EntityPlayerMPFake.createFake(
+            bot.name(),
+            source.getServer(),
+            bot.pos(),
+            bot.facing().x,
+            bot.facing().y,
+            bot.dimType(),
+            bot.mode(),
+            bot.flying()
+        )
+            //#if MC < 12100
+            //$$ != null
+            //#endif
+            ;
+        if (success) {
+            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(bot.name());
+            if (player != null) bot.actions().applyAction(player);
+        } else {
+            source.sendFailure(Component.literal("%s is not loaded.".formatted(bot.name())));
+        }
+        return success;
+
     }
 
     private static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -449,7 +478,7 @@ public class BotCommand {
             player.level().dimension(),
             player.gameMode.getGameModeForPlayer(),
             player.getAbilities().flying,
-            FakePlayerSerializer.actionPackToJson(((ServerPlayerInterface) player).getActionPack())
+            BotActionInfo.fromActionPack(((ServerPlayerInterface) player).getActionPack())
         ));
         source.sendSuccess(() -> Component.literal("%s is added.".formatted(name)), false);
         return Command.SINGLE_SUCCESS;

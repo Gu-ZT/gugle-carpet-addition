@@ -1,6 +1,5 @@
 package dev.dubhe.gugle.carpet.entry;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
@@ -19,7 +18,7 @@ public record BotInfo(
     ResourceKey<Level> dimType,
     GameType mode,
     boolean flying,
-    JsonObject actions
+    BotActionInfo actions
 ) implements IWithName {
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
@@ -29,6 +28,6 @@ public record BotInfo(
         ResourceKey.codec(Registries.DIMENSION).fieldOf("dim_type").forGetter(BotInfo::dimType),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
-        CustomCodec.JSON_CODEC.fieldOf("actions").forGetter(BotInfo::actions)
+        BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions)
     ).apply(instance, BotInfo::new));
 }
