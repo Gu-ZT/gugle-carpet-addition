@@ -511,8 +511,8 @@ public class BotCommand {
             botInfo.name,
             BOT_INFO.server,
             botInfo.pos,
-            botInfo.facing.x,
             botInfo.facing.y,
+            botInfo.facing.x,
             botInfo.dimType,
             botInfo.mode,
             botInfo.flying
