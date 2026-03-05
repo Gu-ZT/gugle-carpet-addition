@@ -198,15 +198,22 @@ public class LocCommand {
 
     public static List<Component> info(LocationInfo loc) {
         MutableComponent desc = Component.literal(loc.desc());
+        String dimName = loc.dimType()
+            //#if MC>=12111
+            //$$ .identifier()
+            //#else
+            .location()
+            //#endif
+            .toString();
         MutableComponent dimType;
         if (loc.dimType() == Level.NETHER) {
-            dimType = Component.translatableWithFallback("advancements.nether.root.title", loc.dimType().location().toString());
+            dimType = Component.translatableWithFallback("advancements.nether.root.title", dimName);
         } else if (loc.dimType() == Level.END) {
-            dimType = Component.translatableWithFallback("advancements.end.root.title", loc.dimType().location().toString());
+            dimType = Component.translatableWithFallback("advancements.end.root.title", dimName);
         } else if (loc.dimType() == Level.OVERWORLD) {
-            dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", loc.dimType().location().toString());
+            dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", dimName);
         } else {
-            dimType = Component.literal(loc.dimType().location().toString());
+            dimType = Component.literal(dimName);
         }
         List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimType());
         List<Component> result = new ArrayList<>();

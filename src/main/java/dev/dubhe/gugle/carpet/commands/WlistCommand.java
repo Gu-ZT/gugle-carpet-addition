@@ -40,7 +40,14 @@ public class WlistCommand {
                 .executes(WlistCommand::list)
                 .then(
                     Commands.literal("permission")
-                        .requires(stack -> stack.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .requires(stack ->
+                            //
+                            //#if MC>=12111
+                            //$$ Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(stack)
+                            //#else
+                            stack.hasPermission(Commands.LEVEL_GAMEMASTERS)
+                            //#endif
+                        )
                         .then(
                             Commands.literal("add")
                                 .then(
