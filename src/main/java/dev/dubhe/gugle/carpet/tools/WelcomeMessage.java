@@ -12,7 +12,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.entry.WelcomeMessageInfo;
+import dev.dubhe.gugle.carpet.entry.WelcomeInfo;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
@@ -40,10 +40,10 @@ import javax.annotation.Nullable;
 
 public class WelcomeMessage {
     public static final String ARGS_REGEX = "\\{%\\w+%}";
-    private static final GcaConfig<WelcomeMessageInfo> WELCOME_CONFIG = GcaConfig.create("welcome", WelcomeMessageInfo.CODEC);
+    private static final GcaConfig<WelcomeInfo> WELCOME_CONFIG = GcaConfig.create("welcome", WelcomeInfo.CODEC);
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
-        WelcomeMessageInfo info = WELCOME_CONFIG.getContents().get("data");
+        WelcomeInfo info = WELCOME_CONFIG.getContents().get("data");
         MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
         for (String msg : info.messages()) {
             List<String> argKeys = new ArrayList<>();
