@@ -10,8 +10,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
@@ -47,13 +50,41 @@ import javax.annotation.Nullable;
 
 @FieldsAreNonnullByDefault
 public class FakePlayerResident {
-    public static JsonObject save(Player player) {
+    public static JsonElement save(Player player) {
         JsonObject fakePlayer = new JsonObject();
         if (GcaSetting.fakePlayerReloadAction) {
             EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
-            fakePlayer.add("actions", FakePlayerSerializer.actionPackToJson(actionPack));
+            BotActionInfo actions = BotActionInfo.fromActionPack(actionPack);
+            DataResult<JsonElement> result = BotActionInfo.CODEC.encodeStart(JsonOps.INSTANCE, actions);
+            result.result().ifPresent(it -> fakePlayer.add("actions", it));
         }
         return fakePlayer;
+    }
+
+    public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
+        String username = entry.getKey();
+        JsonObject fakePlayer = entry.getValue().getAsJsonObject();
+        JsonObject actions = new JsonObject();
+        if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
+            actions = fakePlayer.get("actions").getAsJsonObject();
+        }
+        Vec3 position = null;
+        Vec2 rotation = null;
+        if (fakePlayer.has("pos")) {
+            JsonArray pos = fakePlayer.get("pos").getAsJsonArray();
+            position = new Vec3(pos.get(0).getAsDouble(), pos.get(1).getAsDouble(), pos.get(2).getAsDouble());
+            if (pos.size() > 3) {
+                rotation = new Vec2(pos.get(3).getAsFloat(), pos.get(4).getAsFloat());
+            }
+        }
+        GcaExtension.LOGGER.info(
+            "Load fake player {} at [{}, {}, {}]",
+            username,
+            position == null ? "null" : position.x,
+            position == null ? "null" : position.y,
+            position == null ? "null" : position.z
+        );
+        FakePlayerResident.createFake(username, server, actions, position, rotation);
     }
 
     public static void createFake(
@@ -137,31 +168,5 @@ public class FakePlayerResident {
         //$$ FakePlayerSerializer.applyActionPackFromJson(actions, playerMPFake);
         //$$ ((EntityInvoker) playerMPFake).invokeUnsetRemoved();
         //#endif
-    }
-
-    public static void load(Map.Entry<String, JsonElement> entry, MinecraftServer server) {
-        String username = entry.getKey();
-        JsonObject fakePlayer = entry.getValue().getAsJsonObject();
-        JsonObject actions = new JsonObject();
-        if (GcaSetting.fakePlayerReloadAction && fakePlayer.has("actions")) {
-            actions = fakePlayer.get("actions").getAsJsonObject();
-        }
-        Vec3 position = null;
-        Vec2 rotation = null;
-        if (fakePlayer.has("pos")) {
-            JsonArray pos = fakePlayer.get("pos").getAsJsonArray();
-            position = new Vec3(pos.get(0).getAsDouble(), pos.get(1).getAsDouble(), pos.get(2).getAsDouble());
-            if (pos.size() > 3) {
-                rotation = new Vec2(pos.get(3).getAsFloat(), pos.get(4).getAsFloat());
-            }
-        }
-        GcaExtension.LOGGER.info(
-            "Load fake player {} at [{}, {}, {}]",
-            username,
-            position == null ? "null" : position.x,
-            position == null ? "null" : position.y,
-            position == null ? "null" : position.z
-        );
-        FakePlayerResident.createFake(username, server, actions, position, rotation);
     }
 }
