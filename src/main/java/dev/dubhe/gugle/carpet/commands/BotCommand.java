@@ -418,6 +418,18 @@ public class BotCommand {
             source.sendFailure(Component.literal("%s is not exist."));
             return false;
         }
+        //#if MC>=12100
+        if (
+            //#if MC < 12104
+            BotUtil.isGcaSpawningBot(bot.name())
+            //#else
+            //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
+            //#endif
+        ) {
+            source.sendFailure(Component.literal("Player %s is currently logging on".formatted(bot.name())));
+            return false;
+        }
+        //#endif
         if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
             source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
             return false;
