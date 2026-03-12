@@ -1,6 +1,7 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import com.google.common.collect.ImmutableList;
+import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -15,7 +16,7 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
-public class PosUtils {
+public class PosUtil {
     public static MutableComponent xaero(String desc, double x, double y, double z, ResourceKey<Level> dimType) {
         int color = dimType == Level.OVERWORLD ? 10 :
                     dimType == Level.NETHER ? 12 :
@@ -34,6 +35,10 @@ public class PosUtils {
         );
     }
 
+    public static List<MutableComponent> pos(String desc, Vec3 pos, ResourceKey<Level> dimension) {
+        return pos(desc, pos.x, pos.y, pos.z, dimension);
+    }
+
     public static List<MutableComponent> pos(String desc, double x, double y, double z, ResourceKey<Level> dimension) {
         MutableComponent pos = Component.literal("[%.1f, %.1f, %.1f]".formatted(x, y, z)).withStyle(
             Style.EMPTY
@@ -46,7 +51,7 @@ public class PosUtils {
                     ChatFormatting.LIGHT_PURPLE :
                     ChatFormatting.AQUA
                 )
-                .withHoverEvent(ComponentUtils.createHoverEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
                     Component.literal(dimension.location().toString())
                 ))
@@ -69,7 +74,7 @@ public class PosUtils {
                     ChatFormatting.GREEN :
                     ChatFormatting.AQUA
                 )
-                .withHoverEvent(ComponentUtils.createHoverEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
                     Component.literal(toDimension.location().toString())
                 ))
@@ -84,7 +89,7 @@ public class PosUtils {
         Vec3 position = player.position();
         ResourceKey<Level> dimension = player.level().dimension();
         ImmutableList.Builder<MutableComponent> builder = ImmutableList.builder();
-        List<MutableComponent> pos = PosUtils.pos("Shared Location", position.x, position.y, position.z, dimension);
+        List<MutableComponent> pos = PosUtil.pos("Shared Location", position, dimension);
         GameProfileHelper.prasePlayerGameProfile(
             player, (profile, name, uuid) -> {
                 MutableComponent component = Component.literal("%s at".formatted(name)).append(" ").append(pos.getFirst());

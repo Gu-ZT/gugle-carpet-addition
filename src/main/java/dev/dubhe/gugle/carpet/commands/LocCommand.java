@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
-import com.google.gson.annotations.SerializedName;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
@@ -10,11 +10,13 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
-import dev.dubhe.gugle.carpet.tools.FilesUtil;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.LocationInfo;
+import dev.dubhe.gugle.carpet.entry.PageInfo;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import dev.dubhe.gugle.carpet.tools.PosUtils;
-import dev.dubhe.gugle.carpet.tools.IdGenerator;
+import dev.dubhe.gugle.carpet.util.PosUtil;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -33,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class LocCommand {
-    public static final FilesUtil.MapFile<Long, LocPoint> LOC_POINT = new FilesUtil.MapFile<>("loc", Long::decode, LocPoint.class);
+    private static final GcaConfig<LocationInfo> LOCATION_CONFIG = GcaConfig.create("loc", LocationInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
@@ -78,76 +80,63 @@ public class LocCommand {
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
-        return SharedSuggestionProvider.suggest(LOC_POINT.map.keySet().stream().map(Object::toString), builder);
+        LOCATION_CONFIG.tryInit(context);
+        return SharedSuggestionProvider.suggest(LOCATION_CONFIG.getContents().keySet(), builder);
     }
 
     public static int add(CommandContext<CommandSourceStack> context) {
-        LOC_POINT.init(context);
+        LOCATION_CONFIG.tryInit(context);
         CommandSourceStack source = context.getSource();
-        long id = IdGenerator.nextId();
+        long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
         Vec3 pos = source.getPosition();
-        ResourceKey<Level> dim = source.getLevel().dimension();
-        LOC_POINT.map.put(id, new LocPoint(id, desc, pos.x, pos.y, pos.z, dim));
-        LOC_POINT.save();
+        ResourceKey<Level> dimension = source.getLevel().dimension();
+        LOCATION_CONFIG.update(new LocationInfo(id, desc, pos, dimension));
         source.sendSuccess(() -> Component.literal("Loc %s is added.".formatted(desc)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int remove(CommandContext<CommandSourceStack> context) {
-        LOC_POINT.init(context);
-        Long id = LongArgumentType.getLong(context, "id");
-        LocPoint remove = LOC_POINT.map.remove(id);
-        if (remove == null) {
+        LOCATION_CONFIG.tryInit(context);
+        long id = LongArgumentType.getLong(context, "id");
+        LocationInfo removed = LOCATION_CONFIG.remove(String.valueOf(id));
+        if (removed == null) {
             context.getSource().sendFailure(Component.literal("No such loc id %s".formatted(id)));
             return 0;
         }
-        LOC_POINT.save();
-        context.getSource().sendSuccess(() -> Component.literal("Loc %s is removed.".formatted(remove.desc)), false);
-        return 1;
+        context.getSource().sendSuccess(() -> Component.literal("Loc %s is removed.".formatted(removed.desc())), false);
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int list(CommandContext<CommandSourceStack> context) {
-        LOC_POINT.init(context);
-        int page;
-        try {
-            page = IntegerArgumentType.getInteger(context, "page");
-        } catch (IllegalArgumentException ignored) {
-            page = 1;
-        }
-        final int pageSize = 8;
-        int size = LOC_POINT.map.size();
-        int maxPage = size / pageSize + 1;
-        if (page > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
-            return 0;
-        }
-        LocPoint[] locPoints = LOC_POINT.map.values().toArray(new LocPoint[0]);
+        LOCATION_CONFIG.tryInit(context);
+        PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.getContents().values());
+        if (page == null) return 0;
         context.getSource().sendSystemMessage(
-            Component.literal("======= Loc List (Page %s/%s) =======".formatted(page, maxPage))
+            Component.literal("======= Loc List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
                 .withStyle(ChatFormatting.YELLOW)
         );
-        for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(locToComponent(locPoints[i]));
+        for (LocationInfo node : page.page()) {
+            context.getSource().sendSystemMessage(locToComponent(node));
         }
-        Component prevPage = page <= 1 ?
+        Component prevPage = page.pageNum() <= 1 ?
                              Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
                              Component.literal("<<<").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
-                                         "/loc list " + (page - 1)
+                                         "/loc list " + (page.pageNum() - 1)
                                      ))
                              );
-        Component nextPage = page >= maxPage ?
+        Component nextPage = page.pageNum() >= page.maxPage() ?
                              Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
                              Component.literal(">>>").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
-                                         "/loc list " + (page + 1)
+                                         "/loc list " + (page.pageNum() + 1)
                                      ))
                              );
         context.getSource().sendSystemMessage(
@@ -156,36 +145,36 @@ public class LocCommand {
                 .append(" ")
                 .append(prevPage)
                 .append(" ")
-                .append(Component.literal("(Loc %s/%s)".formatted(page, maxPage)).withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal("(Loc %s/%s)".formatted(page.pageNum(), page.maxPage())).withStyle(ChatFormatting.YELLOW))
                 .append(" ")
                 .append(nextPage)
                 .append(" ")
                 .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
         );
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static MutableComponent locToComponent(LocPoint locPoint) {
-        MutableComponent component = Component.literal(locPoint.desc).withStyle(
+    private static MutableComponent locToComponent(LocationInfo loc) {
+        MutableComponent component = Component.literal(loc.desc()).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(locPoint.id))))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(loc.name())))
         );
-        List<MutableComponent> pos = PosUtils.pos(locPoint.desc, locPoint.x, locPoint.y, locPoint.z, locPoint.dimType);
+        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimType());
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.YELLOW)
-                .withHoverEvent(ComponentUtils.createHoverEvent(
+                .withHoverEvent(ComponentUtil.createHoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
                     Component.literal("View loc point information")
                 ))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(locPoint.id)))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(loc.name())))
         );
         MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove loc point")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/loc remove %s".formatted(locPoint.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove loc point")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/loc remove %s".formatted(loc.id())))
         );
         return Component.literal("▶ ").append(component)
             .append(" ").append(pos.getFirst())
@@ -194,32 +183,39 @@ public class LocCommand {
     }
 
     public static int info(CommandContext<CommandSourceStack> context) {
-        LOC_POINT.init(context);
-        Long id = LongArgumentType.getLong(context, "id");
-        LocPoint point = LOC_POINT.map.getOrDefault(id, null);
-        if (point == null) {
+        LOCATION_CONFIG.tryInit(context);
+        long id = LongArgumentType.getLong(context, "id");
+        LocationInfo location = LOCATION_CONFIG.getContents().get(String.valueOf(id));
+        if (location == null) {
             context.getSource().sendFailure(Component.literal("No such loc id %s".formatted(id)));
             return 0;
         }
-        for (Component component : LocCommand.info(point)) {
+        for (Component component : LocCommand.info(location)) {
             context.getSource().sendSuccess(() -> component, false);
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
-    public static List<Component> info(LocPoint point) {
-        MutableComponent desc = Component.literal(point.desc);
+    public static List<Component> info(LocationInfo loc) {
+        MutableComponent desc = Component.literal(loc.desc());
+        String dimName = loc.dimType()
+            //#if MC>=12111
+            //$$ .identifier()
+            //#else
+            .location()
+            //#endif
+            .toString();
         MutableComponent dimType;
-        if (point.dimType == Level.NETHER) {
-            dimType = Component.translatableWithFallback("advancements.nether.root.title", point.dimType.location().toString());
-        } else if (point.dimType == Level.END) {
-            dimType = Component.translatableWithFallback("advancements.end.root.title", point.dimType.location().toString());
-        } else if (point.dimType == Level.OVERWORLD) {
-            dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", point.dimType.location().toString());
+        if (loc.dimType() == Level.NETHER) {
+            dimType = Component.translatableWithFallback("advancements.nether.root.title", dimName);
+        } else if (loc.dimType() == Level.END) {
+            dimType = Component.translatableWithFallback("advancements.end.root.title", dimName);
+        } else if (loc.dimType() == Level.OVERWORLD) {
+            dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", dimName);
         } else {
-            dimType = Component.literal(point.dimType.location().toString());
+            dimType = Component.literal(dimName);
         }
-        List<MutableComponent> pos = PosUtils.pos(point.desc, point.x, point.y, point.z, point.dimType);
+        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimType());
         List<Component> result = new ArrayList<>();
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         result.add(Component.literal("Loc Point: ").append(desc));
@@ -230,15 +226,5 @@ public class LocCommand {
         if (pos.size() > 3) result.add(pos.get(3));
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         return result;
-    }
-
-    public record LocPoint(
-        long id,
-        String desc,
-        double x,
-        double y,
-        double z,
-        @SerializedName("dim_type") ResourceKey<Level> dimType
-    ) {
     }
 }

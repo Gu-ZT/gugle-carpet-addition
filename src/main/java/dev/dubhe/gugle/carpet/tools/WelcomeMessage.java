@@ -8,7 +8,12 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.WelcomeInfo;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -18,15 +23,14 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
 import org.apache.commons.lang3.time.DateUtils;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.TimeZone;
@@ -36,17 +40,17 @@ import javax.annotation.Nullable;
 
 public class WelcomeMessage {
     public static final String ARGS_REGEX = "\\{%\\w+%}";
-    public static final FilesUtil.ObjFile<MessageConfig> WELCOME_MESSAGE = new FilesUtil.ObjFile<>("welcome", new MessageConfig());
+    private static final GcaConfig<WelcomeInfo> WELCOME_CONFIG = GcaConfig.create("welcome", WelcomeInfo.CODEC);
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
-        MessageConfig config = WELCOME_MESSAGE.obj;
+        WelcomeInfo info = WELCOME_CONFIG.getContents().get("data");
         MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
-        for (String msg : config.message) {
+        for (String msg : info.messages()) {
             List<String> argKeys = new ArrayList<>();
             Matcher matcher = Pattern.compile(ARGS_REGEX).matcher(msg);
             while (matcher.find()) argKeys.add(msg.substring(matcher.start() + 2, matcher.end() - 2));
             List<String> split = new ArrayList<>(List.of(msg.split(ARGS_REGEX)));
-            List<MessageData> args = argKeys.stream().map(config::getArg).toList();
+            List<MessageData> args = argKeys.stream().map(info::getArg).toList();
             for (int i = split.size(); i < args.size() + 1; i++) split.add("");
             MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
             for (int i = 0; i < split.size(); i++) {
@@ -59,24 +63,26 @@ public class WelcomeMessage {
         }
     }
 
-    public static class MessageConfig {
-        public List<String> message = new ArrayList<>();
-        public Map<String, MessageData> args = new HashMap<>();
-
-        public MessageConfig() {
-            message.add("{%player%}, welcome!");
-            args.put("player", new MessageData());
-        }
-
-        public MessageData getArg(String key) {
-            return args.getOrDefault(key, new MessageData());
-        }
-    }
-
     public static class MessageData {
-        public ResourceLocation type = MessageDataType.PLAYER.location;
-        public @Nullable JsonElement data = null;
-        public ChatFormatting color = ChatFormatting.GOLD;
+        public static final Codec<MessageData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ResourceLocation.CODEC.fieldOf("type").forGetter(it -> it.type),
+            ExtraCodecs.JSON.optionalFieldOf("data").xmap(it -> it.orElse(null), Optional::ofNullable).forGetter(it -> it.data),
+            ChatFormatting.CODEC.fieldOf("color").forGetter(it -> it.color)
+        ).apply(instance, MessageData::new));
+
+        public ResourceLocation type;
+        public @Nullable JsonElement data;
+        public ChatFormatting color;
+
+        public MessageData() {
+            this(MessageDataType.PLAYER.location, null, ChatFormatting.GOLD);
+        }
+
+        public MessageData(ResourceLocation type, @Nullable JsonElement data, ChatFormatting color) {
+            this.type = type;
+            this.data = data;
+            this.color = color;
+        }
 
         public MessageDataType getType() {
             return MessageDataType.get(type);
@@ -196,16 +202,16 @@ public class WelcomeMessage {
                 MutableComponent component1 = Component.literal(name);
                 Style style = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
                     .withHoverEvent(
-                        ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
+                        ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
                     );
                 //#if MC>=12100
                 style = style.withClickEvent(
                     host.contains(":") ?
-                    ComponentUtils.createClickEvent(
+                    ComponentUtil.createClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
                         "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])
                     ) :
-                    ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
+                    ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
                 );
                 //#else
                 //#endif

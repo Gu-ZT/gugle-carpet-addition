@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import dev.dubhe.gugle.carpet.GcaExtension;
 
@@ -6,7 +6,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
 
-public class IdGenerator {
+public class IdUtil {
     /**
      * 工作id 也就是机器id
      */
