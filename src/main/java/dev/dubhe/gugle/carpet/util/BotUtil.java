@@ -1,44 +1,71 @@
 package dev.dubhe.gugle.carpet.util;
 
-import carpet.CarpetSettings;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import com.mojang.authlib.GameProfile;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.HashSet;
+import java.util.Set;
 
 //#if MC < 12102
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //#else
 //$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
-//$$ import java.util.Set;
 //#endif
-
-
+//#if MC >= 12110
+//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
+//#endif
 public class BotUtil {
+    private static final Set<String> SpawningBots = new HashSet<>();
+
+    //#if MC >= 12104
+    //$$ /**
+    //$$  * Use {@link EntityPlayerMPFake#isSpawningPlayer(String)} instead in 1.21.4+.
+    //$$  */
+    //#endif
+    public static boolean isGcaSpawningBot(String name) {
+        return SpawningBots.contains(name);
+    }
+
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
         ServerLevel level = server.getLevel(bot.dimension());
-        GameProfile gameProfile = getGameProfile(server, bot.name());
+        GameProfile gameProfile = ProfileUtil.getGameProfile(server, bot.name());
         if (gameProfile == null) return false;
-        fetchGameProfile(gameProfile.getName()).thenAcceptAsync(p -> {
-            GameProfile profile = p.orElse(gameProfile);
+        String name = gameProfile
+            //#if MC < 12110
+            .getName();
+        //#else
+        //$$ .name();
+        //#endif
+
+        SpawningBots.add(name);
+        ProfileUtil.fetchGameProfile(server, gameProfile).whenCompleteAsync((p, t) -> {
+            SpawningBots.remove(name);
+            if (t != null) return;
+            GameProfile profile =
+                //#if MC < 12110
+                p.orElse(gameProfile);
+            //#else
+            //$$ p.name().isEmpty() ? gameProfile : p;
+            //#endif
+
             EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile, ClientInformation.createDefault());
             instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
             server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation(), false));
+            //#if MC >= 12110
+            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
+            //#endif
+            instance.stopRiding();
             instance.teleportTo(
                 level,
                 bot.pos().x,
@@ -70,26 +97,5 @@ public class BotUtil {
             bot.actions().applyAction(instance);
         }, server);
         return true;
-    }
-
-    private static GameProfile getGameProfile(MinecraftServer server, final String name) {
-        GameProfileCache.setUsesAuthentication(false);
-        GameProfile gameprofile = null;
-        try {
-            GameProfileCache cache = server.getProfileCache();
-            if (cache != null) {
-                gameprofile = server.getProfileCache().get(name).orElse(null);
-            }
-        } finally {
-            GameProfileCache.setUsesAuthentication(server.isDedicatedServer() && server.usesAuthentication());
-        }
-        if (gameprofile == null && CarpetSettings.allowSpawningOfflinePlayers) {
-            gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
-        }
-        return gameprofile;
-    }
-
-    private static CompletableFuture<Optional<GameProfile>> fetchGameProfile(final String name) {
-        return SkullBlockEntity.fetchGameProfile(name);
     }
 }

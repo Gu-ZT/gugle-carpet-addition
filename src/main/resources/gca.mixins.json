@@ -12,6 +12,7 @@
     "ChestMenuMixin",
     "CommandsMixin",
     "EntityInvoker",
+    "EntityPlayerMPFakeMixin",
     "EntityTypeMixin",
     "FenceGateBlockMixin",
     "FishingHookMixin",

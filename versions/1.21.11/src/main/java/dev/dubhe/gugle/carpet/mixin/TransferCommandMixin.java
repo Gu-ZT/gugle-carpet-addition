@@ -23,7 +23,8 @@ abstract class TransferCommandMixin {
         method = "register",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;"
+            target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;",
+            remap = false
         )
     )
     private static <S extends CommandSourceStack, T extends ArgumentBuilder<S, T>> T registerPermission(
