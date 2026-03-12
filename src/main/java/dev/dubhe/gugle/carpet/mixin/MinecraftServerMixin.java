@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
-import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.resident.FakePlayerResidentV2;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,11 +15,11 @@ public class MinecraftServerMixin {
 
     @Unique
     @Nullable
-    private FakePlayerResidentV2 gca$Resident = null;
+    private FakePlayerResident gca$Resident = null;
 
     @Inject(method = "loadLevel", at = @At("HEAD"))
     public void initResident(CallbackInfo ci) {
-        this.gca$Resident = new FakePlayerResidentV2((MinecraftServer) (Object) this);
+        this.gca$Resident = new FakePlayerResident((MinecraftServer) (Object) this);
     }
 
     @Inject(method = "loadLevel", at = @At("RETURN"))
