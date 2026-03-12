@@ -51,6 +51,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
         .create();
     public static String MOD_ID = "gca";
+    public static String MOD_NAME = "guglecarpetaddition";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
     public static final List<Map.Entry<Long, Runnable>> PLAN_FUNCTION = new ArrayList<>();

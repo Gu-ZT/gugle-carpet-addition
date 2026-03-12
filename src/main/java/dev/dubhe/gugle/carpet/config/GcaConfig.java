@@ -88,10 +88,7 @@ public class GcaConfig<T extends IWithName> {
         this.server = server;
         this.contents.clear();
 
-        Path path = this.server.getWorldPath(LevelResource.ROOT)
-            .resolve("serverconfig")
-            .resolve(GcaExtension.MOD_ID)
-            .resolve(this.filename);
+        Path path = this.getFilePath();
 
         try {
             String json = this.getOrCreateFile(path);
@@ -101,6 +98,13 @@ public class GcaConfig<T extends IWithName> {
         } catch (IOException e) {
             GcaExtension.LOGGER.error("Failed to create config file: {}", this.filename, e);
         }
+    }
+
+    private Path getFilePath() {
+        return this.server.getWorldPath(LevelResource.ROOT)
+            .resolve("serverconfig")
+            .resolve(GcaExtension.MOD_NAME)
+            .resolve(this.filename);
     }
 
     public void close() {
@@ -121,10 +125,7 @@ public class GcaConfig<T extends IWithName> {
     public void setDirty() {
         if (this.server == null) return;
 
-        Path path = this.server.getWorldPath(LevelResource.ROOT)
-            .resolve("serverconfig")
-            .resolve(GcaExtension.MOD_ID)
-            .resolve(this.filename);
+        Path path = this.getFilePath();
 
         try {
             path.toFile().getParentFile().mkdirs();
