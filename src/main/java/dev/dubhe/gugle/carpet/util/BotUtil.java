@@ -23,8 +23,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class BotUtil {
-    public static boolean spawnBot(MinecraftServer server, BotInfo bot)
-    {
+    public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
         ServerLevel level = server.getLevel(bot.dimension());
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameProfile = getGameProfile(server, bot.name());
@@ -55,8 +54,7 @@ public class BotUtil {
             if (cache != null) {
                 gameprofile = server.getProfileCache().get(name).orElse(null);
             }
-        }
-        finally {
+        } finally {
             GameProfileCache.setUsesAuthentication(server.isDedicatedServer() && server.usesAuthentication());
         }
         if (gameprofile == null && CarpetSettings.allowSpawningOfflinePlayers) {
