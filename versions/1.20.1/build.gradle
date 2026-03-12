@@ -52,6 +52,24 @@ repositories {
 
 loom {
     accessWidenerPath = file("gca.accesswidener")
+
+    runConfigs.configureEach {
+        runDir '../../run'
+        def args = [
+                '-Dmixin.debug.export=true',
+                '-DMC_DEBUG_ENABLED=true',
+                '-DMC_DEBUG_DEV_COMMANDS=true'
+        ]
+        vmArgs args
+    }
+
+    runConfigs.client {
+        ideConfigGenerated = true
+    }
+
+    mixin {
+        useLegacyMixinAp = true
+    }
 }
 
 //remapJar {
