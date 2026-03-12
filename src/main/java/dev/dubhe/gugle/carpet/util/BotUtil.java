@@ -10,7 +10,6 @@ import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
-import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
@@ -22,10 +21,17 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+//#if MC < 12102
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
+//#else
+//$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
+//$$ import java.util.Set;
+//#endif
+
+
 public class BotUtil {
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
         ServerLevel level = server.getLevel(bot.dimension());
-        GameProfileCache.setUsesAuthentication(false);
         GameProfile gameProfile = getGameProfile(server, bot.name());
         if (gameProfile == null) return false;
         fetchGameProfile(gameProfile.getName()).thenAcceptAsync(p -> {
@@ -33,13 +39,32 @@ public class BotUtil {
             EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile, ClientInformation.createDefault());
             instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
             server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation(), false));
-            instance.teleportTo(level, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
+            instance.teleportTo(
+                level,
+                bot.pos().x,
+                bot.pos().y,
+                bot.pos().z,
+                //#if MC >= 12102
+                //$$ Set.of(),
+                //#endif
+                bot.facing().y,
+                bot.facing().x
+                //#if MC >= 12102
+                //$$ ,true
+                //#endif
+            );
             instance.setHealth(20.0F);
             ((EntityInvoker) instance).invokeUnsetRemoved();
             instance.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6F);
             instance.gameMode.changeGameModeForPlayer(bot.mode());
             server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) (instance.yHeadRot * 256 / 360)), bot.dimension());
-            server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), bot.dimension());
+            server.getPlayerList().broadcastAll(
+                //#if MC < 12102
+                new ClientboundTeleportEntityPacket(instance),
+                //#else
+                //$$ ClientboundEntityPositionSyncPacket.of(instance),
+                //#endif
+                bot.dimension());
             instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
             instance.getAbilities().flying = bot.flying();
             bot.actions().applyAction(instance);
@@ -48,6 +73,7 @@ public class BotUtil {
     }
 
     private static GameProfile getGameProfile(MinecraftServer server, final String name) {
+        GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile = null;
         try {
             GameProfileCache cache = server.getProfileCache();
