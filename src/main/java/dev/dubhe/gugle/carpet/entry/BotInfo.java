@@ -15,7 +15,7 @@ public record BotInfo(
     String desc,
     Vec3 pos,
     Vec2 facing,
-    ResourceKey<Level> dimType,
+    ResourceKey<Level> dimension,
     GameType mode,
     boolean flying,
     BotActionInfo actions
@@ -25,7 +25,7 @@ public record BotInfo(
         Codec.STRING.fieldOf("desc").forGetter(BotInfo::desc),
         Vec3.CODEC.fieldOf("pos").forGetter(BotInfo::pos),
         CustomCodec.VEC2_CODEC.fieldOf("facing").forGetter(BotInfo::facing),
-        ResourceKey.codec(Registries.DIMENSION).fieldOf("dim_type").forGetter(BotInfo::dimType),
+        ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(BotInfo::dimension),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions)

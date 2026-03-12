@@ -19,6 +19,7 @@ import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
+import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
@@ -421,26 +422,8 @@ public class BotCommand {
             source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
             return false;
         }
-        boolean success = EntityPlayerMPFake.createFake(
-            bot.name(),
-            source.getServer(),
-            bot.pos(),
-            bot.facing().y,
-            bot.facing().x,
-            bot.dimType(),
-            bot.mode(),
-            bot.flying()
-        )
-            //#if MC < 12100
-            //$$ != null
-            //#endif
-            ;
-        System.out.println(success);
-
-        if (success) {
-            ServerPlayer player = source.getServer().getPlayerList().getPlayerByName(bot.name());
-            if (player != null) bot.actions().applyAction(player);
-        } else {
+        boolean success = BotUtil.spawnBot(source.getServer(), bot);
+        if (!success) {
             source.sendFailure(Component.literal("%s is not loaded.".formatted(bot.name())));
         }
         return success;
