@@ -6,6 +6,10 @@ import net.minecraft.server.MinecraftServer;
 
 public class BotUtil {
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
+        return spawnBot(server, bot, true);
+    }
+
+    public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction) {
         EntityPlayerMPFake instance = EntityPlayerMPFake.createFake(
             bot.name(),
             server,
@@ -18,7 +22,7 @@ public class BotUtil {
         );
 
         if (instance != null) {
-            bot.actions().applyAction(instance);
+            if (applyAction) bot.actions().applyAction(instance);
             return true;
         } else {
             return false;

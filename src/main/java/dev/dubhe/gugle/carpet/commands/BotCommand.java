@@ -15,7 +15,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
@@ -295,16 +294,7 @@ public class BotCommand {
                 source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
                 continue;
             }
-            BotInfo bot = new BotInfo(
-                botName,
-                botName,
-                player.position(),
-                player.getRotationVector(),
-                player.level().dimension(),
-                player.gameMode.getGameModeForPlayer(),
-                player.getAbilities().flying,
-                BotActionInfo.fromActionPack(new EntityPlayerActionPack(player))
-            );
+            BotInfo bot = BotInfo.create(botName, botName, player, new EntityPlayerActionPack(player));
             BOT_CONFIG.update(bot, false);
             bots.add(bot);
         }
@@ -453,7 +443,7 @@ public class BotCommand {
                     //$$ .name()
                     //#else
                     .getName()
-                    //#endif
+                //#endif
             )));
             return 0;
         }
@@ -462,20 +452,16 @@ public class BotCommand {
             //$$ .name();
             //#else
             .getName();
-            //#endif
+        //#endif
         if (BOT_CONFIG.getContents().containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
         }
-        BOT_CONFIG.update(new BotInfo(
+        BOT_CONFIG.update(BotInfo.create(
             name,
             StringArgumentType.getString(context, "desc"),
-            player.position(),
-            player.getRotationVector(),
-            player.level().dimension(),
-            player.gameMode.getGameModeForPlayer(),
-            player.getAbilities().flying,
-            BotActionInfo.fromActionPack(((ServerPlayerInterface) player).getActionPack())
+            player,
+            ((ServerPlayerInterface) player).getActionPack()
         ));
         source.sendSuccess(() -> Component.literal("%s is added.".formatted(name)), false);
         return Command.SINGLE_SUCCESS;

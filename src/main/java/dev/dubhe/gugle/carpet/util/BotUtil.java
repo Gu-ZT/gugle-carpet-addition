@@ -38,6 +38,10 @@ public class BotUtil {
     }
 
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
+        return spawnBot(server, bot, true);
+    }
+
+    public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction) {
         ServerLevel level = server.getLevel(bot.dimension());
         GameProfile gameProfile = ProfileUtil.getGameProfile(server, bot.name());
         if (gameProfile == null) return false;
@@ -94,7 +98,7 @@ public class BotUtil {
                 bot.dimension());
             instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
             instance.getAbilities().flying = bot.flying();
-            bot.actions().applyAction(instance);
+            if (applyAction) bot.actions().applyAction(instance);
         }, server);
         return true;
     }

@@ -17,8 +17,10 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class GcaConfig<T extends IWithName> {
     public static final Map<String, GcaConfig<?>> CONFIGS = new LinkedHashMap<>();
@@ -33,9 +35,14 @@ public class GcaConfig<T extends IWithName> {
         this.codec = Codec.unboundedMap(Codec.STRING, codec);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends IWithName> GcaConfig<T> create(String name, Codec<T> codec) {
-        return (GcaConfig<T>) CONFIGS.computeIfAbsent(name, key -> new GcaConfig<>(name, codec));
+        return create(name, codec, true);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends IWithName> GcaConfig<T> create(String name, Codec<T> codec, boolean global) {
+        Supplier<GcaConfig<T>> factory = () -> new GcaConfig<>(name, codec);
+        return global ? (GcaConfig<T>) CONFIGS.computeIfAbsent(name, key -> factory.get()) : factory.get();
     }
 
     public void update(T value) {
@@ -45,6 +52,14 @@ public class GcaConfig<T extends IWithName> {
     public void update(T value, boolean dirty) {
         this.contents.put(value.name(), value);
         if (dirty) this.setDirty();
+    }
+
+    public void set(Collection<T> values) {
+        this.contents.clear();
+        for (T value : values) {
+            this.contents.put(value.name(), value);
+        }
+        this.setDirty();
     }
 
     public T remove(String name) {
@@ -86,6 +101,11 @@ public class GcaConfig<T extends IWithName> {
         } catch (IOException e) {
             GcaExtension.LOGGER.error("Failed to create config file: {}", this.filename, e);
         }
+    }
+
+    public void close() {
+        this.server = null;
+        this.contents.clear();
     }
 
     public String getOrCreateFile(Path path) throws IOException {

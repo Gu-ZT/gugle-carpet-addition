@@ -1,10 +1,13 @@
 package dev.dubhe.gugle.carpet.entry;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
@@ -30,4 +33,30 @@ public record BotInfo(
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions)
     ).apply(instance, BotInfo::new));
+
+    public static BotInfo create(ServerPlayer player, boolean saveAction) {
+        String name = player.getGameProfile()
+            //#if MC < 12110
+            .getName();
+        //#else
+        //$$ .name();
+        //#endif
+        EntityPlayerActionPack actionPack = saveAction ?
+            ((ServerPlayerInterface) player).getActionPack() :
+            new EntityPlayerActionPack(player);
+        return BotInfo.create(name, name, player, actionPack);
+    }
+
+    public static BotInfo create(String name, String desc, ServerPlayer player, EntityPlayerActionPack actionPack) {
+        return new BotInfo(
+            name,
+            desc,
+            player.position(),
+            player.getRotationVector(),
+            player.level().dimension(),
+            player.gameMode.getGameModeForPlayer(),
+            player.getAbilities().flying,
+            BotActionInfo.fromActionPack(actionPack)
+        );
+    }
 }
