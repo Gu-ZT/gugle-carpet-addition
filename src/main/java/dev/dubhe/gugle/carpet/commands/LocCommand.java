@@ -160,7 +160,7 @@ public class LocCommand {
                 .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(loc.name())))
         );
-        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimType());
+        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimension());
         MutableComponent info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.YELLOW)
@@ -198,7 +198,7 @@ public class LocCommand {
 
     public static List<Component> info(LocationInfo loc) {
         MutableComponent desc = Component.literal(loc.desc());
-        String dimName = loc.dimType()
+        String dimName = loc.dimension()
             //#if MC>=12111
             //$$ .identifier()
             //#else
@@ -206,16 +206,16 @@ public class LocCommand {
             //#endif
             .toString();
         MutableComponent dimType;
-        if (loc.dimType() == Level.NETHER) {
+        if (loc.dimension() == Level.NETHER) {
             dimType = Component.translatableWithFallback("advancements.nether.root.title", dimName);
-        } else if (loc.dimType() == Level.END) {
+        } else if (loc.dimension() == Level.END) {
             dimType = Component.translatableWithFallback("advancements.end.root.title", dimName);
-        } else if (loc.dimType() == Level.OVERWORLD) {
+        } else if (loc.dimension() == Level.OVERWORLD) {
             dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", dimName);
         } else {
             dimType = Component.literal(dimName);
         }
-        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimType());
+        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimension());
         List<Component> result = new ArrayList<>();
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         result.add(Component.literal("Loc Point: ").append(desc));
