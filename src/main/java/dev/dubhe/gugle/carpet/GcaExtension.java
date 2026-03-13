@@ -14,6 +14,7 @@ import dev.dubhe.gugle.carpet.commands.SopCommand;
 import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
+import dev.dubhe.gugle.carpet.config.ConfigUpdater;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;

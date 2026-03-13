@@ -19,6 +19,7 @@
     "ItemFrameMixin",
     "ItemStackMixin",
     "LocatorBarMixin",
+    "MainServerMixin",
     "MinecraftServerMixin",
     "NaturalSpawnerMixin",
     "PlayerAccessor",
@@ -36,6 +37,7 @@
   "server": [
   ],
   "client": [
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

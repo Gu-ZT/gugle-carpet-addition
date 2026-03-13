@@ -11,6 +11,7 @@ import dev.dubhe.gugle.carpet.entry.IWithName;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class GcaConfig<T extends IWithName> {
     public static final Map<String, GcaConfig<?>> CONFIGS = new LinkedHashMap<>();
 
     private final Map<String, T> contents = new LinkedHashMap<>();
+    @Nullable
     private MinecraftServer server;
     private final String filename;
     private final Codec<Map<String, T>> codec;
@@ -62,6 +64,7 @@ public class GcaConfig<T extends IWithName> {
         this.setDirty();
     }
 
+    @Nullable
     public T remove(String name) {
         if (!this.contents.containsKey(name)) return null;
         T removed = this.contents.remove(name);
@@ -73,6 +76,7 @@ public class GcaConfig<T extends IWithName> {
         return this.contents;
     }
 
+    @Nullable
     public MinecraftServer getServer() {
         return this.server;
     }

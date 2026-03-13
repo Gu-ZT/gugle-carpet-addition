@@ -20,10 +20,12 @@ public class MinecraftServerMixin {
     @Unique
     @Nullable
     private FakePlayerResident gca$Resident = null;
+    @Unique
+    private final MinecraftServer gca$server = (MinecraftServer) (Object) this;
 
     @Inject(method = "loadLevel", at = @At("HEAD"))
     public void initResident(CallbackInfo ci) {
-        this.gca$Resident = new FakePlayerResident((MinecraftServer) (Object) this);
+        this.gca$Resident = new FakePlayerResident(this.gca$server);
     }
 
     @Inject(method = "loadLevel", at = @At("RETURN"))
@@ -37,7 +39,7 @@ public class MinecraftServerMixin {
     public void saveResidentPoint1(CallbackInfo ci) {
         GcaExtension.LOGGER.info("stop server is running: {}", this.running);
         if (this.gca$Resident == null) return;
-        if (((MinecraftServer) (Object) this).isSingleplayer()) return;
+        if (this.gca$server.isSingleplayer()) return;
         this.gca$Resident.save();
     }
 
