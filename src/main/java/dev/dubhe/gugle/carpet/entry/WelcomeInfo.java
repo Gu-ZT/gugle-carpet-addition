@@ -1,27 +1,35 @@
 package dev.dubhe.gugle.carpet.entry;
 
+import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.ExtraCodecs;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Map;
 
-public record WelcomeInfo(List<String> messages, Map<String, WelcomeMessage.MessageData> args) implements IWithName {
+public record WelcomeInfo(List<String> messages, @Nullable JsonElement args) implements IWithName {
+    public static final String KEY = "info";
     public static final Codec<WelcomeInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.STRING.listOf().optionalFieldOf("messages", List.of("{%player%}, welcome!")).forGetter(WelcomeInfo::messages),
-        Codec.unboundedMap(Codec.STRING, WelcomeMessage.MessageData.CODEC)
-            .optionalFieldOf("args", Map.of("player", new WelcomeMessage.MessageData()))
-            .forGetter(WelcomeInfo::args)
+        Codec.STRING.listOf().fieldOf("messages").forGetter(WelcomeInfo::messages),
+        ExtraCodecs.JSON.optionalFieldOf("args", null).forGetter(WelcomeInfo::args)
     ).apply(instance, WelcomeInfo::new));
 
     @Override
     public String name() {
-        return "data";
+        return KEY;
     }
 
-    public WelcomeMessage.MessageData getArg(String key) {
-        return this.args.getOrDefault(key, new WelcomeMessage.MessageData());
+    public static WelcomeInfo defaultInfo() {
+        return new WelcomeInfo(List.of("{%player%}, welcome!"), null);
+    }
+
+    @FunctionalInterface
+    public interface IMessageReplacer {
+        Component getMessage(MinecraftServer server, ServerPlayer player, @org.jetbrains.annotations.Nullable JsonElement args) throws Exception;
     }
 
 }

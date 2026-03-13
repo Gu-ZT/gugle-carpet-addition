@@ -44,7 +44,6 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
         .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocationSerializer())
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
-        .registerTypeHierarchyAdapter(WelcomeMessage.MessageData.class, new WelcomeMessage.MessageData.Serializer())
         .create();
     public static String MOD_ID = "gca";
     public static String MOD_NAME = "GugleCarpetAddition";
@@ -60,14 +59,17 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
         //#endif
     }
 
+    public static ResourceLocation parseLocation(String string) {
+        //#if MC>=12100
+        return ResourceLocation.parse(string);
+        //#else
+        //$$ return new ResourceLocation(string);
+        //#endif
+    }
+
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
         PlayerGameProfileInfo info = PlayerGameProfileInfo.of(player);
-//        Level level = player.level();
-//        MinecraftServer server = level instanceof ServerLevel serverLevel ? serverLevel.getServer() : null;
-//        if (server != null && server.isSingleplayer() && server.isSingleplayerOwner(profile)) {
-//            loadSavedPlayer(server);
-//        }
         Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(info.name());
         if (consumer != null) consumer.accept(player);
         if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
@@ -103,13 +105,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
     @Override
     public void onInitialize() {
         CarpetServer.manageExtension(this);
+        WelcomeMessage.registerDefaultReplacer();
     }
 
-    public static ResourceLocation parseLocation(String string) {
-        //#if MC>=12100
-        return ResourceLocation.parse(string);
-        //#else
-        //$$ return new ResourceLocation(string);
-        //#endif
-    }
 }
