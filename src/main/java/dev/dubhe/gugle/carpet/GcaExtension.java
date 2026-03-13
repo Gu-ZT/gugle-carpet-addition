@@ -28,10 +28,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-//#if MC>=12106
-//$$ import net.minecraft.util.ProblemReporter;
-//$$ import net.minecraft.world.level.storage.TagValueOutput;
-//#endif
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
