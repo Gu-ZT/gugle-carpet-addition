@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
     public static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting()
+        .setPrettyPrinting().disableHtmlEscaping()
         .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
         .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocationSerializer())
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
