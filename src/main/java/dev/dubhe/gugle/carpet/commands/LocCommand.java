@@ -198,33 +198,36 @@ public class LocCommand {
 
     public static List<Component> info(LocationInfo loc) {
         MutableComponent desc = Component.literal(loc.desc());
-        String dimName = loc.dimension()
-            //#if MC>=12111
-            //$$ .identifier()
-            //#else
-            .location()
-            //#endif
-            .toString();
-        MutableComponent dimType;
-        if (loc.dimension() == Level.NETHER) {
-            dimType = Component.translatableWithFallback("advancements.nether.root.title", dimName);
-        } else if (loc.dimension() == Level.END) {
-            dimType = Component.translatableWithFallback("advancements.end.root.title", dimName);
-        } else if (loc.dimension() == Level.OVERWORLD) {
-            dimType = Component.translatableWithFallback("flat_world_preset.minecraft.overworld", dimName);
-        } else {
-            dimType = Component.literal(dimName);
-        }
+        MutableComponent dimension = getDimensionComponent(loc.dimension());
         List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimension());
         List<Component> result = new ArrayList<>();
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         result.add(Component.literal("Loc Point: ").append(desc));
-        result.add(Component.literal("Dimension: ").append(dimType));
+        result.add(Component.literal("Dimension: ").append(dimension));
         if (!pos.isEmpty()) result.add(Component.literal("Position: ").append(pos.get(0)));
         if (pos.size() > 1) result.add(pos.get(1));
         if (pos.size() > 2) result.add(Component.literal("Transform Position: ").append(pos.get(2)));
         if (pos.size() > 3) result.add(pos.get(3));
         result.add(Component.literal("==================").withStyle(ChatFormatting.YELLOW));
         return result;
+    }
+
+    private static MutableComponent getDimensionComponent(ResourceKey<Level> dimension) {
+        String name = dimension
+            //#if MC>=12111
+            //$$ .identifier()
+            //#else
+            .location()
+            //#endif
+            .toString();
+        if (dimension == Level.NETHER) {
+            return Component.translatableWithFallback("advancements.nether.root.title", name);
+        } else if (dimension == Level.END) {
+            return Component.translatableWithFallback("advancements.end.root.title", name);
+        } else if (dimension == Level.OVERWORLD) {
+            return Component.translatableWithFallback("flat_world_preset.minecraft.overworld", name);
+        } else {
+            return Component.literal(name);
+        }
     }
 }

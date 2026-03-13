@@ -7,5 +7,6 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(value = EntityPlayerMPFake.class, remap = false)
 public interface EntityPlayerMPFakeInvoker {
     @Invoker(remap = false)
-    static void invokeLoadPlayerData(EntityPlayerMPFake player){}
+    static void invokeLoadPlayerData(EntityPlayerMPFake player) {
+    }
 }
