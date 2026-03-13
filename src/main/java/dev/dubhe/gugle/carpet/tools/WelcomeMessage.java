@@ -50,7 +50,7 @@ public class WelcomeMessage {
                     continue;
                 }
                 try {
-                    component.append(replacer.getMessage(server, player, info.args()));
+                    component.append(replacer.getMessage(server, player, info.args().orElse(null)));
                 } catch (Exception e) {
                     GcaExtension.LOGGER.error("Failed to replace welcome arg {}", argKey, e);
                     component.append("{%" + argKey + "%}");
