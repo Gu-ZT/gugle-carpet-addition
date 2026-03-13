@@ -33,7 +33,7 @@ public class WelcomeMessage {
     private static final Map<String, WelcomeInfo.IMessageReplacer> REPLACERS = new HashMap<>();
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
-        WelcomeInfo info = WELCOME_CONFIG.getContents().computeIfAbsent(WelcomeInfo.KEY, key -> WelcomeInfo.defaultInfo());
+        WelcomeInfo info = getOrCreateWelcomeInfo();
         MinecraftServer server = player.level().getServer();
         for (String msg : info.messages()) {
             MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
@@ -58,6 +58,15 @@ public class WelcomeMessage {
             }
             player.sendSystemMessage(component);
         }
+    }
+
+    private static WelcomeInfo getOrCreateWelcomeInfo() {
+        WelcomeInfo info = WELCOME_CONFIG.getContents().get(WelcomeInfo.KEY);
+        if (info == null) {
+            info = WelcomeInfo.defaultInfo();
+            WELCOME_CONFIG.update(info);
+        }
+        return info;
     }
 
     public static void registerReplacer(String key, WelcomeInfo.IMessageReplacer replacer) {
