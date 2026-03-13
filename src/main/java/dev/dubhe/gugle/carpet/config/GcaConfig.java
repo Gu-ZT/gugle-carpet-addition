@@ -103,7 +103,7 @@ public class GcaConfig<T extends IWithName> {
     private Path getFilePath() {
         return this.server.getWorldPath(LevelResource.ROOT)
             .resolve("serverconfig")
-            .resolve(GcaExtension.MOD_NAME)
+            .resolve(GcaExtension.MOD_NAME.toLowerCase())
             .resolve(this.filename);
     }
 
