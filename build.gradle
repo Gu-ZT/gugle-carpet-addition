@@ -21,6 +21,6 @@ preprocess {
     mc12104.link(mc12103, null)
     mc12105.link(mc12104, null)
     mc12107.link(mc12105, null)
-    mc12110.link(mc12107, file('versions/mapping-1.21.7-1.21.10.txt'))
+    mc12110.link(mc12107, file('versions/mapping-1.21.10-1.21.7.txt'))
     mc12111.link(mc12110, null)
 }

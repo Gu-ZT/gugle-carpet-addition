@@ -15,7 +15,7 @@ import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
@@ -66,18 +66,15 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
-        GameProfileHelper.prasePlayerGameProfile(
-            player, (profile, name, uuid) -> {
-//                Level level = player.level();
-//                MinecraftServer server = level instanceof ServerLevel serverLevel ? serverLevel.getServer() : null;
-//                if (server != null && server.isSingleplayer() && server.isSingleplayerOwner(profile)) {
-//                    loadSavedPlayer(server);
-//                }
-                Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(name);
-                if (consumer != null) consumer.accept(player);
-                if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
-            }
-        );
+        PlayerGameProfileInfo info = PlayerGameProfileInfo.of(player);
+//        Level level = player.level();
+//        MinecraftServer server = level instanceof ServerLevel serverLevel ? serverLevel.getServer() : null;
+//        if (server != null && server.isSingleplayer() && server.isSingleplayerOwner(profile)) {
+//            loadSavedPlayer(server);
+//        }
+        Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(info.name());
+        if (consumer != null) consumer.accept(player);
+        if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
     }
 
     @Override

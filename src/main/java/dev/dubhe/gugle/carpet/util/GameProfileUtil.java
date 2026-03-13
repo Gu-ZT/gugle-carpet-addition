@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public class ProfileUtil {
+public class GameProfileUtil {
 
     public static GameProfile getGameProfile(MinecraftServer server, final String name) {
         GameProfileCache.setUsesAuthentication(false);

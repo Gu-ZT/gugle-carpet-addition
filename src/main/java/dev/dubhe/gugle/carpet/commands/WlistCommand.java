@@ -8,8 +8,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.PermissionUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -20,7 +21,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 public class WlistCommand {
     private static final SimpleCommandExceptionType ERROR_ALREADY_WHITELISTED = new SimpleCommandExceptionType(Component.translatable(
@@ -72,9 +73,9 @@ public class WlistCommand {
                                     return SharedSuggestionProvider.suggest(
                                         playerList.getPlayers()
                                             .stream()
-                                            .filter((serverPlayer) -> !playerList.getWhiteList()
-                                                .isWhiteListed(GameProfileHelper.prasePlayerGameProfile(serverPlayer)))
-                                            .map(GameProfileHelper::prasePlayerGameName),
+                                            .filter(player -> !playerList.getWhiteList()
+                                                .isWhiteListed(PlayerGameProfileInfo.of(player).profile()))
+                                            .map(player -> player.getGameProfile().getName()),
                                         suggestionsBuilder
                                     );
                                 })
@@ -100,41 +101,41 @@ public class WlistCommand {
     public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList whiteList = source.getServer().getPlayerList().getWhiteList();
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                if (whiteList.isWhiteListed(profile)) return;
-                UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(profile);
-                whiteList.add(userWhiteListEntry);
-                counter.getAndIncrement();
-                source.sendSuccess(() -> Component.translatable("commands.whitelist.add.success", Component.literal(name)), true);
-            }
-        );
-        if (counter.get() == 0) throw ERROR_ALREADY_WHITELISTED.create();
-        return counter.get();
+
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (whiteList.isWhiteListed(info.profile())) continue;
+            UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(info.profile());
+            whiteList.add(userWhiteListEntry);
+            counter++;
+            source.sendSuccess(() -> Component.translatable("commands.whitelist.add.success", Component.literal(info.name())), true);
+        }
+        if (counter == 0) throw ERROR_ALREADY_WHITELISTED.create();
+        return counter;
     }
 
     public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserWhiteList whiteList = source.getServer().getPlayerList().getWhiteList();
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                if (whiteList.isWhiteListed(profile)) {
-                    UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(profile);
-                    whiteList.remove(userWhiteListEntry);
-                    counter.getAndIncrement();
-                    source.sendSuccess(() -> Component.translatable("commands.whitelist.remove.success", Component.literal(name)), true);
-                }
+
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (whiteList.isWhiteListed(info.profile())) {
+                UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(info.profile());
+                whiteList.remove(userWhiteListEntry);
+                counter++;
+                source.sendSuccess(() -> Component.translatable("commands.whitelist.remove.success", Component.literal(info.name())), true);
             }
-        );
-        if (counter.get() == 0) throw ERROR_NOT_WHITELISTED.create();
+        }
+        if (counter == 0) throw ERROR_NOT_WHITELISTED.create();
         source.getServer().kickUnlistedPlayers(
             //#if MC<12109
             source
             //#endif
         );
-        return counter.get();
+        return counter;
     }
 
     public static int list(CommandContext<CommandSourceStack> context) {
@@ -150,34 +151,35 @@ public class WlistCommand {
 
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         WLIST_PERMISSION_CONFIG.tryInit(context);
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(uuid.toString(), true), false);
-                context.getSource()
-                    .sendSuccess(
-                        () -> Component.literal("Player %s has been granted permission to operate the whitelist.".formatted(name)),
-                        true
-                    );
-                counter.incrementAndGet();
-            }
-        );
-        if (counter.get() > 0) WLIST_PERMISSION_CONFIG.setDirty();
-        return counter.get();
+
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), true), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(
+                    () -> Component.literal("Player %s has been granted permission to operate the whitelist.".formatted(info.name())),
+                    true
+                );
+        }
+        if (counter > 0) WLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
 
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         WLIST_PERMISSION_CONFIG.tryInit(context);
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(uuid.toString(), false), false);
-                context.getSource()
-                    .sendSuccess(() -> Component.literal("Revoked player %s's permission to operate the whitelist".formatted(name)), true);
-                counter.incrementAndGet();
-            }
-        );
-        if (counter.get() > 0) WLIST_PERMISSION_CONFIG.setDirty();
-        return counter.get();
+
+
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), false), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(() -> Component.literal("Revoked player %s's permission to operate the whitelist".formatted(info.name())), true);
+        }
+        if (counter > 0) WLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
 }

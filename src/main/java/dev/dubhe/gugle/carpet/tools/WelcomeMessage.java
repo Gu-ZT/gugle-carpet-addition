@@ -12,6 +12,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.entry.WelcomeInfo;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
@@ -44,7 +45,7 @@ public class WelcomeMessage {
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
         WelcomeInfo info = WELCOME_CONFIG.getContents().get("data");
-        MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
+        MinecraftServer server = player.level().getServer();
         for (String msg : info.messages()) {
             List<String> argKeys = new ArrayList<>();
             Matcher matcher = Pattern.compile(ARGS_REGEX).matcher(msg);
@@ -138,7 +139,8 @@ public class WelcomeMessage {
         PLAYER(
             GcaExtension.id("player"), (s, p, d) -> {
             MutableComponent component = Component.literal("");
-            GameProfileHelper.prasePlayerGameProfile(p, (profile, name, uuid) -> component.append(name));
+            String name = PlayerGameProfileInfo.of(p).name();
+            component.append(name);
             return component;
         }
         ),

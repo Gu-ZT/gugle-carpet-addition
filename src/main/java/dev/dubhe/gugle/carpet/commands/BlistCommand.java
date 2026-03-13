@@ -10,8 +10,9 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.PermissionUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -24,7 +25,7 @@ import net.minecraft.server.players.UserBanListEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 public class BlistCommand {
     private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable(
@@ -106,38 +107,36 @@ public class BlistCommand {
         CommandSourceStack source = context.getSource();
         UserBanList banned = source.getServer().getPlayerList().getBans();
         String reason = getReason(context);
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                if (banned.isBanned(profile)) return;
-                UserBanListEntry ban = new UserBanListEntry(profile, null, source.getTextName(), null, reason);
-                banned.add(ban);
-                counter.incrementAndGet();
-                ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(uuid);
-                if (serverPlayer != null) {
-                    serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
-                }
-                source.sendSuccess(() -> Component.translatable("commands.ban.success", Component.literal(name), ban.getReason()), true);
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (banned.isBanned(info.profile())) continue;
+            UserBanListEntry ban = new UserBanListEntry(info.profile(), null, source.getTextName(), null, reason);
+            banned.add(ban);
+            counter++;
+            ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(info.uuid());
+            if (serverPlayer != null) {
+                serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
             }
-        );
-        if (counter.get() == 0) throw ERROR_ALREADY_BANNED.create();
-        return counter.get();
+            source.sendSuccess(() -> Component.translatable("commands.ban.success", Component.literal(info.name()), ban.getReason()), true);
+        }
+        if (counter == 0) throw ERROR_ALREADY_BANNED.create();
+        return counter;
     }
 
     public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
         UserBanList banned = source.getServer().getPlayerList().getBans();
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                if (!banned.isBanned(profile)) return;
-                banned.remove(profile);
-                counter.incrementAndGet();
-                source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(name)), true);
-            }
-        );
-        if (counter.get() == 0) throw ERROR_NOT_BANNED.create();
-        return counter.get();
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (!banned.isBanned(info.profile())) continue;
+            banned.remove(info.profile());
+            counter++;
+            source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(info.name())), true);
+        }
+        if (counter == 0) throw ERROR_NOT_BANNED.create();
+        return counter;
     }
 
     public static int list(CommandContext<CommandSourceStack> context) {
@@ -163,37 +162,36 @@ public class BlistCommand {
 
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         BLIST_PERMISSION_CONFIG.tryInit(context);
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(uuid.toString(), true), false);
-                context.getSource()
-                    .sendSuccess(
-                        () -> Component.literal("Player %s has been granted permission to operate the banned list.".formatted(name)),
-                        true
-                    );
-                counter.incrementAndGet();
-            }
-        );
-        if (counter.get() > 0) BLIST_PERMISSION_CONFIG.setDirty();
-        return counter.get();
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), true), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(
+                    () -> Component.literal("Player %s has been granted permission to operate the banned list.".formatted(info.name())),
+                    true
+                );
+        }
+        if (counter > 0) BLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
 
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         BLIST_PERMISSION_CONFIG.tryInit(context);
-        AtomicInteger counter = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (profile, name, uuid) -> {
-                BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(uuid.toString(), false), false);
-                context.getSource()
-                    .sendSuccess(
-                        () -> Component.literal("Revoked player %s's permission to operate the banned list".formatted(name)),
-                        true
-                    );
-                counter.incrementAndGet();
-            }
-        );
-        if (counter.get() > 0) BLIST_PERMISSION_CONFIG.setDirty();
-        return counter.get();
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), false), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(
+                    () -> Component.literal("Revoked player %s's permission to operate the banned list".formatted(info.name())),
+                    true
+                );
+        }
+        if (counter > 0) BLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
+
 }

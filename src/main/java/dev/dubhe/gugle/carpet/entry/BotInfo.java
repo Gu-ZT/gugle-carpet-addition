@@ -35,12 +35,7 @@ public record BotInfo(
     ).apply(instance, BotInfo::new));
 
     public static BotInfo create(ServerPlayer player, boolean saveAction) {
-        String name = player.getGameProfile()
-            //#if MC < 12110
-            .getName();
-        //#else
-        //$$ .name();
-        //#endif
+        String name = player.getGameProfile().getName();
         EntityPlayerActionPack actionPack = saveAction ?
             ((ServerPlayerInterface) player).getActionPack() :
             new EntityPlayerActionPack(player);

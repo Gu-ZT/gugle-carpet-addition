@@ -438,21 +438,11 @@ public class BotCommand {
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
             source.sendFailure(Component.literal("%s is not a fake player.".formatted(
-                p.getGameProfile()
-                    //#if MC>=12110
-                    //$$ .name()
-                    //#else
-                    .getName()
-                //#endif
+                p.getGameProfile().getName()
             )));
             return 0;
         }
-        String name = player.getGameProfile()
-            //#if MC>=12110
-            //$$ .name();
-            //#else
-            .getName();
-        //#endif
+        String name = player.getGameProfile().getName();
         if (BOT_CONFIG.getContents().containsKey(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;

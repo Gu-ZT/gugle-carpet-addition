@@ -6,13 +6,12 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.OldUsersConverter;
 import net.minecraft.world.item.component.ResolvableProfile;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
-import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
-public class ProfileUtil {
+public class GameProfileUtil {
+
     public static GameProfile getGameProfile(MinecraftServer server, final String name) {
         server.services().nameToIdCache().resolveOfflineUsers(false);
 

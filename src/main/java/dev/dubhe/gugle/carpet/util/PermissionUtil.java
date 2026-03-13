@@ -2,7 +2,6 @@ package dev.dubhe.gugle.carpet.util;
 
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,7 +21,7 @@ public class PermissionUtil {
         if (!stack.isPlayer()) return true;
         ServerPlayer player = stack.getPlayer();
         if (player == null) return false;
-        String uuid = GameProfileHelper.prasePlayerGameID(player).toString();
+        String uuid = player.getGameProfile().getId().toString();
         return Optional.ofNullable(permission.getContents().get(uuid)).map(NameBooleanInfo::status).orElse(false);
     }
 

@@ -43,17 +43,12 @@ public class BotUtil {
 
     public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction) {
         ServerLevel level = server.getLevel(bot.dimension());
-        GameProfile gameProfile = ProfileUtil.getGameProfile(server, bot.name());
+        GameProfile gameProfile = GameProfileUtil.getGameProfile(server, bot.name());
         if (gameProfile == null) return false;
-        String name = gameProfile
-            //#if MC < 12110
-            .getName();
-        //#else
-        //$$ .name();
-        //#endif
+        String name = gameProfile.getName();
 
         SpawningBots.add(name);
-        ProfileUtil.fetchGameProfile(server, gameProfile).whenCompleteAsync((p, t) -> {
+        GameProfileUtil.fetchGameProfile(server, gameProfile).whenCompleteAsync((p, t) -> {
             SpawningBots.remove(name);
             if (t != null) return;
             GameProfile profile =
