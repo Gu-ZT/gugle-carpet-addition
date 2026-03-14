@@ -50,7 +50,8 @@ public class ConfigUpdater {
 
     public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access) {
         Path levelPath = access.getLevelPath(LevelResource.ROOT);
-        // bot
+        GcaExtension.LOGGER.info("Checking old config files...");
+
         updateMapping(NameMapper.of(levelPath, "bot"), DeprecatedBotInfo.class, BotInfo.CODEC, info -> {
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, info.actions).result().orElse(BotActionInfo.EMPTY);
             return new BotInfo(
@@ -116,6 +117,7 @@ public class ConfigUpdater {
 
     private static <T extends IWithName> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
+        GcaExtension.LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
             String jsonStr = Files.readString(fileMapper.oldPath);
             JsonObject json = GSON.fromJson(jsonStr, JsonObject.class);
@@ -133,7 +135,9 @@ public class ConfigUpdater {
             }
 
             JsonElement resultJson = result.result().orElseThrow();
+            fileMapper.newName.getParent().toFile().mkdirs();
             Files.writeString(fileMapper.newName, GcaConfig.GSON.toJson(resultJson), StandardCharsets.UTF_8);
+            Files.deleteIfExists(fileMapper.oldPath);
         } catch (Exception e) {
             GcaExtension.LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
         }
