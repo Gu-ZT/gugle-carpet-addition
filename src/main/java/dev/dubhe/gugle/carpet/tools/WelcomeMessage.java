@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -30,30 +31,37 @@ import java.util.regex.Pattern;
 public class WelcomeMessage {
     private static final Pattern ARGS_PATTERN = Pattern.compile("\\{%\\w+%}");
     private static final GcaConfig<WelcomeInfo> WELCOME_CONFIG = GcaConfig.create("welcome", WelcomeInfo.CODEC);
-    private static final Map<String, WelcomeInfo.IMessageReplacer> REPLACERS = new HashMap<>();
+    private static final Map<ResourceLocation, WelcomeInfo.IMessageReplacer> REPLACERS = new HashMap<>();
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
         WelcomeInfo info = getOrCreateWelcomeInfo();
         MinecraftServer server = player.level().getServer();
-        for (String msg : info.messages()) {
+        if (server == null) return;
+        for (String message : info.messages()) {
             MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
-            for (MessageSegment segment : splitSegments(msg)) {
+            for (MessageSegment segment : splitSegments(message)) {
                 if (!segment.arg()) {
                     component.append(segment.text());
                     continue;
                 }
-                String argKey = segment.text();
-                WelcomeInfo.IMessageReplacer replacer = REPLACERS.get(argKey);
+                String key = segment.text();
+                WelcomeInfo.MessageArg arg = info.args().get(key);
+                if (arg == null) {
+                    GcaExtension.LOGGER.warn("No arg found for key '{}'", key);
+                    component.append("{%" + key + "%}");
+                    continue;
+                }
+                WelcomeInfo.IMessageReplacer replacer = REPLACERS.get(arg.type());
                 if (replacer == null) {
-                    GcaExtension.LOGGER.warn("No replacer found for welcome arg {}", argKey);
-                    component.append("{%" + argKey + "%}");
+                    GcaExtension.LOGGER.warn("No replacer found for welcome arg '{}'", arg.type());
+                    component.append("{%" + key + "%}");
                     continue;
                 }
                 try {
-                    component.append(replacer.getMessage(server, player, info.args().orElse(null)));
+                    component.append(replacer.getMessage(server, player, arg.data().orElse(null)));
                 } catch (Exception e) {
-                    GcaExtension.LOGGER.error("Failed to replace welcome arg {}", argKey, e);
-                    component.append("{%" + argKey + "%}");
+                    GcaExtension.LOGGER.error("Failed to replace welcome arg {}", key, e);
+                    component.append("{%" + key + "%}");
                 }
             }
             player.sendSystemMessage(component);
@@ -69,8 +77,8 @@ public class WelcomeMessage {
         return info;
     }
 
-    public static void registerReplacer(String key, WelcomeInfo.IMessageReplacer replacer) {
-        REPLACERS.put(key, replacer);
+    public static void registerReplacer(ResourceLocation location, WelcomeInfo.IMessageReplacer replacer) {
+        REPLACERS.put(location, replacer);
     }
 
     private static List<MessageSegment> splitSegments(String msg) {
@@ -95,10 +103,10 @@ public class WelcomeMessage {
     }
 
     public static void registerDefaultReplacer() {
-        registerReplacer("player", (server, player, args) ->
+        registerReplacer(GcaExtension.id("player"), (server, player, args) ->
             player.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
         );
-        registerReplacer("day_count", (server, player, args) -> {
+        registerReplacer(GcaExtension.id("day_count"), (server, player, args) -> {
             MutableComponent component = Component.literal(String.valueOf((server.overworld().getDayTime() / 1728000)));
             if (args == null || args.isJsonNull() || (!args.isJsonPrimitive() && !args.isJsonObject()) || (
                 args.isJsonObject() && args.getAsJsonObject().asMap().isEmpty()
@@ -122,7 +130,7 @@ public class WelcomeMessage {
                 return component;
             }
         });
-        registerReplacer("random", (server, player, args) -> {
+        registerReplacer(GcaExtension.id("random"), (server, player, args) -> {
             if (args != null && args.isJsonArray()) {
                 List<String> list = args.getAsJsonArray()
                     .asList()
@@ -137,7 +145,7 @@ public class WelcomeMessage {
             }
             return Component.literal("[EMPTY]");
         });
-        registerReplacer("server", (server, player, args) -> {
+        registerReplacer(GcaExtension.id("server"), (server, player, args) -> {
             MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
             if (args == null || !args.isJsonArray()) return component;
             int i = 0;
