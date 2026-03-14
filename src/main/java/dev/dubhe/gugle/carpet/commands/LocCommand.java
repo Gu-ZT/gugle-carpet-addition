@@ -35,7 +35,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class LocCommand {
-    private static final GcaConfig<LocationInfo> LOCATION_CONFIG = GcaConfig.create("loc", LocationInfo.CODEC);
+    private static final GcaConfig<LocationInfo> LOCATION_CONFIG = GcaConfig.create("location", LocationInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(

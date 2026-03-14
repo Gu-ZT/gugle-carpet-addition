@@ -44,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class BotCommand {
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
-    private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("botGroup", BotGroupInfo.CODEC);
+    private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
