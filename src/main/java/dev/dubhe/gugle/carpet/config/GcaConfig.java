@@ -1,5 +1,7 @@
 package dev.dubhe.gugle.carpet.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.context.CommandContext;
@@ -24,6 +26,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class GcaConfig<T extends IWithName> {
+    public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     public static final Map<String, GcaConfig<?>> CONFIGS = new LinkedHashMap<>();
 
     private final Map<String, T> contents = new LinkedHashMap<>();
@@ -140,7 +143,7 @@ public class GcaConfig<T extends IWithName> {
             }
 
             JsonElement json = result.result().orElseThrow();
-            Files.writeString(path, GcaExtension.GSON.toJson(json), StandardCharsets.UTF_8);
+            Files.writeString(path, GSON.toJson(json), StandardCharsets.UTF_8);
         } catch (IOException e) {
             GcaExtension.LOGGER.error("Failed to save config file: {}", this.filename, e);
         }

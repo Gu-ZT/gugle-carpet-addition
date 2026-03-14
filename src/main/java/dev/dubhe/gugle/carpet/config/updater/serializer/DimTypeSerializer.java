@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools.serializer;
+package dev.dubhe.gugle.carpet.config.updater.serializer;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;

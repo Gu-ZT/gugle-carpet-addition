@@ -2,8 +2,6 @@ package dev.dubhe.gugle.carpet;
 
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.mojang.brigadier.CommandDispatcher;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.commands.BlistCommand;
@@ -16,15 +14,10 @@ import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
-import dev.dubhe.gugle.carpet.tools.ResourceLocationSerializer;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
-import dev.dubhe.gugle.carpet.tools.serializer.ChatFormattingSerializer;
-import dev.dubhe.gugle.carpet.tools.serializer.DimTypeSerializer;
 import net.fabricmc.api.ModInitializer;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -39,12 +32,6 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
-    public static final Gson GSON = new GsonBuilder()
-        .setPrettyPrinting().disableHtmlEscaping()
-        .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
-        .registerTypeHierarchyAdapter(ResourceLocation.class, new ResourceLocationSerializer())
-        .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
-        .create();
     public static String MOD_ID = "gca";
     public static String MOD_NAME = "GugleCarpetAddition";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
