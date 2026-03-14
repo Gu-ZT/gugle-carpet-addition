@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.entry;
 
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
@@ -32,10 +33,14 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
     }
 
     public record MessageArg(ResourceLocation type, Optional<JsonElement> data) {
-        public static final Codec<MessageArg> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        private static final Codec<MessageArg> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("type").forGetter(MessageArg::type),
             ExtraCodecs.JSON.optionalFieldOf("data").forGetter(MessageArg::data)
         ).apply(instance, MessageArg::new));
+        public static final Codec<MessageArg> CODEC = Codec.either(ResourceLocation.CODEC, OBJECT_CODEC).xmap(
+            either -> either.map(type -> new MessageArg(type, Optional.empty()), arg -> arg),
+            arg -> arg.data().isPresent() ? Either.right(arg) : Either.left(arg.type())
+        );
     }
 
     @FunctionalInterface
