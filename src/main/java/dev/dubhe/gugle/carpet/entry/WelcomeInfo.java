@@ -5,7 +5,8 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
-import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,24 +29,29 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
     }
 
     public static WelcomeInfo defaultInfo() {
-        MessageArg arg = new MessageArg(GcaExtension.id("player"), Optional.empty());
+        MessageArg arg = new MessageArg(GcaExtension.id("player"));
         return new WelcomeInfo(List.of("{%player%}, welcome!"), Map.of("player", arg));
     }
 
-    public record MessageArg(ResourceLocation type, Optional<JsonElement> data) {
+    public record MessageArg(ResourceLocation type, Optional<JsonElement> data, ChatFormatting style) {
         private static final Codec<MessageArg> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("type").forGetter(MessageArg::type),
-            ExtraCodecs.JSON.optionalFieldOf("data").forGetter(MessageArg::data)
+            ExtraCodecs.JSON.optionalFieldOf("data").forGetter(MessageArg::data),
+            ChatFormatting.CODEC.optionalFieldOf("color", ChatFormatting.GOLD).forGetter(MessageArg::style)
         ).apply(instance, MessageArg::new));
         public static final Codec<MessageArg> CODEC = Codec.either(ResourceLocation.CODEC, OBJECT_CODEC).xmap(
-            either -> either.map(type -> new MessageArg(type, Optional.empty()), arg -> arg),
-            arg -> arg.data().isPresent() ? Either.right(arg) : Either.left(arg.type())
+            either -> either.map(MessageArg::new, arg -> arg),
+            arg -> arg.data.isEmpty() && arg.style == ChatFormatting.GOLD ? Either.left(arg.type()) : Either.right(arg)
         );
+
+        public MessageArg(ResourceLocation type) {
+            this(type, Optional.empty(), ChatFormatting.GOLD);
+        }
     }
 
     @FunctionalInterface
     public interface IMessageReplacer {
-        Component getMessage(MinecraftServer server, ServerPlayer player, @org.jetbrains.annotations.Nullable JsonElement args) throws Exception;
+        MutableComponent getMessage(MinecraftServer server, ServerPlayer player, @org.jetbrains.annotations.Nullable JsonElement args) throws Exception;
     }
 
 

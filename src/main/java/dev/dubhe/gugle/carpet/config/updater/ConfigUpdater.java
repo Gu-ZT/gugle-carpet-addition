@@ -95,15 +95,16 @@ public class ConfigUpdater {
                 .collect(Collectors.toMap(Map.Entry::getKey, it -> {
                     JsonElement element = it.getValue();
                     if (element.isJsonPrimitive()) {
-                        return new WelcomeInfo.MessageArg(
-                            GcaExtension.parseLocation(element.getAsString()),
-                            Optional.empty()
-                        );
+                        return new WelcomeInfo.MessageArg(GcaExtension.parseLocation(element.getAsString()));
                     }
                     JsonObject object = json.getAsJsonObject();
+                    ChatFormatting color = Optional.ofNullable(object.get("color"))
+                        .map(key -> ChatFormatting.getByName(key.getAsString()))
+                        .orElse(ChatFormatting.GOLD);
                     return new WelcomeInfo.MessageArg(
                         GcaExtension.parseLocation(object.get("type").getAsString()),
-                        Optional.ofNullable(object.get("data"))
+                        Optional.ofNullable(object.get("data")),
+                        color
                     );
                 }));
 

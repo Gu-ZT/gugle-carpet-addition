@@ -58,7 +58,7 @@ public class WelcomeMessage {
                     continue;
                 }
                 try {
-                    component.append(replacer.getMessage(server, player, arg.data().orElse(null)));
+                    component.append(replacer.getMessage(server, player, arg.data().orElse(null)).withStyle(arg.style()));
                 } catch (Exception e) {
                     GcaExtension.LOGGER.error("Failed to replace welcome arg {}", key, e);
                     component.append("{%" + key + "%}");
@@ -104,7 +104,7 @@ public class WelcomeMessage {
 
     public static void registerDefaultReplacer() {
         registerReplacer(GcaExtension.id("player"), (server, player, args) ->
-            player.getDisplayName().copy().withStyle(ChatFormatting.GOLD)
+            player.getDisplayName().copy()
         );
         registerReplacer(GcaExtension.id("day_count"), (server, player, args) -> {
             MutableComponent component = Component.literal(String.valueOf((server.overworld().getDayTime() / 1728000)));
@@ -146,7 +146,7 @@ public class WelcomeMessage {
             return Component.literal("[EMPTY]");
         });
         registerReplacer(GcaExtension.id("server"), (server, player, args) -> {
-            MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
+            MutableComponent component = Component.literal("");
             if (args == null || !args.isJsonArray()) return component;
             int i = 0;
             for (JsonElement element : args.getAsJsonArray()) {
