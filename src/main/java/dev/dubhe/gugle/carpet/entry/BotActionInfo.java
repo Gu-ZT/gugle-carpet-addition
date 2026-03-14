@@ -27,6 +27,8 @@ public record BotActionInfo(
         Codec.INT.optionalFieldOf("jump", 0).forGetter(BotActionInfo::jump)
     ).apply(instance, BotActionInfo::new));
 
+    public static final BotActionInfo EMPTY = new BotActionInfo(false, false, 0F, 0F, 0, 0, 0);
+
     public static BotActionInfo fromActionPack(EntityPlayerActionPack pack) {
         APAccessor accessor = (APAccessor) pack;
         return new BotActionInfo(

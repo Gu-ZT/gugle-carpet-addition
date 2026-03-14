@@ -1,6 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
-import dev.dubhe.gugle.carpet.config.ConfigUpdater;
+import dev.dubhe.gugle.carpet.config.updater.ConfigUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.repository.PackRepository;

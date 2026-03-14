@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.dubhe.gugle.carpet.config.ConfigUpdater;
+import dev.dubhe.gugle.carpet.config.updater.ConfigUpdater;
 import net.minecraft.server.Main;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
