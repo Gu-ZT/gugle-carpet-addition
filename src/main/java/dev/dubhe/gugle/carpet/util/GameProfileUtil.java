@@ -6,12 +6,14 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class GameProfileUtil {
 
+    @Nullable
     public static GameProfile getGameProfile(MinecraftServer server, final String name) {
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile = null;
