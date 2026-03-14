@@ -124,20 +124,23 @@ public class ConfigUpdater {
             JsonObject json = GSON.fromJson(jsonStr, JsonObject.class);
 
             List<T> list = function.apply(json);
-            if (list.isEmpty()) return;
-            Map<String, T> contents = list.stream().collect(Collectors.toMap(IWithName::name, it -> it, (a, b) -> b));
 
-            Codec<Map<String, T>> resultCodec = Codec.unboundedMap(Codec.STRING, codec);
-            DataResult<JsonElement> result = resultCodec.encodeStart(JsonOps.INSTANCE, contents);
+            if (!list.isEmpty()) {
+                Map<String, T> contents = list.stream().collect(Collectors.toMap(IWithName::name, it -> it, (a, b) -> b));
 
-            if (result.error().isPresent()) {
-                GcaExtension.LOGGER.error("Failed to encode config: {}", result.error().get().message());
-                return;
+                Codec<Map<String, T>> resultCodec = Codec.unboundedMap(Codec.STRING, codec);
+                DataResult<JsonElement> result = resultCodec.encodeStart(JsonOps.INSTANCE, contents);
+
+                if (result.error().isPresent()) {
+                    GcaExtension.LOGGER.error("Failed to encode config: {}", result.error().get().message());
+                    return;
+                }
+
+                JsonElement resultJson = result.result().orElseThrow();
+                fileMapper.newName.getParent().toFile().mkdirs();
+                Files.writeString(fileMapper.newName, GcaConfig.GSON.toJson(resultJson), StandardCharsets.UTF_8);
             }
 
-            JsonElement resultJson = result.result().orElseThrow();
-            fileMapper.newName.getParent().toFile().mkdirs();
-            Files.writeString(fileMapper.newName, GcaConfig.GSON.toJson(resultJson), StandardCharsets.UTF_8);
             Files.deleteIfExists(fileMapper.oldPath);
         } catch (Exception e) {
             GcaExtension.LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
