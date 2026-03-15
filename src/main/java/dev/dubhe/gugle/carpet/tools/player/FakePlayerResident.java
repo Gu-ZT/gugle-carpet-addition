@@ -28,7 +28,7 @@ public class FakePlayerResident {
             .getPlayers()
             .stream()
             .filter(it -> it instanceof EntityPlayerMPFake)
-            .map(it -> BotInfo.create(it, GcaSetting.fakePlayerReloadAction))
+            .map(it -> BotInfo.create(it, "Resident bot", GcaSetting.fakePlayerReloadAction))
             .toList();
         this.config.set(bots);
     }

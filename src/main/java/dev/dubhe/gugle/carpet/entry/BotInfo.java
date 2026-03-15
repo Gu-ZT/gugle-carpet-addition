@@ -34,12 +34,12 @@ public record BotInfo(
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions)
     ).apply(instance, BotInfo::new));
 
-    public static BotInfo create(ServerPlayer player, boolean saveAction) {
+    public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
         String name = player.getGameProfile().getName();
         EntityPlayerActionPack actionPack = saveAction ?
             ((ServerPlayerInterface) player).getActionPack() :
             new EntityPlayerActionPack(player);
-        return BotInfo.create(name, name, player, actionPack);
+        return BotInfo.create(name, desc, player, actionPack);
     }
 
     public static BotInfo create(String name, String desc, ServerPlayer player, EntityPlayerActionPack actionPack) {
