@@ -1,7 +1,9 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import dev.dubhe.gugle.carpet.config.updater.ConfigUpdater;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.Services;
 import net.minecraft.server.WorldStem;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.world.level.storage.LevelStorageSource;
@@ -18,8 +20,8 @@ public class MinecraftMixin {
         //#if MC < 12100
         //$$ String string,
         //#endif
-        LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, boolean bl, CallbackInfo ci) {
-        ConfigUpdater.tryUpdateOldVersion(levelStorageAccess);
+        LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, boolean bl, CallbackInfo ci, @Local Services services) {
+        ConfigUpdater.tryUpdateOldVersion(levelStorageAccess, services);
     }
 
 }

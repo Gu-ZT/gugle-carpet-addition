@@ -5,8 +5,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.SerializedName;
+import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
@@ -22,21 +24,33 @@ import dev.dubhe.gugle.carpet.config.updater.serializer.ResourceLocationSerializ
 import dev.dubhe.gugle.carpet.config.updater.serializer.ChatFormattingSerializer;
 import dev.dubhe.gugle.carpet.config.updater.serializer.DimTypeSerializer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtAccounter;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.Services;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,7 +62,7 @@ public class ConfigUpdater {
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
         .create();
 
-    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access) {
+    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services) {
         Path levelPath = access.getLevelPath(LevelResource.ROOT);
         GcaExtension.LOGGER.info("Checking old config files...");
 
@@ -76,6 +90,8 @@ public class ConfigUpdater {
         updateNameBoolean(NameMapper.of(levelPath, "wlist"));
 
         updateWelcome(NameMapper.of(levelPath, "welcome"));
+
+        updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services);
     }
 
     private static <T, R extends IWithName> void updateMapping(NameMapper fileMapper, Class<T> tClass, Codec<R> codec, Function<T, R> function) {
@@ -112,8 +128,60 @@ public class ConfigUpdater {
         });
     }
 
+    private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services) {
+        File playerDir = access.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
+        updateNormalResolver(fileMapper, BotInfo.CODEC, entry -> {
+            String name = entry.getKey();
+            JsonObject value = entry.getValue().getAsJsonObject();
+            UUID uuid = getUUIDByName(services, name);
+            File file = new File(playerDir, uuid.toString() + ".dat");
+            if (!file.exists() || !file.isFile()) {
+                GcaExtension.LOGGER.warn("Player data file not found for {}, skipping...", name);
+                return null;
+            }
+            Optional<CompoundTag> optional = getPlayerData(file);
+            if (optional.isEmpty()) {
+                GcaExtension.LOGGER.warn("Failed to load player data for {}, skipping...", name);
+                return null;
+            }
+            CompoundTag playerData = optional.get();
+            ListTag posList = playerData.getList("Pos", Tag.TAG_DOUBLE);
+            ListTag rotationList = playerData.getList("Rotation", Tag.TAG_FLOAT);
+            Vec3 pos = new Vec3(
+                Mth.clamp(posList.getDouble(0), -3.0000512E7, 3.0000512E7),
+                Mth.clamp(posList.getDouble(1), -2.0E7, 2.0E7),
+                Mth.clamp(posList.getDouble(2), -3.0000512E7, 3.0000512E7)
+            );
+            Vec2 facing = new Vec2(rotationList.getFloat(1), rotationList.getFloat(0));
+            GameType mode = playerData.contains("playerGameType", Tag.TAG_ANY_NUMERIC) ?
+                GameType.byId(playerData.getInt("playerGameType")) :
+                GameType.DEFAULT_MODE;
+            boolean flying = playerData.contains("abilities", Tag.TAG_COMPOUND) && playerData.getCompound("abilities").getBoolean("flying");
+            ResourceKey<Level> dimension = optional
+                .flatMap(tag -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, tag.get("Dimension"))).resultOrPartial(GcaExtension.LOGGER::error))
+                .orElse(Level.OVERWORLD);
+            BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, value.get("actions")).result().orElse(BotActionInfo.EMPTY);
+
+            return new BotInfo(
+                name,
+                "Resident bot imported from old config",
+                pos,
+                facing,
+                dimension,
+                mode,
+                flying,
+                actions
+            );
+        });
+    }
+
     private static <T extends IWithName> void updateNormalResolver(NameMapper fileMapper, Codec<T> codec, Function<Map.Entry<String, JsonElement>, T> function) {
-        updateResolver(fileMapper, codec, json -> GSON.fromJson(json, JsonObject.class).entrySet().stream().map(function).toList());
+        updateResolver(fileMapper, codec, json -> GSON.fromJson(json, JsonObject.class)
+            .entrySet()
+            .stream()
+            .map(function)
+            .filter(Objects::nonNull)
+            .toList());
     }
 
     private static <T extends IWithName> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
@@ -144,6 +212,24 @@ public class ConfigUpdater {
             Files.deleteIfExists(fileMapper.oldPath);
         } catch (Exception e) {
             GcaExtension.LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
+        }
+    }
+
+    private static UUID getUUIDByName(Services services, String name) {
+        return services
+            //#if MC < 12110
+            .profileCache().get(name)
+            //#else
+            //$$ .profileResolver().fetchByName(name)
+            //#endif
+            .map(GameProfile::getId).orElse(null);
+    }
+
+    private static Optional<CompoundTag> getPlayerData(File file) {
+        try {
+            return Optional.of(NbtIo.readCompressed(file.toPath(), NbtAccounter.unlimitedHeap()));
+        } catch (Exception var5) {
+            return Optional.empty();
         }
     }
 
