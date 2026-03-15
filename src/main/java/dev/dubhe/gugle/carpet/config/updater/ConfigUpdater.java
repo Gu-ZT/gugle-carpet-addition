@@ -8,7 +8,6 @@ import com.google.gson.annotations.SerializedName;
 import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
@@ -25,18 +24,13 @@ import dev.dubhe.gugle.carpet.config.updater.serializer.ChatFormattingSerializer
 import dev.dubhe.gugle.carpet.config.updater.serializer.DimTypeSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Services;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec2;
@@ -53,6 +47,15 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+//#if MC >= 12100
+import net.minecraft.nbt.NbtAccounter;
+//#endif
+//#if MC < 12105
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.util.Mth;
+//#endif
 
 public class ConfigUpdater {
     public static final Gson GSON = new GsonBuilder()
@@ -144,34 +147,8 @@ public class ConfigUpdater {
                 GcaExtension.LOGGER.warn("Failed to load player data for {}, skipping...", name);
                 return null;
             }
-            CompoundTag playerData = optional.get();
-            ListTag posList = playerData.getList("Pos", Tag.TAG_DOUBLE);
-            ListTag rotationList = playerData.getList("Rotation", Tag.TAG_FLOAT);
-            Vec3 pos = new Vec3(
-                Mth.clamp(posList.getDouble(0), -3.0000512E7, 3.0000512E7),
-                Mth.clamp(posList.getDouble(1), -2.0E7, 2.0E7),
-                Mth.clamp(posList.getDouble(2), -3.0000512E7, 3.0000512E7)
-            );
-            Vec2 facing = new Vec2(rotationList.getFloat(1), rotationList.getFloat(0));
-            GameType mode = playerData.contains("playerGameType", Tag.TAG_ANY_NUMERIC) ?
-                GameType.byId(playerData.getInt("playerGameType")) :
-                GameType.DEFAULT_MODE;
-            boolean flying = playerData.contains("abilities", Tag.TAG_COMPOUND) && playerData.getCompound("abilities").getBoolean("flying");
-            ResourceKey<Level> dimension = optional
-                .flatMap(tag -> DimensionType.parseLegacy(new Dynamic<>(NbtOps.INSTANCE, tag.get("Dimension"))).resultOrPartial(GcaExtension.LOGGER::error))
-                .orElse(Level.OVERWORLD);
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, value.get("actions")).result().orElse(BotActionInfo.EMPTY);
-
-            return new BotInfo(
-                name,
-                "Resident bot imported from old config",
-                pos,
-                facing,
-                dimension,
-                mode,
-                flying,
-                actions
-            );
+            return parseResidentBotInfo(name, actions, optional.get());
         });
     }
 
@@ -227,10 +204,42 @@ public class ConfigUpdater {
 
     private static Optional<CompoundTag> getPlayerData(File file) {
         try {
-            return Optional.of(NbtIo.readCompressed(file.toPath(), NbtAccounter.unlimitedHeap()));
+            return Optional.of(NbtIo.readCompressed(file
+                    //#if MC >= 12100
+                    .toPath(), NbtAccounter.unlimitedHeap()
+                //#endif
+            ));
         } catch (Exception var5) {
             return Optional.empty();
         }
+    }
+
+    private static BotInfo parseResidentBotInfo(String name, BotActionInfo actions, CompoundTag playerData) {
+        //#if MC < 12105
+        ListTag posList = playerData.getList("Pos", Tag.TAG_DOUBLE);
+        ListTag rotationList = playerData.getList("Rotation", Tag.TAG_FLOAT);
+        Vec3 pos = new Vec3(
+            Mth.clamp(posList.getDouble(0), -3.0000512E7, 3.0000512E7),
+            Mth.clamp(posList.getDouble(1), -2.0E7, 2.0E7),
+            Mth.clamp(posList.getDouble(2), -3.0000512E7, 3.0000512E7)
+        );
+        Vec2 facing = new Vec2(rotationList.getFloat(1), rotationList.getFloat(0));
+        GameType mode = playerData.contains("playerGameType", Tag.TAG_ANY_NUMERIC) ?
+            GameType.byId(playerData.getInt("playerGameType")) :
+            GameType.DEFAULT_MODE;
+        boolean flying = playerData.contains("abilities", Tag.TAG_COMPOUND) && playerData.getCompound("abilities").getBoolean("flying");
+        //#else
+//$$         Vec3 pos = playerData.read("Pos", Vec3.CODEC).orElse(Vec3.ZERO);
+//$$         Vec2 facing = playerData.read("Rotation", Vec2.CODEC).map(it -> new Vec2(it.y, it.x)).orElse(Vec2.ZERO);
+//$$         GameType mode = playerData.read("playerGameType", GameType.LEGACY_ID_CODEC).orElse(GameType.DEFAULT_MODE);
+//$$         boolean flying = playerData.getCompound("abilities")
+//$$             .flatMap(it -> it.getBoolean("flying"))
+//$$             .orElse(false);
+        //#endif
+        ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, playerData.get("Dimension"))
+            .resultOrPartial(GcaExtension.LOGGER::error)
+            .orElse(Level.OVERWORLD);
+        return new BotInfo(name, "Resident bot imported from old config", pos, facing, dimension, mode, flying, actions);
     }
 
     private record NameMapper(Path oldPath, Path newName) {
