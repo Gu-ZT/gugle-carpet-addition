@@ -142,6 +142,11 @@ public class ConfigUpdater {
     }
 
     private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services, boolean onelineMode) {
+        try {
+            Files.deleteIfExists(access.getLevelPath(LevelResource.ROOT).resolve("fake_player.old.gca.json"));
+        } catch (Exception e) {
+            GcaExtension.LOGGER.warn("Failed to delete old fake_player config backup file.", e);
+        }
         File playerDir = access.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
         updateNormalResolver(fileMapper, BotInfo.CODEC, entry -> {
             String name = entry.getKey();
