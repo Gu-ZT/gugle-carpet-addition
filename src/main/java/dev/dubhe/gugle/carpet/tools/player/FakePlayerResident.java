@@ -37,7 +37,7 @@ public class FakePlayerResident {
         if (!GcaSetting.fakePlayerResident) return;
         List<BotInfo> bots = this.config.getContents().values().stream().toList();
         for (BotInfo bot : bots) {
-            //#if MC>=12100
+            //#if MC>=12002
             if (
                 //#if MC < 12104
                 BotUtil.isGcaSpawningBot(bot.name())

@@ -6,21 +6,30 @@ plugins {
 
 preprocess {
     def mc12001 = createNode("1.20.1", 1_20_01, "official")
+    def mc12002 = createNode("1.20.2", 1_20_02, "official")
+    def mc12003 = createNode("1.20.3", 1_20_03, "official")
+    def mc12005 = createNode("1.20.5", 1_20_05, "official")
+
+
     def mc12101 = createNode("1.21.1", 1_21_01, "official")
     def mc12102 = createNode("1.21.2", 1_21_02, "official")
-    def mc12103 = createNode("1.21.3", 1_21_03, "official")
     def mc12104 = createNode("1.21.4", 1_21_04, "official")
     def mc12105 = createNode("1.21.5", 1_21_05, "official")
-    def mc12107 = createNode("1.21.7", 1_21_07, "official")
+    def mc12106 = createNode("1.21.6", 1_21_06, "official")
+    def mc12109 = createNode("1.21.9", 1_21_09, "official")
     def mc12110 = createNode("1.21.10", 1_21_10, "official")
     def mc12111 = createNode("1.21.11", 1_21_11, "official")
 
-    mc12001.link(mc12101, null)
-    mc12102.link(mc12101, null)
-    mc12103.link(mc12102, null)
-    mc12104.link(mc12103, null)
-    mc12105.link(mc12104, null)
-    mc12107.link(mc12105, null)
-    mc12110.link(mc12107, file('versions/mapping-1.21.10-1.21.7.txt'))
-    mc12111.link(mc12110, null)
+    mc12001.link(mc12002, null)
+    mc12002.link(mc12003, null)
+    mc12003.link(mc12005, null)
+    mc12005.link(mc12101, null)
+
+    mc12101.link(mc12102, null)
+    mc12102.link(mc12104, null)
+    mc12104.link(mc12105, null)
+    mc12105.link(mc12106, null)
+    mc12106.link(mc12109, file('versions/mapping-1.21.6-1.21.9.txt'))
+    mc12109.link(mc12110, null)
+    mc12110.link(mc12111, null)
 }

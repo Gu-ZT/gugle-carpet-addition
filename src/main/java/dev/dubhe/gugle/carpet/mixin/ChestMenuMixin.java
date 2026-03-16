@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//#if MC>=12100
+//#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 //#else
@@ -49,7 +49,7 @@ public abstract class ChestMenuMixin implements IClientMenuTick {
     @Unique
     private boolean isFakePlayerMenu() {
         ItemStack itemStack = thisMenu.getSlot(0).getItem();
-        //#if MC>=12100
+        //#if MC>=12005
         if (itemStack.is(Items.STRUCTURE_VOID)) {
             CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
             return customData != null && customData.copyTag().get(Button.GCA_CLEAR) != null;

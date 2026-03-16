@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC>=12100
+//#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 //#else
@@ -24,19 +24,16 @@ abstract class AbstractContainerMenuMixin {
     @Unique
     private final AbstractContainerMenu gca$self = (AbstractContainerMenu) (Object) this;
 
-    //#if MC < 12100
-    //#elseif MC < 12105
+    //#if MC >= 12005
     @Unique
     @SuppressWarnings("SameParameterValue")
     private boolean gca$getBoolean(CustomData data, String string) {
-        return data.copyTag().getBoolean(string);
+        return data.copyTag().getBoolean(string)
+            //#if MC >= 12105
+            //$$ .orElse(false)
+            //#endif
+            ;
     }
-    //#else
-    //$$ @Unique
-    //$$ @SuppressWarnings("SameParameterValue")
-    //$$ private boolean gca$getBoolean(CustomData data, String string) {
-    //$$     return data.copyTag().getBoolean(string).orElse(false);
-    //$$ }
     //#endif
 
     @Inject(method = "doClick", at = @At("HEAD"), cancellable = true)
@@ -44,7 +41,7 @@ abstract class AbstractContainerMenuMixin {
         if (slotIndex < 0) return;
         Slot slot = gca$self.getSlot(slotIndex);
         ItemStack itemStack = slot.getItem();
-        //#if MC>=12100
+        //#if MC>=12005
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData == null || customData.copyTag().get(Button.GCA_CLEAR) == null) {
             return;

@@ -89,7 +89,7 @@ abstract class ItemFrameMixin extends Entity {
                     BlockPos blockPos = this.getOnPos().relative(direction, -1);
                     BlockState blockState = level.getBlockState(blockPos);
                     BlockHitResult hitResult = new BlockHitResult(Vec3.atCenterOf(blockPos), direction, blockPos, false);
-                    //#if MC>=12100
+                    //#if MC>=12005
                     blockState.useWithoutItem(level, player, hitResult);
                     //#else
                     //$$ blockState.use(level, player, hand, hitResult);

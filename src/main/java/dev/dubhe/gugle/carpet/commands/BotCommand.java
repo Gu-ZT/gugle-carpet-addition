@@ -408,7 +408,7 @@ public class BotCommand {
             source.sendFailure(Component.literal("%s is not exist."));
             return false;
         }
-        //#if MC>=12100
+        //#if MC>=12002
         if (
             //#if MC < 12104
             BotUtil.isGcaSpawningBot(bot.name())

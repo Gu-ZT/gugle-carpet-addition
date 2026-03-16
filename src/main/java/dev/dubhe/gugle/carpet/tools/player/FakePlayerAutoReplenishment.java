@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 
-//#if MC>=12100
+//#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemContainerContents;
 //#else
@@ -59,7 +59,7 @@ public class FakePlayerAutoReplenishment {
     }
 
     private static boolean hasContainer(ItemStack stack) {
-        //#if MC>=12100
+        //#if MC>=12005
         return stack.has(DataComponents.CONTAINER);
         //#else
         //$$ CompoundTag tag = stack.getTag();
@@ -70,7 +70,7 @@ public class FakePlayerAutoReplenishment {
 
     // 从潜影盒拿取物品，请注意：在创造模式下使用鼠标中键复制物品（不是指选取方块）时，物品组件仅被浅拷贝。
     private static int pickItemFromBox(ItemStack shulkerBox, ItemStack itemStack, int count) {
-        //#if MC>=12100
+        //#if MC>=12005
         ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
         if (contents == null) return 0;
         // 潜影盒没有容器组件
@@ -120,7 +120,7 @@ public class FakePlayerAutoReplenishment {
     }
 
     // 如果潜影盒为空，将物品栏组件替换为空以保证潜影盒堆叠的正常运行
-    //#if MC>=12100
+    //#if MC>=12005
     private static void ifIsEmptyClear(ItemStack shulkerBox) {
         ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
         if (contents == null) {
@@ -133,6 +133,5 @@ public class FakePlayerAutoReplenishment {
         // 潜影盒中已经没有物品了
         shulkerBox.set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
     }
-    //#else
     //#endif
 }

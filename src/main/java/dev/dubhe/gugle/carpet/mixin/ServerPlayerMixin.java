@@ -5,9 +5,6 @@ import dev.dubhe.gugle.carpet.tools.player.IGcaPlayer;
 import dev.dubhe.gugle.carpet.tools.player.PlayerEnderChestContainer;
 import dev.dubhe.gugle.carpet.tools.player.PlayerInventoryContainer;
 import net.minecraft.server.MinecraftServer;
-//#if MC>=12100
-import net.minecraft.server.level.ClientInformation;
-//#endif
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,6 +12,10 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+//#if MC>=12002
+import net.minecraft.server.level.ClientInformation;
+//#endif
 
 @Mixin(value = ServerPlayer.class, priority = 1001)
 abstract class ServerPlayerMixin implements IGcaPlayer {
@@ -26,7 +27,7 @@ abstract class ServerPlayerMixin implements IGcaPlayer {
     private PlayerEnderChestContainer gca$playerEnderChestContainer = null;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    //#if MC<12100
+    //#if MC<12002
     //$$ private void init(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, CallbackInfo ci) {
     //#else
     private void init(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, ClientInformation clientInformation, CallbackInfo ci) {
