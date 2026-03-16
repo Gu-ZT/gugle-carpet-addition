@@ -7,6 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class CommandUtil {
 
@@ -20,4 +21,16 @@ public class CommandUtil {
             .toList();
     }
 
+    public static <T> T getArgOrDefault(CommandSupplier<T> getter, Supplier<T> defaultValue) throws CommandSyntaxException {
+        try {
+            return getter.get();
+        } catch (IllegalArgumentException e) {
+            return defaultValue.get();
+        }
+    }
+
+    @FunctionalInterface
+    public interface CommandSupplier<T> {
+        T get() throws CommandSyntaxException;
+    }
 }
