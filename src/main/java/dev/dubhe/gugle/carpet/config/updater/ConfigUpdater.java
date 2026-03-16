@@ -62,12 +62,15 @@ import net.minecraft.util.Mth;
 //#if MC < 12109
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.players.GameProfileCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 //#else
 //$$ import net.minecraft.server.players.NameAndId;
 //$$ import net.minecraft.util.StringUtil;
 //#endif
 public class ConfigUpdater {
+    public static final Logger LOGGER = LoggerFactory.getLogger("GcaConfigUpdater");
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
@@ -77,7 +80,7 @@ public class ConfigUpdater {
 
     public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services, boolean onelineMode) {
         Path levelPath = access.getLevelPath(LevelResource.ROOT);
-        GcaExtension.LOGGER.info("Checking old config files...");
+        LOGGER.info("Checking old config files...");
 
         updateMapping(NameMapper.of(levelPath, "bot"), DeprecatedBotInfo.class, BotInfo.CODEC, info -> {
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, info.actions).result().orElse(BotActionInfo.EMPTY);
@@ -143,9 +146,9 @@ public class ConfigUpdater {
 
     private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services, boolean onelineMode) {
         try {
-            Files.deleteIfExists(access.getLevelPath(LevelResource.ROOT).resolve("fake_player.old.gca.json"));
+            Files.deleteIfExists(access.getLevelPath(LevelResource.ROOT).resolve("fake_player.gca.old.json"));
         } catch (Exception e) {
-            GcaExtension.LOGGER.warn("Failed to delete old fake_player config backup file.", e);
+            LOGGER.warn("Failed to delete old fake_player config backup file.", e);
         }
         File playerDir = access.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
         updateNormalResolver(fileMapper, BotInfo.CODEC, entry -> {
@@ -153,17 +156,17 @@ public class ConfigUpdater {
             JsonObject value = entry.getValue().getAsJsonObject();
             UUID uuid = getUUIDByName(services, name, onelineMode);
             if (uuid == null) {
-                GcaExtension.LOGGER.warn("Failed to get UUID for {}, skipping...", name);
+                LOGGER.warn("Failed to get UUID for {}, skipping...", name);
                 return null;
             }
             File file = new File(playerDir, uuid + ".dat");
             if (!file.exists() || !file.isFile()) {
-                GcaExtension.LOGGER.warn("Player data file not found for {}, skipping...", name);
+                LOGGER.warn("Player data file not found for {}, skipping...", name);
                 return null;
             }
             Optional<CompoundTag> optional = getPlayerData(file);
             if (optional.isEmpty()) {
-                GcaExtension.LOGGER.warn("Failed to load player data for {}, skipping...", name);
+                LOGGER.warn("Failed to load player data for {}, skipping...", name);
                 return null;
             }
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, value.get("actions")).result().orElse(BotActionInfo.EMPTY);
@@ -182,7 +185,7 @@ public class ConfigUpdater {
 
     private static <T extends IWithName> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
-        GcaExtension.LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
+        LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
             String jsonStr = Files.readString(fileMapper.oldPath);
             JsonObject json = GSON.fromJson(jsonStr, JsonObject.class);
@@ -209,7 +212,7 @@ public class ConfigUpdater {
                 DataResult<JsonElement> result = fileCodec.encodeStart(JsonOps.INSTANCE, contents);
 
                 if (result.error().isPresent()) {
-                    GcaExtension.LOGGER.error("Failed to encode config: {}", result.error().get().message());
+                    LOGGER.error("Failed to encode config: {}", result.error().get().message());
                     return;
                 }
 
@@ -220,7 +223,7 @@ public class ConfigUpdater {
 
             Files.deleteIfExists(fileMapper.oldPath);
         } catch (Exception e) {
-            GcaExtension.LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
+            LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
         }
     }
 
@@ -287,7 +290,7 @@ public class ConfigUpdater {
 //$$             .orElse(false);
         //#endif
         ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, playerData.get("Dimension"))
-            .resultOrPartial(GcaExtension.LOGGER::error)
+            .resultOrPartial(LOGGER::error)
             .orElse(Level.OVERWORLD);
         return new BotInfo(name, "Resident bot imported from old config", pos, facing, dimension, mode, flying, actions);
     }
