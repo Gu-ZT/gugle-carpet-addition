@@ -48,7 +48,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//#if MC >= 12002
+//#if MC >= 12003
 import net.minecraft.nbt.NbtAccounter;
 //#endif
 //#if MC < 12105

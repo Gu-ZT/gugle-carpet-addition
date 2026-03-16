@@ -215,17 +215,16 @@ public class GcaSetting {
     )
     public static boolean wanderingTraderSpawnRemind = false;
 
-    //#if MC>=12100
+    //#if MC>=12005
     // 服务器玩家转移命令
     @Rule(
         categories = {GCA, COMMAND}
     )
-    //#else
-    //#endif
     public static boolean commandTransfer = false;
+    //#endif
 
-    //#if MC>=12106
     // 假人定位条
+    //#if MC>=12106
     //$$ @Rule(
     //$$     categories = {
     //$$         GCA,
@@ -235,6 +234,5 @@ public class GcaSetting {
     //$$     validators = dev.dubhe.gugle.carpet.tools.validator.LocatorBar.class
     //$$ )
     //$$ public static boolean fakePlayerLocatorBar = true;
-    //#else
     //#endif
 }
