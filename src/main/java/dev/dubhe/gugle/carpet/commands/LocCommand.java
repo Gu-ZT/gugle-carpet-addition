@@ -6,21 +6,25 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.PosUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.DimensionArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -34,6 +38,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+
 public class LocCommand {
     private static final GcaConfig<LocationInfo> LOCATION_CONFIG = GcaConfig.create("location", LocationInfo.CODEC);
 
@@ -42,36 +49,31 @@ public class LocCommand {
             ModCommands.root(dispatcher, "loc")
                 .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandLoc))
                 .executes(LocCommand::list)
-                .then(
-                    Commands.literal("add")
-                        .then(
-                            Commands.argument("desc", StringArgumentType.greedyString())
-                                .executes(LocCommand::add)
-                        )
+                .then(literal("add")
+                    .then(locAppendCommand())
+                    .then(literal("at").then(argument("pos", Vec3Argument.vec3())
+                        .then(locAppendCommand())
+                        .then(literal("in").then(argument("dimension", DimensionArgument.dimension())
+                            .then(locAppendCommand())
+                        ))
+                    ))
                 )
-                .then(
-                    Commands.literal("remove")
-                        .then(
-                            Commands.argument("id", LongArgumentType.longArg())
-                                .suggests(LocCommand::suggestId)
-                                .executes(LocCommand::remove)
-                        )
+                .then(literal("remove")
+                    .then(argument("id", LongArgumentType.longArg())
+                        .suggests(LocCommand::suggestId)
+                        .executes(LocCommand::remove)
+                    )
                 )
-                .then(
-                    Commands.literal("info")
-                        .then(
-                            Commands.argument("id", LongArgumentType.longArg())
-                                .suggests(LocCommand::suggestId)
-                                .executes(LocCommand::info)
-                        )
+                .then(literal("info")
+                    .then(argument("id", LongArgumentType.longArg())
+                        .suggests(LocCommand::suggestId)
+                        .executes(LocCommand::info)
+                    )
                 )
-                .then(
-                    Commands.literal("list")
+                .then(literal("list").executes(LocCommand::list)
+                    .then(argument("page", IntegerArgumentType.integer(1))
                         .executes(LocCommand::list)
-                        .then(
-                            Commands.argument("page", IntegerArgumentType.integer(1))
-                                .executes(LocCommand::list)
-                        )
+                    )
                 )
         );
     }
@@ -84,13 +86,24 @@ public class LocCommand {
         return SharedSuggestionProvider.suggest(LOCATION_CONFIG.getContents().keySet(), builder);
     }
 
-    public static int add(CommandContext<CommandSourceStack> context) {
+    private static RequiredArgumentBuilder<CommandSourceStack, ?> locAppendCommand() {
+        return argument("desc", StringArgumentType.greedyString())
+            .executes(LocCommand::add);
+    }
+
+    public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         LOCATION_CONFIG.tryInit(context);
         CommandSourceStack source = context.getSource();
+        Vec3 pos = CommandUtil.getArgOrDefault(
+            () -> Vec3Argument.getVec3(context, "pos"),
+            source::getPosition
+        );
+        ResourceKey<Level> dimension = CommandUtil.getArgOrDefault(
+            () -> DimensionArgument.getDimension(context, "dimension").dimension(),
+            source.getLevel()::dimension
+        );
         long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
-        Vec3 pos = source.getPosition();
-        ResourceKey<Level> dimension = source.getLevel().dimension();
         LOCATION_CONFIG.update(new LocationInfo(id, desc, pos, dimension));
         source.sendSuccess(() -> Component.literal("Loc %s is added.".formatted(desc)), false);
         return Command.SINGLE_SUCCESS;
@@ -120,25 +133,25 @@ public class LocCommand {
             context.getSource().sendSystemMessage(locToComponent(node));
         }
         Component prevPage = page.pageNum() <= 1 ?
-                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-                             Component.literal("<<<").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtil.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         "/loc list " + (page.pageNum() - 1)
-                                     ))
-                             );
+            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
+            Component.literal("<<<").withStyle(
+                Style.EMPTY
+                    .applyFormat(ChatFormatting.GREEN)
+                    .withClickEvent(ComponentUtil.createClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        "/loc list " + (page.pageNum() - 1)
+                    ))
+            );
         Component nextPage = page.pageNum() >= page.maxPage() ?
-                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-                             Component.literal(">>>").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtil.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         "/loc list " + (page.pageNum() + 1)
-                                     ))
-                             );
+            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
+            Component.literal(">>>").withStyle(
+                Style.EMPTY
+                    .applyFormat(ChatFormatting.GREEN)
+                    .withClickEvent(ComponentUtil.createClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        "/loc list " + (page.pageNum() + 1)
+                    ))
+            );
         context.getSource().sendSystemMessage(
             Component.literal("=======")
                 .withStyle(ChatFormatting.YELLOW)
