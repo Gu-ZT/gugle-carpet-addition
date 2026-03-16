@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 
 import com.llamalad7.mixinextras.sugar.Local;
-//#if MC>=12002
+//#if MC>=12005
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
@@ -51,7 +51,7 @@ import net.minecraft.world.InteractionResultHolder;
 
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
-    //#if MC>=12002
+    //#if MC>=12005
     @Shadow
     public abstract Item getItem();
 
@@ -83,7 +83,7 @@ abstract class ItemStackMixin {
         return call;
     }
 
-    //#if MC>=12002
+    //#if MC>=12005
     @WrapOperation(method = "hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V", at = @At(value = "INVOKE", target =
         //#if MC >= 12100
         "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/server/level/ServerPlayer;Ljava/util/function/Consumer;)V"
@@ -136,7 +136,7 @@ abstract class ItemStackMixin {
     //#endif
 
 
-    //#if MC>=12002
+    //#if MC>=12005
     @Inject(method = "getComponents", at = @At("HEAD"), cancellable = true)
     private void getComponents(CallbackInfoReturnable<DataComponentMap> cir) {
         CustomData customData = this.components.get(DataComponents.CUSTOM_DATA);

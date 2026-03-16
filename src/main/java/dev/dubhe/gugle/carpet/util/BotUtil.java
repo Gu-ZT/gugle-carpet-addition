@@ -12,7 +12,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.CommonListenerCookie;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -24,6 +23,9 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //#endif
 //#if MC >= 12110
 //$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
+//#endif
+//#if MC >= 12005
+import net.minecraft.world.entity.ai.attributes.Attributes;
 //#endif
 public class BotUtil {
     private static final Set<String> SpawningBots = new HashSet<>();
@@ -60,7 +62,11 @@ public class BotUtil {
 
             EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile, ClientInformation.createDefault());
             instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
-            server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation(), false));
+            server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation()
+                //#if MC >= 12005
+                , false
+                //#endif
+            ));
             //#if MC >= 12110
             //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
             //#endif
@@ -81,7 +87,11 @@ public class BotUtil {
             );
             instance.setHealth(20.0F);
             ((EntityInvoker) instance).invokeUnsetRemoved();
+            //#if MC >= 12005
             instance.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6F);
+            //#else
+            //$$ instance.setMaxUpStep(0.6F);
+            //#endif
             instance.gameMode.changeGameModeForPlayer(bot.mode());
             server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) (instance.yHeadRot * 256 / 360)), bot.dimension());
             server.getPlayerList().broadcastAll(

@@ -13,10 +13,9 @@ import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.List;
 
-//#if MC>=12002
+//#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
-//#else
 //#endif
 
 public class Button {
@@ -79,19 +78,26 @@ public class Button {
         );
     }
 
-    //#if MC>=12002
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount, Component onText, Component offText) {
         this.flag = defaultState;
         this.compoundTag.putBoolean(GCA_CLEAR, true);
 
         ItemStack onItemStack = new ItemStack(onItem, itemCount);
+        ItemStack offItemStack = new ItemStack(offItem, itemCount);
+
+        //#if MC>=12005
         onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag));
         onItemStack.set(DataComponents.ITEM_NAME, onText);
-        this.onItem = onItemStack;
-
-        ItemStack offItemStack = new ItemStack(offItem, itemCount);
         offItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
         offItemStack.set(DataComponents.ITEM_NAME, offText);
+        //#else
+        //$$ onItemStack.setTag(compoundTag.copy());
+        //$$ onItemStack.setHoverName(onText);
+        //$$ offItemStack.setTag(compoundTag.copy());
+        //$$ offItemStack.setHoverName(offText);
+        //#endif
+
+        this.onItem = onItemStack;
         this.offItem = offItemStack;
     }
 
@@ -100,37 +106,19 @@ public class Button {
         this.compoundTag.putBoolean(GCA_CLEAR, true);
 
         ItemStack onItemStack = onItem.copy();
-        onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
-        this.onItem = onItemStack;
-
         ItemStack offItemStack = offItem.copy();
+
+        //#if MC>=12005
+        onItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
         offItemStack.set(DataComponents.CUSTOM_DATA, CustomData.of(compoundTag.copy()));
+        //#else
+        //$$ onItemStack.setTag(compoundTag.copy());
+        //$$ offItemStack.setTag(compoundTag.copy());
+        //#endif
+
+        this.onItem = onItemStack;
         this.offItem = offItemStack;
     }
-    //#else
-    //$$ public Button(boolean defaultState, Item onItem, Item offItem, int itemCount, Component onText, Component offText) {
-    //$$     this.flag = defaultState;
-    //$$     this.compoundTag.putBoolean("GcaClear", true);
-    //$$     ItemStack onItemStack = new ItemStack(onItem, itemCount);
-    //$$     onItemStack.setTag(compoundTag.copy());
-    //$$     onItemStack.setHoverName(onText);
-    //$$     this.onItem = onItemStack;
-    //$$     ItemStack offItemStack = new ItemStack(offItem, itemCount);
-    //$$     offItemStack.setTag(compoundTag.copy());
-    //$$     offItemStack.setHoverName(offText);
-    //$$     this.offItem = offItemStack;
-    //$$ }
-    //$$ public Button(boolean defaultState, ItemStack onItem, ItemStack offItem) {
-    //$$     this.flag = defaultState;
-    //$$     this.compoundTag.putBoolean("GcaClear", true);
-    //$$     ItemStack onItemStack = onItem.copy();
-    //$$     onItemStack.setTag(compoundTag.copy());
-    //$$     this.onItem = onItemStack;
-    //$$     ItemStack offItemStack = offItem.copy();
-    //$$     offItemStack.setTag(compoundTag.copy());
-    //$$     this.offItem = offItemStack;
-    //$$ }
-    //#endif
 
     public void checkButton(Container container, int slot) {
         ItemStack onItemStack = this.onItem.copy();

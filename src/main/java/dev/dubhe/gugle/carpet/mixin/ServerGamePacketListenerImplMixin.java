@@ -16,8 +16,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-//#if MC>=12100
-//#else
+//#if MC < 12002
 //$$ import java.util.concurrent.CompletableFuture;
 //$$ import java.util.concurrent.ExecutionException;
 //#endif
