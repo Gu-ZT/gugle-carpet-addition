@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
 import java.util.ArrayList;
 import java.util.List;
 
-//#if MC>=12100
+//#if MC>=12002
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 //#else
@@ -79,7 +79,7 @@ public class Button {
         );
     }
 
-    //#if MC>=12100
+    //#if MC>=12002
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount, Component onText, Component offText) {
         this.flag = defaultState;
         this.compoundTag.putBoolean(GCA_CLEAR, true);

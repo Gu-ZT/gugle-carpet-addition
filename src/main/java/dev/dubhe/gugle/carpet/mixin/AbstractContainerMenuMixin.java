@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC>=12100
+//#if MC>=12002
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 //#else
@@ -24,7 +24,7 @@ abstract class AbstractContainerMenuMixin {
     @Unique
     private final AbstractContainerMenu gca$self = (AbstractContainerMenu) (Object) this;
 
-    //#if MC < 12100
+    //#if MC < 12002
     //#elseif MC < 12105
     @Unique
     @SuppressWarnings("SameParameterValue")
@@ -44,7 +44,7 @@ abstract class AbstractContainerMenuMixin {
         if (slotIndex < 0) return;
         Slot slot = gca$self.getSlot(slotIndex);
         ItemStack itemStack = slot.getItem();
-        //#if MC>=12100
+        //#if MC>=12002
         CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData == null || customData.copyTag().get(Button.GCA_CLEAR) == null) {
             return;

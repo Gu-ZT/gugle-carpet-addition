@@ -29,7 +29,7 @@ abstract class ServerGamePacketListenerImplMixin {
     public abstract ServerPlayer getPlayer();
 
     @Inject(method = "method_45064", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;broadcastChatMessage(Lnet/minecraft/network/chat/PlayerChatMessage;)V", shift = At.Shift.AFTER))
-    //#if MC>=12100
+    //#if MC>=12002
     private void handleChat(PlayerChatMessage playerChatMessage, Component component, FilteredText filteredText, CallbackInfo ci) {
         this.gca$handleChat(GcaSetting.simpleInGameCalculator, "==", component, (server, player, msg) -> SimpleInGameCalculator.handleChat(server, msg));
         this.gca$handleChat(GcaSetting.fastPingFriend, "@ ", component, FastPingFriend::handleChat);

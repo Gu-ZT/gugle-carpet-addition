@@ -40,7 +40,7 @@ public class Color {
 
     private static TextColor color(String color) {
         return TextColor.parseColor(color)
-            //#if MC>=12100
+            //#if MC >= 12002
             .getOrThrow()
             //#endif
             ;

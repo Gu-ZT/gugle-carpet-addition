@@ -48,7 +48,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//#if MC >= 12100
+//#if MC >= 12002
 import net.minecraft.nbt.NbtAccounter;
 //#endif
 //#if MC < 12105
@@ -205,7 +205,7 @@ public class ConfigUpdater {
     private static Optional<CompoundTag> getPlayerData(File file) {
         try {
             return Optional.of(NbtIo.readCompressed(file
-                    //#if MC >= 12100
+                    //#if MC >= 12002
                     .toPath(), NbtAccounter.unlimitedHeap()
                 //#endif
             ));

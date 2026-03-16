@@ -29,7 +29,7 @@ public class MinecraftMixin {
 
     @Inject(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;spin(Ljava/util/function/Function;)Lnet/minecraft/server/MinecraftServer;"))
     private void updateConfig(
-        //#if MC < 12100
+        //#if MC < 12002
         //$$ String string,
         //#endif
         LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, boolean bl, CallbackInfo ci

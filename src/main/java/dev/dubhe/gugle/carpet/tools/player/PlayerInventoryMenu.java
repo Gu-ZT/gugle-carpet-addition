@@ -18,7 +18,7 @@ import net.minecraft.world.item.Items;
 //#else
 import net.minecraft.world.item.ArmorItem;
 //#endif
-//#if MC>=12100
+//#if MC>=12002
 import net.minecraft.core.component.DataComponents;
 //#else
 //#endif
@@ -56,7 +56,7 @@ public class PlayerInventoryMenu extends ChestMenu {
                     return ItemStack.EMPTY;
                 }
             } else if (
-                //#if MC>=12100
+                //#if MC>=12002
                 slotStack.has(DataComponents.FOOD)
                 //#else
                 //$$ slotStack.getItem().isEdible()

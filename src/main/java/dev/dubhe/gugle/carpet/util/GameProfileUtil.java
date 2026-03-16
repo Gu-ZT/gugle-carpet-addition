@@ -1,3 +1,4 @@
+//#if MC > 12001
 package dev.dubhe.gugle.carpet.util;
 
 import carpet.CarpetSettings;
@@ -36,3 +37,4 @@ public class GameProfileUtil {
     }
 
 }
+//#endif

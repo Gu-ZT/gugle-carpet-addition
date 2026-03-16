@@ -168,16 +168,22 @@ publishMods {
     modLoaders.add("fabric")
     modLoaders.add("quilt")
 
+    def versions = project.game_versions.toString().split(',')*.trim().findAll { it } as List
+    
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "662867"
-        minecraftVersions.add(project.game_versions)
+        versions.each {
+            minecraftVersions.add(it)
+        }
     }
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = "UHjbX5mk"
-        minecraftVersions.add(project.game_versions)
+        versions.each {
+            minecraftVersions.add(it)
+        }
     }
 }
 

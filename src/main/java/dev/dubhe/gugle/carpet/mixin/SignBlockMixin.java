@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//#if MC>=12100
+//#if MC>=12002
 //#else
 //$$ import net.minecraft.world.InteractionHand;
 //#endif
@@ -33,7 +33,7 @@ abstract class SignBlockMixin {
     //#elseif MC>=12105
     //$$ @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;)V"), cancellable = true)
     //$$ public void use(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
-    //#elseif MC>=12100
+    //#elseif MC>=12002
     @Inject(method = "useWithoutItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;playSound(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/core/BlockPos;Lnet/minecraft/sounds/SoundEvent;Lnet/minecraft/sounds/SoundSource;)V"), cancellable = true)
     public void use(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult blockHitResult, CallbackInfoReturnable<InteractionResult> cir) {
         //#else
@@ -48,7 +48,7 @@ abstract class SignBlockMixin {
             if (blockState.getBlock() instanceof WallSignBlock) {
                 return;
             }
-            //#if MC>=12100
+            //#if MC>=12002
             blockState.useWithoutItem(level, player, hitResult);
             //#else
             //$$ blockState.use(level, player, hand, hitResult);

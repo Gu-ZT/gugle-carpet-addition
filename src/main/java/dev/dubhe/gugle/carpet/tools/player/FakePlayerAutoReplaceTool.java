@@ -8,9 +8,10 @@ import net.minecraft.world.item.ItemStack;
 
 
 import java.util.function.Predicate;
-//#if MC>=12005
-import net.minecraft.core.component.DataComponents;
+
+//#if MC >= 12100
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.item.enchantment.Enchantment;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -18,12 +19,15 @@ import net.minecraft.core.Holder;
 //#else
 //$$ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 //$$ import net.minecraft.world.item.enchantment.Enchantments;
+//#endif
+
+//#if MC < 12002
 //$$ import java.util.Optional;
 //#endif
 
 public class FakePlayerAutoReplaceTool {
     @SuppressWarnings("UnnecessaryReturnStatement")
-    //#if MC>=12100
+    //#if MC>=12002
     public static void autoReplaceTool(Player fakePlayer, Item item, EquipmentSlot equipmentSlot) {
         ItemStack itemStack = fakePlayer.getItemBySlot(equipmentSlot);
     //#else
@@ -31,7 +35,7 @@ public class FakePlayerAutoReplaceTool {
     //#endif
         Predicate<ItemStack> isDamageItem = itemDamagePredicate();
         if (isDamageItem.test(itemStack)) {
-            //#if MC>=12100
+            //#if MC>=12002
             //#else
             //$$ Optional<EquipmentSlot> optional = getEquipmentSlot(fakePlayer, itemStack);
             //$$ if (optional.isEmpty()) {
@@ -52,7 +56,7 @@ public class FakePlayerAutoReplaceTool {
         }
     }
 
-    //#if MC<12100
+    //#if MC<12002
     //$$ private static Optional<EquipmentSlot> getEquipmentSlot(Player fakePlayer, ItemStack itemStack) {
     //$$     for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
     //$$         if (fakePlayer.getItemBySlot(equipmentSlot) == itemStack) {
