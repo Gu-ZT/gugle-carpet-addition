@@ -4,11 +4,13 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 
 public record PageInfo<T>(int pageSize, int pageNum, int maxPage, List<T> page) {
+    @Nullable
     public static <T> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection) {
         final int pageSize = 8;
         int pageNum = getPage(context);
