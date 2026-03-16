@@ -197,9 +197,13 @@ public class ConfigUpdater {
                 Codec<Map<String, T>> fileCodec = Codec.unboundedMap(Codec.STRING, codec);
                 if (fileMapper.newName.toFile().exists()) {
                     String already = Files.readString(fileMapper.newName, StandardCharsets.UTF_8);
-                    fileCodec.parse(JsonOps.INSTANCE, JsonParser.parseString(already))
-                        .result()
-                        .ifPresent(contents::putAll);
+                    DataResult<Map<String, T>> parseResult = fileCodec.parse(JsonOps.INSTANCE, JsonParser.parseString(already));
+                    if (parseResult.error().isPresent()) {
+                        LOGGER.warn("Failed to parse existing config file: {}, this file will be overwritten.", fileMapper.newName);
+                        LOGGER.warn("{}", parseResult.error().get().message());
+                    } else {
+                        parseResult.result().ifPresent(contents::putAll);
+                    }
                 }
 
                 for (T data : list) {
