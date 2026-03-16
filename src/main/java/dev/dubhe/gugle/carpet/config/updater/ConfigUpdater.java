@@ -77,7 +77,7 @@ public class ConfigUpdater {
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
         .create();
 
-    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services, boolean onelineMode) {
+    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services, boolean onlineMode) {
         Path levelPath = access.getLevelPath(LevelResource.ROOT);
         LOGGER.info("Checking old config files...");
 
@@ -106,7 +106,7 @@ public class ConfigUpdater {
 
         updateWelcome(NameMapper.of(levelPath, "welcome"));
 
-        updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services, onelineMode);
+        updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services, onlineMode);
     }
 
     private static <T, R extends IWithName> void updateMapping(NameMapper fileMapper, Class<T> tClass, Codec<R> codec, Function<T, R> function) {
@@ -143,7 +143,7 @@ public class ConfigUpdater {
         });
     }
 
-    private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services, boolean onelineMode) {
+    private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services, boolean onlineMode) {
         try {
             Files.deleteIfExists(access.getLevelPath(LevelResource.ROOT).resolve("fake_player.gca.old.json"));
         } catch (Exception e) {
@@ -153,7 +153,7 @@ public class ConfigUpdater {
         updateNormalResolver(fileMapper, BotInfo.CODEC, entry -> {
             String name = entry.getKey();
             JsonObject value = entry.getValue().getAsJsonObject();
-            UUID uuid = getUUIDByName(services, name, onelineMode);
+            UUID uuid = getUUIDByName(services, name, onlineMode);
             if (uuid == null) {
                 LOGGER.warn("Failed to get UUID for {}, skipping...", name);
                 return null;
@@ -227,14 +227,14 @@ public class ConfigUpdater {
     }
 
     @Nullable
-    private static UUID getUUIDByName(Services services, String name, boolean onelineMode) {
+    private static UUID getUUIDByName(Services services, String name, boolean onlineMode) {
         //#if MC < 12109
         GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile;
         try {
             gameprofile = services.profileCache().get(name).orElse(null);
         } finally {
-            GameProfileCache.setUsesAuthentication(onelineMode);
+            GameProfileCache.setUsesAuthentication(onlineMode);
         }
         if (gameprofile == null) {
             gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
