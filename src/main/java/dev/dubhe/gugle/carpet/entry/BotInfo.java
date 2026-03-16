@@ -4,7 +4,6 @@ import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.dubhe.gugle.carpet.tools.CustomCodec;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -12,6 +11,10 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+
+//#if MC < 12105
+import dev.dubhe.gugle.carpet.tools.CustomCodec;
+//#endif
 
 public record BotInfo(
     String name,
@@ -27,7 +30,11 @@ public record BotInfo(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
         Codec.STRING.fieldOf("desc").forGetter(BotInfo::desc),
         Vec3.CODEC.fieldOf("pos").forGetter(BotInfo::pos),
+        //#if MC < 12105
         CustomCodec.VEC2_CODEC.fieldOf("facing").forGetter(BotInfo::facing),
+        //#else
+        //$$ Vec2.CODEC.fieldOf("facing").forGetter(BotInfo::facing),
+        //#endif
         ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(BotInfo::dimension),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
