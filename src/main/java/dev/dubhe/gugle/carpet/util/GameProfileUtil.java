@@ -21,7 +21,7 @@ public class GameProfileUtil {
         try {
             GameProfileCache cache = server.getProfileCache();
             if (cache != null) {
-                gameprofile = server.getProfileCache().get(name).orElse(null);
+                gameprofile = cache.get(name).orElse(null);
             }
         } finally {
             GameProfileCache.setUsesAuthentication(server.isDedicatedServer() && server.usesAuthentication());
