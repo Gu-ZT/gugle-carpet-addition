@@ -42,7 +42,7 @@ public class Color {
         return TextColor.parseColor(color)
             //#if MC >= 12005
             .getOrThrow()
-            //#elseif MC >= 12002
+            //#elseif MC >= 12003
             //$$ .get().orThrow()
             //#endif
             ;

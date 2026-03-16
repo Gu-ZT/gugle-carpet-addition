@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-//#if MC >= 12110
+//#if MC >= 12109
 //$$ import org.spongepowered.asm.mixin.Final;
 //$$ import org.spongepowered.asm.mixin.Shadow;
 //#else
@@ -21,7 +21,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
 
-    //#if MC >= 12110
+    //#if MC >= 12109
     //$$ @Shadow
     //$$ @Final
     //$$ private Services services;
@@ -29,11 +29,11 @@ public class MinecraftMixin {
 
     @Inject(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;spin(Ljava/util/function/Function;)Lnet/minecraft/server/MinecraftServer;"))
     private void updateConfig(
-        //#if MC < 12002
+        //#if MC <= 12002
         //$$ String string,
         //#endif
         LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, boolean bl, CallbackInfo ci
-        //#if MC < 12110
+        //#if MC < 12109
         , @Local Services services
         //#endif
         ) {

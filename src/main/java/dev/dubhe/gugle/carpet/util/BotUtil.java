@@ -54,7 +54,7 @@ public class BotUtil {
             SpawningBots.remove(name);
             if (t != null) return;
             GameProfile profile =
-                //#if MC < 12110
+                //#if MC < 12109
                 p.orElse(gameProfile);
             //#else
             //$$ p.name().isEmpty() ? gameProfile : p;
