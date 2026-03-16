@@ -176,6 +176,7 @@ publishMods {
         versions.each {
             minecraftVersions.add(it)
         }
+        requires('carpet')
     }
 
     modrinth {
@@ -184,6 +185,7 @@ publishMods {
         versions.each {
             minecraftVersions.add(it)
         }
+        requires('carpet')
     }
 }
 

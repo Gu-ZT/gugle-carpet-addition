@@ -35,6 +35,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -137,7 +138,11 @@ public class ConfigUpdater {
             String name = entry.getKey();
             JsonObject value = entry.getValue().getAsJsonObject();
             UUID uuid = getUUIDByName(services, name);
-            File file = new File(playerDir, uuid.toString() + ".dat");
+            if (uuid == null) {
+                GcaExtension.LOGGER.info("Failed to get UUID for {}, skipping...", name);
+                return null;
+            }
+            File file = new File(playerDir, uuid + ".dat");
             if (!file.exists() || !file.isFile()) {
                 GcaExtension.LOGGER.warn("Player data file not found for {}, skipping...", name);
                 return null;
@@ -192,6 +197,7 @@ public class ConfigUpdater {
         }
     }
 
+    @Nullable
     private static UUID getUUIDByName(Services services, String name) {
         return services
             //#if MC < 12109
