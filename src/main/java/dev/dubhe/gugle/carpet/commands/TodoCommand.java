@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -10,9 +11,11 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
-import dev.dubhe.gugle.carpet.tools.FilesUtil;
-import dev.dubhe.gugle.carpet.tools.IdGenerator;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.PageInfo;
+import dev.dubhe.gugle.carpet.entry.TodoInfo;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -27,7 +30,7 @@ import net.minecraft.network.chat.Style;
 import java.util.concurrent.CompletableFuture;
 
 public class TodoCommand {
-    public static final FilesUtil.MapFile<Long, Todo> TODO = new FilesUtil.MapFile<>("todo", Long::decode, Todo.class);
+    private static final GcaConfig<TodoInfo> TODO_CONFIG = GcaConfig.create("todo", TodoInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
@@ -76,97 +79,84 @@ public class TodoCommand {
         final CommandContext<CommandSourceStack> context,
         final SuggestionsBuilder builder
     ) {
-        return SharedSuggestionProvider.suggest(TODO.map.keySet().stream().map(Object::toString), builder);
+        TODO_CONFIG.tryInit(context);
+        return SharedSuggestionProvider.suggest(TODO_CONFIG.getContents().keySet(), builder);
     }
 
-
     public static int add(CommandContext<CommandSourceStack> context) {
-        TODO.init(context);
+        TODO_CONFIG.tryInit(context);
         CommandSourceStack source = context.getSource();
-        long id = IdGenerator.nextId();
+        long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
-        TODO.map.put(id, new Todo(id, desc, false));
-        TODO.save();
+        TODO_CONFIG.update(new TodoInfo(id, desc, false));
         source.sendSuccess(() -> Component.literal("Todo %s is added.".formatted(desc)), false);
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int remove(CommandContext<CommandSourceStack> context) {
-        TODO.init(context);
-        Long id = LongArgumentType.getLong(context, "id");
-        Todo todo = TODO.map.remove(id);
-        if (todo == null) {
+        TODO_CONFIG.tryInit(context);
+        long id = LongArgumentType.getLong(context, "id");
+        TodoInfo removed = TODO_CONFIG.remove(String.valueOf(id));
+        if (removed == null) {
             context.getSource().sendFailure(Component.literal("No such todo id %s".formatted(id)));
             return 0;
         }
-        TODO.save();
-        context.getSource().sendSuccess(() -> Component.literal("Todo %s is removed.".formatted(todo.desc)), false);
-        return 1;
+        context.getSource().sendSuccess(() -> Component.literal("Todo %s is removed.".formatted(removed.desc())), false);
+        return Command.SINGLE_SUCCESS;
     }
 
     public static int success(CommandContext<CommandSourceStack> context) {
-        TODO.init(context);
-        Long id = LongArgumentType.getLong(context, "id");
-        boolean success;
-        try {
-            success = BoolArgumentType.getBool(context, "success");
-        } catch (IllegalArgumentException ignored) {
-            success = true;
-        }
-        Todo todo = TODO.map.get(id);
+        TODO_CONFIG.tryInit(context);
+        long id = LongArgumentType.getLong(context, "id");
+        boolean success = getSuccess(context);
+        TodoInfo todo = TODO_CONFIG.getContents().get(String.valueOf(id));
         if (todo == null) {
             context.getSource().sendFailure(Component.literal("No such todo id %s".formatted(id)));
             return 0;
         }
-        todo.success = success;
-        TODO.save();
-        boolean finalSuccess = success;
+        TODO_CONFIG.update(todo.ofSuccess(success));
         context.getSource()
-            .sendSuccess(() -> Component.literal("Todo %s has be %s.".formatted(todo.desc, finalSuccess ? "done" : "undone")), false);
-        return 1;
+            .sendSuccess(() -> Component.literal("Todo %s has be %s.".formatted(todo.desc(), success ? "done" : "undone")), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static boolean getSuccess(CommandContext<CommandSourceStack> context) {
+        try {
+            return BoolArgumentType.getBool(context, "success");
+        } catch (IllegalArgumentException ignored) {
+            return true;
+        }
     }
 
     public static int list(CommandContext<CommandSourceStack> context) {
-        TODO.init(context);
-        int page;
-        try {
-            page = IntegerArgumentType.getInteger(context, "page");
-        } catch (IllegalArgumentException ignored) {
-            page = 1;
-        }
-        final int pageSize = 8;
-        int size = TODO.map.size();
-        int maxPage = size / pageSize + 1;
-        if (page > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(page)));
-            return 0;
-        }
-        Todo[] todos = TODO.map.values().toArray(new Todo[0]);
+        TODO_CONFIG.tryInit(context);
+        PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.getContents().values());
+        if (page == null) return 0;
         context.getSource().sendSystemMessage(
-            Component.literal("======= Todo List (Page %s/%s) =======".formatted(page, maxPage))
+            Component.literal("======= Todo List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
                 .withStyle(ChatFormatting.YELLOW)
         );
-        for (int i = (page - 1) * pageSize; i < size && i < page * pageSize; i++) {
-            context.getSource().sendSystemMessage(TodoToComponent(todos[i]));
+        for (TodoInfo todo : page.page()) {
+            context.getSource().sendSystemMessage(TodoToComponent(todo));
         }
-        Component prevPage = page <= 1 ?
+        Component prevPage = page.pageNum() <= 1 ?
                              Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
                              Component.literal("<<<").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
-                                         "/todo list " + (page - 1)
+                                         "/todo list " + (page.pageNum() - 1)
                                      ))
                              );
-        Component nextPage = page >= maxPage ?
+        Component nextPage = page.pageNum() >= page.maxPage() ?
                              Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
                              Component.literal(">>>").withStyle(
                                  Style.EMPTY
                                      .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtils.createClickEvent(
+                                     .withClickEvent(ComponentUtil.createClickEvent(
                                          ClickEvent.Action.RUN_COMMAND,
-                                         "/todo list " + (page + 1)
+                                         "/todo list " + (page.pageNum() + 1)
                                      ))
                              );
         context.getSource().sendSystemMessage(
@@ -175,56 +165,43 @@ public class TodoCommand {
                 .append(" ")
                 .append(prevPage)
                 .append(" ")
-                .append(Component.literal("(Todo %s/%s)".formatted(page, maxPage)).withStyle(ChatFormatting.YELLOW))
+                .append(Component.literal("(Todo %s/%s)".formatted(page.pageNum(), page.maxPage())).withStyle(ChatFormatting.YELLOW))
                 .append(" ")
                 .append(nextPage)
                 .append(" ")
                 .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
         );
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 
-    private static MutableComponent TodoToComponent(Todo todo) {
-        MutableComponent component = Component.literal(todo.desc).withStyle(
+    private static MutableComponent TodoToComponent(TodoInfo todo) {
+        MutableComponent component = Component.literal(todo.desc()).withStyle(
             Style.EMPTY
-                .withStrikethrough(todo.success)
+                .withStrikethrough(todo.success())
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(Long.toString(todo.id))))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(todo.name())))
         );
         MutableComponent success = Component.literal("[✔]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(todo.id())))
         );
         MutableComponent unSuccess = Component.literal("[❌]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(todo.id())))
         );
         MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove todo")))
-                .withClickEvent(ComponentUtils.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/todo remove %s".formatted(todo.id)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove todo")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/todo remove %s".formatted(todo.id())))
         );
-        return Component.literal(todo.success ? "☑" : "☐")
+        return Component.literal(todo.success() ? "☑" : "☐")
             .append(" ").append(component)
-            .append(" ").append(todo.success ? unSuccess : success)
+            .append(" ").append(todo.success() ? unSuccess : success)
             .append(" ").append(remove);
-    }
-
-
-    public static class Todo {
-        public final Long id;
-        public final String desc;
-        public boolean success;
-
-        Todo(Long id, String desc, boolean success) {
-            this.id = id;
-            this.desc = desc;
-            this.success = success;
-        }
     }
 }

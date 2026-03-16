@@ -8,9 +8,12 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.tools.FilesUtil;
-import dev.dubhe.gugle.carpet.tools.GameProfileHelper;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
+import dev.dubhe.gugle.carpet.util.PermissionUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -19,28 +22,36 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.List;
 
 public class BlistCommand {
     private static final SimpleCommandExceptionType ERROR_ALREADY_BANNED = new SimpleCommandExceptionType(Component.translatable(
         "commands.ban.failed"));
     private static final SimpleCommandExceptionType ERROR_NOT_BANNED = new SimpleCommandExceptionType(Component.translatable(
         "commands.pardon.failed"));
-    public static final FilesUtil.MapFile<String, Boolean> PERMISSION = new FilesUtil.MapFile<>("blist", Object::toString, Boolean.class);
+
+    private static final GcaConfig<NameBooleanInfo> BLIST_PERMISSION_CONFIG = GcaConfig.create("blist", NameBooleanInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
             ModCommands.root(dispatcher, "blist")
-                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBlist) && WlistCommand.hasPermission(
-                    PERMISSION,
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBlist) && PermissionUtil.hasPermission(
+                    BLIST_PERMISSION_CONFIG,
                     stack
                 ))
                 .executes(BlistCommand::list)
                 .then(
                     Commands.literal("permission")
-                        .requires(stack -> stack.hasPermission(Commands.LEVEL_GAMEMASTERS))
+                        .requires(stack ->
+                            //#if MC>=12111
+                            //$$ Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(stack)
+                            //#else
+                            stack.hasPermission(Commands.LEVEL_GAMEMASTERS)
+                            //#endif
+                        )
                         .then(
                             Commands.literal("add")
                                 .then(
@@ -62,7 +73,7 @@ public class BlistCommand {
                             Commands.argument("targets", GameProfileArgument.gameProfile())
                                 .executes(BlistCommand::add)
                                 .then(
-                                    Commands.argument("reson", StringArgumentType.greedyString())
+                                    Commands.argument("reason", StringArgumentType.greedyString())
                                         .executes(BlistCommand::add)
                                 )
                         )
@@ -84,70 +95,48 @@ public class BlistCommand {
         );
     }
 
+    @Nullable
+    private static String getReason(CommandContext<CommandSourceStack> context) {
+        try {
+            return StringArgumentType.getString(context, "reason");
+        } catch (IllegalArgumentException ignored) { }
+        return null;
+    }
+
     public static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
-        UserBanList userBanList = source.getServer().getPlayerList().getBans();
-        AtomicInteger i = new AtomicInteger();
-        Component component = null;
-        try {
-            component = Component.literal(StringArgumentType.getString(context, "reson"));
-        } catch (IllegalArgumentException ignored) {
-        }
-        Component finalComponent = component;
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (gameProfile, name, id) -> {
-                if (!userBanList.isBanned(gameProfile)) {
-                    UserBanListEntry userBanListEntry = new UserBanListEntry(
-                        gameProfile,
-                        null,
-                        source.getTextName(),
-                        null,
-                        finalComponent == null ? null : finalComponent.getString()
-                    );
-                    userBanList.add(userBanListEntry);
-                    i.incrementAndGet();
-                    source.sendSuccess(
-                        () -> Component.translatable(
-                            "commands.ban.success",
-                            Component.literal(name),
-                            userBanListEntry.getReason()
-                        ), true
-                    );
-                    ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(id);
-                    if (serverPlayer != null) {
-                        serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
-                    }
-                }
+        UserBanList banned = source.getServer().getPlayerList().getBans();
+        String reason = getReason(context);
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (banned.isBanned(info.profile())) continue;
+            UserBanListEntry ban = new UserBanListEntry(info.profile(), null, source.getTextName(), null, reason);
+            banned.add(ban);
+            counter++;
+            ServerPlayer serverPlayer = source.getServer().getPlayerList().getPlayer(info.uuid());
+            if (serverPlayer != null) {
+                serverPlayer.connection.disconnect(Component.translatable("multiplayer.disconnect.banned"));
             }
-        );
-
-        if (i.get() == 0) {
-            throw ERROR_ALREADY_BANNED.create();
-        } else {
-            return i.get();
+            source.sendSuccess(() -> Component.translatable("commands.ban.success", Component.literal(info.name()), ban.getReason()), true);
         }
+        if (counter == 0) throw ERROR_ALREADY_BANNED.create();
+        return counter;
     }
 
     public static int remove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack source = context.getSource();
-        UserBanList userBanList = source.getServer().getPlayerList().getBans();
-        AtomicInteger i = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (gameProfile, name, id) -> {
-                if (userBanList.isBanned(gameProfile)) {
-                    if (userBanList.isBanned(gameProfile)) {
-                        userBanList.remove(gameProfile);
-                        i.incrementAndGet();
-                        source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(name)), true);
-                    }
-                }
-            }
-        );
-        if (i.get() == 0) {
-            throw ERROR_NOT_BANNED.create();
-        } else {
-            return i.get();
+        UserBanList banned = source.getServer().getPlayerList().getBans();
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            if (!banned.isBanned(info.profile())) continue;
+            banned.remove(info.profile());
+            counter++;
+            source.sendSuccess(() -> Component.translatable("commands.pardon.success", Component.literal(info.name())), true);
         }
+        if (counter == 0) throw ERROR_NOT_BANNED.create();
+        return counter;
     }
 
     public static int list(CommandContext<CommandSourceStack> context) {
@@ -155,56 +144,54 @@ public class BlistCommand {
         Collection<UserBanListEntry> collection = source.getServer().getPlayerList().getBans().getEntries();
         if (collection.isEmpty()) {
             source.sendSuccess(() -> Component.translatable("commands.banlist.none"), false);
-        } else {
-            source.sendSuccess(() -> Component.translatable("commands.banlist.list", collection.size()), false);
-
-            for (UserBanListEntry userBanListEntry : collection) {
-                source.sendSuccess(
-                    () -> Component.translatable(
-                        "commands.banlist.entry",
-                        userBanListEntry.getDisplayName(),
-                        userBanListEntry.getSource(),
-                        userBanListEntry.getReason()
-                    ), false
-                );
-            }
+            return 0;
+        }
+        source.sendSuccess(() -> Component.translatable("commands.banlist.list", collection.size()), false);
+        for (UserBanListEntry userBanListEntry : collection) {
+            source.sendSuccess(
+                () -> Component.translatable(
+                    "commands.banlist.entry",
+                    userBanListEntry.getDisplayName(),
+                    userBanListEntry.getSource(),
+                    userBanListEntry.getReason()
+                ), false
+            );
         }
         return collection.size();
     }
 
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        PERMISSION.init(context);
-        AtomicInteger i = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (gameProfile, name, id) -> {
-                PERMISSION.map.put(id.toString(), true);
-                context.getSource()
-                    .sendSuccess(
-                        () -> Component.literal("Player %s has been granted permission to operate the banned list.".formatted(name)),
-                        true
-                    );
-                i.incrementAndGet();
-            }
-        );
-        PERMISSION.save();
-        return i.get();
+        BLIST_PERMISSION_CONFIG.tryInit(context);
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), true), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(
+                    () -> Component.literal("Player %s has been granted permission to operate the banned list.".formatted(info.name())),
+                    true
+                );
+        }
+        if (counter > 0) BLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
 
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        PERMISSION.init(context);
-        AtomicInteger i = new AtomicInteger();
-        GameProfileHelper.praseGameProfileCollection(
-            context, "targets", (gameProfile, name, id) -> {
-                PERMISSION.map.put(id.toString(), false);
-                context.getSource()
-                    .sendSuccess(
-                        () -> Component.literal("Revoked player %s's permission to operate the banned list".formatted(name)),
-                        true
-                    );
-                i.incrementAndGet();
-            }
-        );
-        PERMISSION.save();
-        return i.get();
+        BLIST_PERMISSION_CONFIG.tryInit(context);
+        int counter = 0;
+        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileInfo info : profiles) {
+            BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), false), false);
+            counter++;
+            context.getSource()
+                .sendSuccess(
+                    () -> Component.literal("Revoked player %s's permission to operate the banned list".formatted(info.name())),
+                    true
+                );
+        }
+        if (counter > 0) BLIST_PERMISSION_CONFIG.setDirty();
+        return counter;
     }
+
 }

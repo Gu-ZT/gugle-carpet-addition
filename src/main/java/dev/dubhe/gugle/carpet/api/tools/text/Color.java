@@ -39,10 +39,10 @@ public class Color {
     }
 
     private static TextColor color(String color) {
-        //#if MC>=12100
-        return TextColor.parseColor(color).getOrThrow();
-        //#else
-        //$$ return TextColor.parseColor(color);
-        //#endif
+        return TextColor.parseColor(color)
+            //#if MC>=12100
+            .getOrThrow()
+            //#endif
+            ;
     }
 }

@@ -10,13 +10,17 @@
     "APAccessor",
     "AxeItemMixin",
     "ChestMenuMixin",
-    "CommandsMixin",
     "EntityInvoker",
+    "EntityPlayerMPFakeInvoker",
+    "EntityPlayerMPFakeMixin",
     "EntityTypeMixin",
     "FenceGateBlockMixin",
     "FishingHookMixin",
     "ItemFrameMixin",
     "ItemStackMixin",
+    "LocatorBarMixin",
+    "MainServerMixin",
+    "MinecraftServerMixin",
     "NaturalSpawnerMixin",
     "PlayerAccessor",
     "PlayerCommandMixin",
@@ -33,6 +37,7 @@
   "server": [
   ],
   "client": [
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -4,8 +4,9 @@ import carpet.patches.EntityPlayerMPFake;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(EntityPlayerMPFake.class)
+@Mixin(value = EntityPlayerMPFake.class, remap = false)
 public interface EntityPlayerMPFakeInvoker {
     @Invoker(remap = false)
-    static void invokeLoadPlayerData(EntityPlayerMPFake player){}
+    static void invokeLoadPlayerData(EntityPlayerMPFake player) {
+    }
 }

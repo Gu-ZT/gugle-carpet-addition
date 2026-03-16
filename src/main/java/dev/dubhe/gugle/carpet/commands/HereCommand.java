@@ -1,12 +1,13 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.utils.CommandHelper;
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.GcaValidators;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import dev.dubhe.gugle.carpet.tools.PosUtils;
+import dev.dubhe.gugle.carpet.util.PosUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
@@ -30,9 +31,9 @@ public class HereCommand {
         if (!source.isPlayer()) return 0;
         ServerPlayer player = source.getPlayer();
         if (player == null) return 0;
-        for (MutableComponent component : PosUtils.playerPos(player)) {
+        for (MutableComponent component : PosUtil.playerPos(player)) {
             server.getPlayerList().broadcastSystemMessage(component, false);
         }
-        return 1;
+        return Command.SINGLE_SUCCESS;
     }
 }

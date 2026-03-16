@@ -5,7 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
-import dev.dubhe.gugle.carpet.tools.ComponentUtils;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
@@ -151,7 +151,7 @@ abstract class WanderingTraderMixin {
                         Style.EMPTY
                             .withColor(ChatFormatting.GREEN)
                             .withClickEvent(
-                                ComponentUtils.createClickEvent(
+                                ComponentUtil.createClickEvent(
                                     ClickEvent.Action.SUGGEST_COMMAND,
                                     "/tp @s %.1f %.1f %.1f".formatted(center.x, center.y, center.z)
                                 )

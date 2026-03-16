@@ -10,8 +10,6 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.commands.TransferCommand;
-import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -23,13 +21,14 @@ abstract class TransferCommandMixin {
         method = "register",
         at = @At(
             value = "INVOKE",
-            target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;"
+            target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;",
+            remap = false
         )
     )
     private static <S extends CommandSourceStack, T extends ArgumentBuilder<S, T>> T registerPermission(
         LiteralArgumentBuilder<CommandSourceStack> instance,
         Predicate<CommandSourceStack> predicate,
-        @NonNull Operation<T> original
+        Operation<T> original
     ) {
         Predicate<CommandSourceStack> predicate1 = (stack) -> GcaSetting.commandTransfer || predicate.test(stack);
         return original.call(instance, predicate1);

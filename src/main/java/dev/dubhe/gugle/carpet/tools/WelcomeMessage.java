@@ -1,14 +1,11 @@
 package dev.dubhe.gugle.carpet.tools;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.WelcomeInfo;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -18,140 +15,110 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
 import org.apache.commons.lang3.time.DateUtils;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.annotation.Nullable;
 
 public class WelcomeMessage {
-    public static final String ARGS_REGEX = "\\{%\\w+%}";
-    public static final FilesUtil.ObjFile<MessageConfig> WELCOME_MESSAGE = new FilesUtil.ObjFile<>("welcome", new MessageConfig());
+    private static final Pattern ARGS_PATTERN = Pattern.compile("\\{%\\w+%}");
+    private static final GcaConfig<WelcomeInfo> WELCOME_CONFIG = GcaConfig.create("welcome", WelcomeInfo.CODEC);
+    private static final Map<ResourceLocation, WelcomeInfo.IMessageReplacer> REPLACERS = new HashMap<>();
 
     public static void onPlayerLoggedIn(ServerPlayer player) {
-        MessageConfig config = WELCOME_MESSAGE.obj;
-        MinecraftServer server = GameProfileHelper.getServerPlayerServer(player);
-        for (String msg : config.message) {
-            List<String> argKeys = new ArrayList<>();
-            Matcher matcher = Pattern.compile(ARGS_REGEX).matcher(msg);
-            while (matcher.find()) argKeys.add(msg.substring(matcher.start() + 2, matcher.end() - 2));
-            List<String> split = new ArrayList<>(List.of(msg.split(ARGS_REGEX)));
-            List<MessageData> args = argKeys.stream().map(config::getArg).toList();
-            for (int i = split.size(); i < args.size() + 1; i++) split.add("");
+        WelcomeInfo info = getOrCreateWelcomeInfo();
+        MinecraftServer server = player.level().getServer();
+        if (server == null) return;
+        for (String message : info.messages()) {
             MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
-            for (int i = 0; i < split.size(); i++) {
-                component.append(split.get(i));
-                if (i >= args.size()) continue;
-                MessageData messageData = args.get(i);
-                component.append(messageData.getMsg(server, player).withStyle(messageData.color));
+            for (MessageSegment segment : splitSegments(message)) {
+                if (!segment.arg()) {
+                    component.append(segment.text());
+                    continue;
+                }
+                String key = segment.text();
+                WelcomeInfo.MessageArg arg = info.args().get(key);
+                if (arg == null) {
+                    GcaExtension.LOGGER.warn("No arg found for key '{}'", key);
+                    component.append("{%" + key + "%}");
+                    continue;
+                }
+                WelcomeInfo.IMessageReplacer replacer = REPLACERS.get(arg.type());
+                if (replacer == null) {
+                    GcaExtension.LOGGER.warn("No replacer found for welcome arg '{}'", arg.type());
+                    component.append("{%" + key + "%}");
+                    continue;
+                }
+                try {
+                    component.append(replacer.getMessage(server, player, arg.data().orElse(null)).withStyle(arg.style()));
+                } catch (Exception e) {
+                    GcaExtension.LOGGER.error("Failed to replace welcome arg {}", key, e);
+                    component.append("{%" + key + "%}");
+                }
             }
             player.sendSystemMessage(component);
         }
     }
 
-    public static class MessageConfig {
-        public List<String> message = new ArrayList<>();
-        public Map<String, MessageData> args = new HashMap<>();
-
-        public MessageConfig() {
-            message.add("{%player%}, welcome!");
-            args.put("player", new MessageData());
+    private static WelcomeInfo getOrCreateWelcomeInfo() {
+        WelcomeInfo info = WELCOME_CONFIG.getContents().get(WelcomeInfo.KEY);
+        if (info == null) {
+            info = WelcomeInfo.defaultInfo();
+            WELCOME_CONFIG.update(info);
         }
-
-        public MessageData getArg(String key) {
-            return args.getOrDefault(key, new MessageData());
-        }
+        return info;
     }
 
-    public static class MessageData {
-        public ResourceLocation type = MessageDataType.PLAYER.location;
-        public @Nullable JsonElement data = null;
-        public ChatFormatting color = ChatFormatting.GOLD;
+    public static void registerReplacer(ResourceLocation location, WelcomeInfo.IMessageReplacer replacer) {
+        REPLACERS.put(location, replacer);
+    }
 
-        public MessageDataType getType() {
-            return MessageDataType.get(type);
-        }
-
-        public MutableComponent getMsg(MinecraftServer server, ServerPlayer player) {
-            return getType().getMsg(server, player, data);
-        }
-
-        public static class Serializer implements JsonSerializer<MessageData>, JsonDeserializer<MessageData> {
-            @Override
-            public MessageData deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-                MessageData data = new MessageData();
-                if (json.isJsonPrimitive()) {
-                    data.type = MessageDataType.get(GcaExtension.parseLocation(json.getAsString())).location;
-                    return data;
-                }
-                JsonObject object = json.getAsJsonObject();
-                if (object.has("type")) {
-                    data.type = MessageDataType.get(GcaExtension.parseLocation(object.get("type").getAsString())).location;
-                }
-                if (object.has("data")) {
-                    data.data = object.get("data");
-                }
-                if (object.has("color")) {
-                    data.color = Optional.ofNullable(ChatFormatting.getByName(object.get("color").getAsString()))
-                        .orElse(ChatFormatting.GOLD);
-                }
-                return data;
+    private static List<MessageSegment> splitSegments(String msg) {
+        List<MessageSegment> segments = new ArrayList<>();
+        Matcher matcher = ARGS_PATTERN.matcher(msg);
+        int cursor = 0;
+        while (matcher.find()) {
+            if (cursor < matcher.start()) {
+                segments.add(new MessageSegment(msg.substring(cursor, matcher.start()), false));
             }
-
-            @Override
-            public JsonElement serialize(MessageData src, Type typeOfSrc, JsonSerializationContext context) {
-                if (src.color == ChatFormatting.GOLD && src.data == null) {
-                    return new JsonPrimitive(src.type.toString());
-                }
-                JsonObject object = new JsonObject();
-                object.addProperty("type", src.type.toString());
-                if (src.data != null) object.add("data", src.data);
-                if (src.color != ChatFormatting.GOLD) object.addProperty("color", src.color.toString());
-                return object;
-            }
+            String key = msg.substring(matcher.start() + 2, matcher.end() - 2);
+            segments.add(new MessageSegment(key, true));
+            cursor = matcher.end();
         }
+        if (cursor < msg.length()) {
+            segments.add(new MessageSegment(msg.substring(cursor), false));
+        }
+        return segments;
     }
 
-    @FunctionalInterface
-    public interface WelcomeMessageFunction {
-        MutableComponent getMsg(MinecraftServer server, ServerPlayer player, @Nullable JsonElement data) throws Exception;
+    private record MessageSegment(String text, boolean arg) {
     }
 
-    public enum MessageDataType implements WelcomeMessageFunction {
-        NONE(GcaExtension.id("none"), (s, p, d) -> Component.literal("")),
-        PLAYER(
-            GcaExtension.id("player"), (s, p, d) -> {
-            MutableComponent component = Component.literal("");
-            GameProfileHelper.prasePlayerGameProfile(p, (profile, name, uuid) -> component.append(name));
-            return component;
-        }
-        ),
-        DAYCOUNT(
-            GcaExtension.id("day_count"), (s, p, d) -> {
-            MutableComponent component = Component.literal(String.valueOf((s.overworld().getDayTime() / 1728000)));
-            if (d == null || d.isJsonNull() || (!d.isJsonPrimitive() && !d.isJsonObject()) || (
-                d.isJsonObject() && d.getAsJsonObject()
-                    .asMap()
-                    .isEmpty()
+    public static void registerDefaultReplacer() {
+        registerReplacer(GcaExtension.id("player"), (server, player, args) ->
+            player.getDisplayName().copy()
+        );
+        registerReplacer(GcaExtension.id("day_count"), (server, player, args) -> {
+            MutableComponent component = Component.literal(String.valueOf((server.overworld().getDayTime() / 1728000)));
+            if (args == null || args.isJsonNull() || (!args.isJsonPrimitive() && !args.isJsonObject()) || (
+                args.isJsonObject() && args.getAsJsonObject().asMap().isEmpty()
             )) {
                 return component;
             }
             String fromDay = "";
-            if (d.isJsonPrimitive()) {
+            if (args.isJsonPrimitive()) {
                 // 2024-10-06
-                fromDay = d.getAsString();
-            } else if (d.isJsonObject()) {
-                fromDay = d.getAsJsonObject().getAsJsonPrimitive("from").getAsString();
+                fromDay = args.getAsString();
+            } else if (args.isJsonObject()) {
+                fromDay = args.getAsJsonObject().getAsJsonPrimitive("from").getAsString();
             }
             if (fromDay.isEmpty()) return component;
             Calendar date = Calendar.getInstance(TimeZone.getTimeZone("UTC+8"));
@@ -162,26 +129,27 @@ public class WelcomeMessage {
             } else {
                 return component;
             }
-        }
-        ),
-        RANDOM(
-            GcaExtension.id("random"), (s, p, d) -> {
-            List<String> args = new ArrayList<>();
-            if (d != null && d.isJsonArray()) {
-                for (JsonElement element : d.getAsJsonArray()) {
-                    if (!element.isJsonPrimitive()) continue;
-                    args.add(element.getAsString());
+        });
+        registerReplacer(GcaExtension.id("random"), (server, player, args) -> {
+            if (args != null && args.isJsonArray()) {
+                List<String> list = args.getAsJsonArray()
+                    .asList()
+                    .stream()
+                    .filter(JsonElement::isJsonPrimitive)
+                    .map(JsonElement::getAsString)
+                    .toList();
+                if (!list.isEmpty()) {
+                    RandomSource random = RandomSource.create();
+                    return Component.literal(list.get(random.nextInt(list.size())));
                 }
             }
-            return Component.literal(args.get(new Random().nextInt(args.size())));
-        }
-        ),
-        SERVER(
-            GcaExtension.id("server"), (s, p, d) -> {
-            MutableComponent component = Component.literal("").withStyle(ChatFormatting.WHITE);
-            if (d == null || !d.isJsonArray()) return component;
+            return Component.literal("[EMPTY]");
+        });
+        registerReplacer(GcaExtension.id("server"), (server, player, args) -> {
+            MutableComponent component = Component.literal("");
+            if (args == null || !args.isJsonArray()) return component;
             int i = 0;
-            for (JsonElement element : d.getAsJsonArray()) {
+            for (JsonElement element : args.getAsJsonArray()) {
                 if (!element.isJsonPrimitive() && !element.isJsonObject()) continue;
                 String name;
                 String host;
@@ -196,56 +164,26 @@ public class WelcomeMessage {
                 MutableComponent component1 = Component.literal(name);
                 Style style = Style.EMPTY.applyFormat(ChatFormatting.GREEN)
                     .withHoverEvent(
-                        ComponentUtils.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
+                        ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(host))
                     );
                 //#if MC>=12100
                 style = style.withClickEvent(
                     host.contains(":") ?
-                    ComponentUtils.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])
-                    ) :
-                    ComponentUtils.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
+                        ComponentUtil.createClickEvent(
+                            ClickEvent.Action.RUN_COMMAND,
+                            "/transfer %s %s".formatted(host.split(":")[0], host.split(":")[1])
+                        ) :
+                        ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/transfer %s".formatted(host))
                 );
                 //#else
                 //#endif
                 component1.setStyle(style);
                 component.append(component1);
-                if (i != d.getAsJsonArray().size() - 1) component.append(Component.literal(" "));
+                if (i != args.getAsJsonArray().size() - 1) component.append(Component.literal(" "));
                 i++;
             }
             return Component.literal("").append(component);
-        }
-        );
+        });
 
-        public final ResourceLocation location;
-        private final WelcomeMessageFunction function;
-
-        MessageDataType(ResourceLocation location, WelcomeMessageFunction function) {
-            this.location = location;
-            this.function = function;
-        }
-
-        @Override
-        public String toString() {
-            return this.location.toString();
-        }
-
-        public static MessageDataType get(ResourceLocation location) {
-            for (MessageDataType value : values()) {
-                if (value.location.equals(location)) return value;
-            }
-            return NONE;
-        }
-
-        @Override
-        public MutableComponent getMsg(MinecraftServer server, ServerPlayer player, @Nullable JsonElement data) {
-            try {
-                return this.function.getMsg(server, player, data);
-            } catch (Exception e) {
-                GcaExtension.LOGGER.error(e.getMessage(), e);
-            }
-            return Component.literal("");
-        }
     }
 }
