@@ -4,8 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.annotations.SerializedName;
-import com.mojang.authlib.GameProfile;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
@@ -23,6 +23,7 @@ import dev.dubhe.gugle.carpet.config.updater.serializer.ResourceLocationSerializ
 import dev.dubhe.gugle.carpet.config.updater.serializer.ChatFormattingSerializer;
 import dev.dubhe.gugle.carpet.config.updater.serializer.DimTypeSerializer;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtOps;
@@ -35,11 +36,15 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,8 +61,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.util.Mth;
 //#endif
-
+//#if MC < 12109
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.GameProfileCache;
+//#else
+//$$ import net.minecraft.server.players.NameAndId;
+//$$ import net.minecraft.util.StringUtil;
+//#endif
 public class ConfigUpdater {
+    public static final Logger LOGGER = LoggerFactory.getLogger("GcaConfigUpdater");
     public static final Gson GSON = new GsonBuilder()
         .setPrettyPrinting()
         .registerTypeHierarchyAdapter(ResourceKey.class, new DimTypeSerializer())
@@ -65,9 +77,9 @@ public class ConfigUpdater {
         .registerTypeHierarchyAdapter(ChatFormatting.class, new ChatFormattingSerializer())
         .create();
 
-    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services) {
+    public static void tryUpdateOldVersion(LevelStorageSource.LevelStorageAccess access, Services services, boolean onlineMode) {
         Path levelPath = access.getLevelPath(LevelResource.ROOT);
-        GcaExtension.LOGGER.info("Checking old config files...");
+        LOGGER.info("Checking old config files...");
 
         updateMapping(NameMapper.of(levelPath, "bot"), DeprecatedBotInfo.class, BotInfo.CODEC, info -> {
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, info.actions).result().orElse(BotActionInfo.EMPTY);
@@ -94,7 +106,7 @@ public class ConfigUpdater {
 
         updateWelcome(NameMapper.of(levelPath, "welcome"));
 
-        updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services);
+        updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services, onlineMode);
     }
 
     private static <T, R extends IWithName> void updateMapping(NameMapper fileMapper, Class<T> tClass, Codec<R> codec, Function<T, R> function) {
@@ -131,20 +143,29 @@ public class ConfigUpdater {
         });
     }
 
-    private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services) {
+    private static void updateResident(NameMapper fileMapper, LevelStorageSource.LevelStorageAccess access, Services services, boolean onlineMode) {
+        try {
+            Files.deleteIfExists(access.getLevelPath(LevelResource.ROOT).resolve("fake_player.gca.old.json"));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to delete old fake_player config backup file.", e);
+        }
         File playerDir = access.getLevelPath(LevelResource.PLAYER_DATA_DIR).toFile();
         updateNormalResolver(fileMapper, BotInfo.CODEC, entry -> {
             String name = entry.getKey();
             JsonObject value = entry.getValue().getAsJsonObject();
-            UUID uuid = getUUIDByName(services, name);
-            File file = new File(playerDir, uuid.toString() + ".dat");
+            UUID uuid = getUUIDByName(services, name, onlineMode);
+            if (uuid == null) {
+                LOGGER.warn("Failed to get UUID for {}, skipping...", name);
+                return null;
+            }
+            File file = new File(playerDir, uuid + ".dat");
             if (!file.exists() || !file.isFile()) {
-                GcaExtension.LOGGER.warn("Player data file not found for {}, skipping...", name);
+                LOGGER.warn("Player data file not found for {}, skipping...", name);
                 return null;
             }
             Optional<CompoundTag> optional = getPlayerData(file);
             if (optional.isEmpty()) {
-                GcaExtension.LOGGER.warn("Failed to load player data for {}, skipping...", name);
+                LOGGER.warn("Failed to load player data for {}, skipping...", name);
                 return null;
             }
             BotActionInfo actions = BotActionInfo.CODEC.parse(JsonOps.INSTANCE, value.get("actions")).result().orElse(BotActionInfo.EMPTY);
@@ -163,7 +184,7 @@ public class ConfigUpdater {
 
     private static <T extends IWithName> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
-        GcaExtension.LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
+        LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
             String jsonStr = Files.readString(fileMapper.oldPath);
             JsonObject json = GSON.fromJson(jsonStr, JsonObject.class);
@@ -171,13 +192,30 @@ public class ConfigUpdater {
             List<T> list = function.apply(json);
 
             if (!list.isEmpty()) {
-                Map<String, T> contents = list.stream().collect(Collectors.toMap(IWithName::name, it -> it, (a, b) -> b));
+                Map<String, T> contents = new LinkedHashMap<>();
 
-                Codec<Map<String, T>> resultCodec = Codec.unboundedMap(Codec.STRING, codec);
-                DataResult<JsonElement> result = resultCodec.encodeStart(JsonOps.INSTANCE, contents);
+                Codec<Map<String, T>> fileCodec = Codec.unboundedMap(Codec.STRING, codec);
+                if (fileMapper.newName.toFile().exists()) {
+                    String already = Files.readString(fileMapper.newName, StandardCharsets.UTF_8);
+                    DataResult<Map<String, T>> parseResult = fileCodec.parse(JsonOps.INSTANCE, JsonParser.parseString(already));
+                    if (parseResult.error().isPresent()) {
+                        LOGGER.warn("Failed to parse existing config file: {}, this file will be overwritten.", fileMapper.newName);
+                        LOGGER.warn("{}", parseResult.error().get().message());
+                    } else {
+                        parseResult.result().ifPresent(contents::putAll);
+                    }
+                }
+
+                for (T data : list) {
+                    String name = data.name();
+                    if (contents.containsKey(name)) continue;
+                    contents.put(name, data);
+                }
+
+                DataResult<JsonElement> result = fileCodec.encodeStart(JsonOps.INSTANCE, contents);
 
                 if (result.error().isPresent()) {
-                    GcaExtension.LOGGER.error("Failed to encode config: {}", result.error().get().message());
+                    LOGGER.error("Failed to encode config: {}", result.error().get().message());
                     return;
                 }
 
@@ -188,18 +226,36 @@ public class ConfigUpdater {
 
             Files.deleteIfExists(fileMapper.oldPath);
         } catch (Exception e) {
-            GcaExtension.LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
+            LOGGER.warn("Failed to update old config: {}", fileMapper.oldPath, e);
         }
     }
 
-    private static UUID getUUIDByName(Services services, String name) {
-        return services
-            //#if MC < 12109
-            .profileCache().get(name)
-            //#else
-            //$$ .profileResolver().fetchByName(name)
-            //#endif
-            .map(GameProfile::getId).orElse(null);
+    @Nullable
+    private static UUID getUUIDByName(Services services, String name, boolean onlineMode) {
+        //#if MC < 12109
+        GameProfileCache.setUsesAuthentication(false);
+        GameProfile gameprofile;
+        try {
+            gameprofile = services.profileCache().get(name).orElse(null);
+        } finally {
+            GameProfileCache.setUsesAuthentication(onlineMode);
+        }
+        if (gameprofile == null) {
+            gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
+        }
+        return gameprofile.getId();
+        //#else
+        //$$ services.nameToIdCache().resolveOfflineUsers(false);
+        //$$ if (!StringUtil.isNullOrEmpty(name) && name.length() <= 16) {
+        //$$     Optional<UUID> optional = services.nameToIdCache().get(name).map(NameAndId::id);
+        //$$     return optional.orElseGet(() -> UUIDUtil.createOfflinePlayerUUID(name));
+        //$$ }
+        //$$ try {
+        //$$     return UUID.fromString(name);
+        //$$ } catch (IllegalArgumentException var5) {
+        //$$     return null;
+        //$$ }
+        //#endif
     }
 
     private static Optional<CompoundTag> getPlayerData(File file) {
@@ -237,7 +293,7 @@ public class ConfigUpdater {
 //$$             .orElse(false);
         //#endif
         ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, playerData.get("Dimension"))
-            .resultOrPartial(GcaExtension.LOGGER::error)
+            .resultOrPartial(LOGGER::error)
             .orElse(Level.OVERWORLD);
         return new BotInfo(name, "Resident bot imported from old config", pos, facing, dimension, mode, flying, actions);
     }

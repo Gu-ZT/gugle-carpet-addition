@@ -37,7 +37,7 @@ public class MinecraftMixin {
         , @Local Services services
         //#endif
         ) {
-        ConfigUpdater.tryUpdateOldVersion(levelStorageAccess, services);
+        ConfigUpdater.tryUpdateOldVersion(levelStorageAccess, services, false);
     }
 
 }

@@ -243,12 +243,12 @@ public class BotCommand {
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
         CommandSourceStack source = context.getSource();
-        List<String> bots = group.group.bots();
+        List<String> bots = new ArrayList<>(group.group.bots());
         if (!bots.remove(botName)) {
             source.sendFailure(Component.literal("Bot %s is not found in the %s.".formatted(botName, groupName)));
             return 0;
         }
-        BOT_GROUP_CONFIG.update(group.group);
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
         source.sendSuccess(() -> Component.literal("Bot %s is removed from %s successfully.".formatted(botName, groupName)), false);
         return Command.SINGLE_SUCCESS;
     }
@@ -259,13 +259,13 @@ public class BotCommand {
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
         CommandSourceStack source = context.getSource();
-        List<String> bots = group.group.bots();
+        List<String> bots = new ArrayList<>(group.group.bots());
         if (bots.contains(botName)) {
             source.sendFailure(Component.literal("Bot %s is already added.".formatted(botName)));
             return 0;
         }
         bots.add(botName);
-        BOT_GROUP_CONFIG.update(group.group);
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
         source.sendSuccess(() -> Component.literal("Bot %s is added to %s successfully.".formatted(botName, groupName)), false);
         return Command.SINGLE_SUCCESS;
     }
