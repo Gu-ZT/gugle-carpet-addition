@@ -44,16 +44,17 @@ jobs:
       - name: Build
         run: ./gradlew build
 
-      - name: Publish
-        if: ${{ !contains(github.event.head_commit.message, '- pass publish') }}
-        run: ./gradlew build publishMods
-        env:
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
             */**/build/libs/
+
+      - name: Publish
+        if: ${{ !contains(github.event.head_commit.message, '- pass publish') }}
+        run: ./gradlew publishMods
+        env:
+          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+
