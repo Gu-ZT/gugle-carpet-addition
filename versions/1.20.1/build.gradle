@@ -164,7 +164,7 @@ java {
 publishMods {
     file = remapJar.archiveFile
     changelog = "Changelog"
-    type = BETA
+    type = STABLE
     modLoaders.add("fabric")
     modLoaders.add("quilt")
 
