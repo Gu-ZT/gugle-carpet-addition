@@ -24,6 +24,8 @@ Allow player to open the fake player's inventory
 /carpet openFakePlayerInventory true
 ```
 
+**Usage**: Right-click on a fake player to open their inventory
+
 ![inv](docs/pics/inv.png)
 
 ### openRealPlayerInventory
@@ -40,9 +42,11 @@ Allow player to open the real player's inventory
 /carpet openRealPlayerInventory ops
 ```
 
+**Usage**: Right-click on other real players to open their inventory, requires appropriate permission level
+
 ### openFakePlayerEnderChest
 
-Allow player to open the fake player's ender chest. Sneak to open the fake player's ender chest.
+Allow player to open the fake player's ender chest
 
 * Type: `String`
 * Default: `false`
@@ -53,6 +57,8 @@ Allow player to open the fake player's ender chest. Sneak to open the fake playe
 /carpet openFakePlayerEnderChest true
 /carpet openFakePlayerEnderChest ender_chest
 ```
+
+**Usage**: Sneak (hold Shift) + right-click on a fake player to open their ender chest
 
 ![ender](docs/pics/ender.png)
 
@@ -110,7 +116,7 @@ Make fake player to auto replenishment from shulker box
 
 ### fakePlayerAutoFish
 
-Make fake player to auto fish
+Make fake player to auto fish. When the fishing hook catches a fish, it will automatically reel in and cast again.
 
 * Type: `boolean`
 * Default: `false`
@@ -120,6 +126,8 @@ Make fake player to auto fish
 ```
 /carpet fakePlayerAutoFish true
 ```
+
+**Usage**: Let the fake player hold a fishing rod and use `/player <name> use` to start fishing. The fake player will automatically complete the reel-in and cast operations.
 
 ### fakePlayerAutoReplaceTool
 
@@ -164,7 +172,7 @@ Fake Player Suffix Name
 
 ### commandBot
 
-A Bot Management Menu
+A Bot Management Menu for saving, loading, and grouping fake players
 
 * Type: `String`
 * Default: `ops`
@@ -173,12 +181,28 @@ A Bot Management Menu
 
 ```
 /carpet commandBot ops
-/bot
+```
+
+**Command Usage**:
+```
+/bot                                    # Show saved bot list
+/bot list [page]                        # Show bot list with pagination
+/bot add <player> <desc>                # Save current online fake player (including position, actions, etc.)
+/bot load <player>                      # Load saved fake player
+/bot remove <player>                    # Delete saved fake player
+/bot group                              # Show bot group list
+/bot group create <name>                # Create bot group
+/bot group remove <name>                # Delete bot group
+/bot group add <bot> <group>            # Add bot to group
+/bot group load <group>                 # Load all bots in group
+/bot group unload <group>               # Unload all bots in group
+/bot group info <group>                 # View group details
+/bot group generated <name> <count> [load]  # Batch generate bots and group them
 ```
 
 ### commandTodo
 
-A Todo Management Menu
+A Todo Management Menu with support for adding, removing, and marking completion
 
 * Type: `String`
 * Default: `ops`
@@ -187,27 +211,40 @@ A Todo Management Menu
 
 ```
 /carpet commandTodo ops
-/todo
+```
+
+**Command Usage**:
+```
+/todo                           # Show todo list
+/todo list [page]               # Show todo list with pagination
+/todo add <desc>                # Add new todo item
+/todo remove <id>               # Remove todo item
+/todo success <id> [true/false] # Mark todo as done/undone
 ```
 
 ### commandHere
 
-Quickly send position
+Quickly broadcast your current position to all players and add glowing effect to yourself
 
 * Type: `String`
 * Default: `ops`
 * Options: `ops`, `0`, `1`, `2`, `3`, `4`, `true`, `false`
 * Categories: `GCA`, `command`
-* Conditions: Requires CarpetAmsAddition loaded
+* Conditions: Only works when CarpetAmsAddition is NOT loaded
 
 ```
 /carpet commandHere ops
-/here
+```
+
+**Command Usage**:
+```
+/here   # Broadcast your coordinates, showing current dimension and converted coordinates
+        # Also outputs Xaero's Minimap compatible waypoint format
 ```
 
 ### commandWhereis
 
-Quickly locate players
+Quickly locate players and add glowing effect to target
 
 * Type: `String`
 * Default: `ops`
@@ -216,12 +253,17 @@ Quickly locate players
 
 ```
 /carpet commandWhereis ops
-/whereis <player>
+```
+
+**Command Usage**:
+```
+/whereis <player>   # Query specified player's location
+/vris <player>      # Alias, same function
 ```
 
 ### commandLoc
 
-A Loc Management Menu
+A Location Management Menu for saving, viewing, and deleting location points
 
 * Type: `String`
 * Default: `ops`
@@ -230,12 +272,20 @@ A Loc Management Menu
 
 ```
 /carpet commandLoc ops
-/loc
+```
+
+**Command Usage**:
+```
+/loc                    # Show location list
+/loc list [page]        # Show locations with pagination
+/loc add <desc>         # Add location at current position
+/loc remove <id>        # Remove specified location
+/loc info <id>          # View location details (including dimension converted coordinates)
 ```
 
 ### commandWlist
 
-Whitelist Management
+Whitelist Management, allows authorized regular players to manage the whitelist
 
 * Type: `boolean`
 * Default: `false`
@@ -244,7 +294,15 @@ Whitelist Management
 
 ```
 /carpet commandWlist true
-/wlist
+```
+
+**Command Usage**:
+```
+/wlist                              # Show current whitelist
+/wlist add <player>                 # Add player to whitelist
+/wlist remove <player>              # Remove player from whitelist
+/wlist permission add <player>      # Grant player whitelist management permission (OP only)
+/wlist permission remove <player>   # Revoke player's whitelist management permission (OP only)
 ```
 
 ### commandBlist
