@@ -64,9 +64,10 @@ public class GcaSetting {
 
     // 让假人自动切换快损坏的工具
     @Rule(
+        options = {"false", "true", "keep"},
         categories = {GCA, BOT}
     )
-    public static boolean fakePlayerAutoReplaceTool = false;
+    public static String fakePlayerAutoReplaceTool = "false";
 
     public static final String fakePlayerNoneName = "#none";
 
