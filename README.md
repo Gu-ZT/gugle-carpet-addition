@@ -133,10 +133,14 @@ Make fake player to auto fish. When the fishing hook catches a fish, it will aut
 
 Make fake player to auto replace almost damaged tool
 
-* Type: `boolean`
+* Type: `String`
 * Default: `false`
 * Options: `true`, `false`
-* Categories: `GCA`, `BOT`
+* Categories: `GCA`, `BOT`, `keep`
+
+> `true`: Tools with Mending will keep 10 durability; other tools will automatically switch after they break.
+
+> `keep`: All tools will keep 10 durability.
 
 ```
 /carpet fakePlayerAutoReplaceTool true

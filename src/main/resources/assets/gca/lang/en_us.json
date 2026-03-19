@@ -27,7 +27,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace damaged tool",
 
   "carpet.rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
   "carpet.rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",

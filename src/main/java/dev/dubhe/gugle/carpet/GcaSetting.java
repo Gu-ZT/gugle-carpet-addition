@@ -62,7 +62,7 @@ public class GcaSetting {
     )
     public static boolean fakePlayerAutoFish = false;
 
-    // 让假人自动切换快损坏的工具
+    // 让假人自动切换工具
     @Rule(
         options = {"false", "true", "keep"},
         categories = {GCA, BOT}

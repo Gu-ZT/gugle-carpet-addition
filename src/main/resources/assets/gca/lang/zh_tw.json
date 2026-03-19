@@ -24,7 +24,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "讓假人自動釣魚",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "假人自動切換工具",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "讓假人自動替換快損壞的工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "讓假人自動替換損壞的工具",
 
   "carpet.rule.betterFenceGatePlacement.name": "更好的柵欄門放置",
   "carpet.rule.betterFenceGatePlacement.desc": "讓放置的柵欄門具有與您點擊的柵欄門相同的方塊狀態",
