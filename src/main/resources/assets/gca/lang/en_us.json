@@ -110,6 +110,9 @@
   "carpet.rule.fakePlayerLocatorBar.name": "Fake Player LocatorBar",
   "carpet.rule.fakePlayerLocatorBar.desc": "Display Fake Player Positions On The Locator Bar",
 
+  "carpet.rule.commandSeed.name": "Command Seed",
+  "carpet.rule.commandSeed.desc": "/seed command",
+
   "gca.action.attack.interval.12": "Attack every 12 gt: %s",
   "gca.action.attack.continuous": "Attack continuous: %s",
   "gca.action.use.continuous": "Use continuous: %s",

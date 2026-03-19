@@ -25,6 +25,7 @@
     "PlayerAccessor",
     "PlayerCommandMixin",
     "PlayerMixin",
+    "SeedCommandMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",

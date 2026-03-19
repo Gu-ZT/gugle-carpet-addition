@@ -110,6 +110,9 @@
   "carpet.rule.fakePlayerLocatorBar.name": "假人定位条",
   "carpet.rule.fakePlayerLocatorBar.desc": "在定位条上显示假玩家位置",
 
+  "carpet.rule.commandSeed.name": "seed命令",
+  "carpet.rule.commandSeed.desc": "修改/seed命令的权限等级",
+
   "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",
   "gca.action.attack.continuous": "一直左键： %s",
   "gca.action.use.continuous": "一直右键：%s",
