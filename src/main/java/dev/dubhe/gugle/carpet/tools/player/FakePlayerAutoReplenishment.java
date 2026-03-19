@@ -11,6 +11,8 @@ import net.minecraft.world.item.ItemStack;
 //#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemContainerContents;
+
+import java.util.List;
 //#else
 //$$ import net.minecraft.nbt.CompoundTag;
 //$$ import net.minecraft.nbt.Tag;
@@ -69,25 +71,38 @@ public class FakePlayerAutoReplenishment {
     }
 
     // 从潜影盒拿取物品，请注意：在创造模式下使用鼠标中键复制物品（不是指选取方块）时，物品组件仅被浅拷贝。
-    private static int pickItemFromBox(ItemStack shulkerBox, ItemStack itemStack, int count) {
+    private static int pickItemFromBox(ItemStack shulkerBox, ItemStack itemStack, int requestCount) {
         //#if MC>=12005
         ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
-        if (contents == null) return 0;
-        // 潜影盒没有容器组件
-        for (ItemStack stack : contents.nonEmptyItems()) {
+        // 空的潜影盒
+        if (contents == null || contents == ItemContainerContents.EMPTY) return 0;
+        // 深拷贝
+        List<ItemStack> list = contents.stream().toList();
+        int count = 0;
+
+        for (ItemStack stack : list) {
             if (ItemStack.isSameItemSameComponents(itemStack, stack)) {
-                int temp;
-                if (stack.getCount() >= count) {
-                    stack.shrink(count);
-                    temp = count;
+                if (stack.getCount() >= requestCount) {
+                    stack.shrink(requestCount);
+                    count = requestCount;
                 } else {
-                    temp = stack.getCount();
+                    count = stack.getCount();
                     stack.setCount(0);
                 }
-                ifIsEmptyClear(shulkerBox);
-                return temp;
+                break;
             }
         }
+
+        if (count > 0) {
+            // 将深拷贝的组件写回潜影盒
+            shulkerBox.set(DataComponents.CONTAINER,
+                list.stream().allMatch(ItemStack::isEmpty) ?
+                    ItemContainerContents.EMPTY :
+                    ItemContainerContents.fromItems(list)
+            );
+        }
+
+        return count;
         //#else
         //$$ CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
         //$$ if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) return 0;
@@ -101,9 +116,9 @@ public class FakePlayerAutoReplenishment {
         //$$     CompoundTag tag = next.getId() == 10 ? (CompoundTag) next : new CompoundTag();
         //$$     ItemStack stack = ItemStack.of(tag);
         //$$     if (!ItemStack.isSameItemSameTags(stack, itemStack)) continue;
-        //$$     if (stack.getCount() > count) {
-        //$$         temp = count;
-        //$$         stack.shrink(count);
+        //$$     if (stack.getCount() > requestCount) {
+        //$$         temp = requestCount;
+        //$$         stack.shrink(requestCount);
         //$$     } else {
         //$$         temp = stack.getCount();
         //$$         stack.setCount(0);
@@ -115,8 +130,8 @@ public class FakePlayerAutoReplenishment {
         //$$     } else iterator.remove();
         //$$     return temp;
         //$$ }
+        //$$ return 0;
         //#endif
-        return 0;
     }
 
     // 如果潜影盒为空，将物品栏组件替换为空以保证潜影盒堆叠的正常运行
