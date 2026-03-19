@@ -239,9 +239,9 @@ public class GcaSetting {
 
     // 允许玩家查看服务器种子
     @Rule(
-        options = {"vanilla", "true", "false", "ops", "0", "1", "2", "3", "4"},
+        options = {"true", "false", "ops", "0", "1", "2", "3", "4"},
         categories = {GCA, COMMAND},
         validators = Validators.CommandLevel.class
     )
-    public static String commandSeed = "vanilla";
+    public static String commandSeed = "ops";
 }
