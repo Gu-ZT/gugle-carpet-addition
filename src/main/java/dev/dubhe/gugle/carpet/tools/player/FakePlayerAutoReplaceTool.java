@@ -116,7 +116,7 @@ public class FakePlayerAutoReplaceTool {
             }
             //#else
             //$$ CompoundTag nbt = itemStack.getTagElement("BlockEntityTag");
-            //$$ if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) return false;
+            //$$ if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) continue;
             //$$ ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
             //$$ for (int index = 0; index < tagList.size(); index++) {
             //$$     CompoundTag tag = tagList.getCompound(index);
@@ -128,6 +128,7 @@ public class FakePlayerAutoReplaceTool {
             //$$         CompoundTag newTag = itemBySlot.save(new CompoundTag());
             //$$         newTag.putByte("Slot", tag.getByte("Slot"));
             //$$         tagList.set(index, newTag);
+            //$$         return true;
             //$$     }
             //$$ }
             //#endif
