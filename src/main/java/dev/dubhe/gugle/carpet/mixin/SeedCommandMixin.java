@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 public class SeedCommandMixin {
     @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;", remap = false))
     private static ArgumentBuilder modify(LiteralArgumentBuilder instance, Predicate<CommandSourceStack> predicate, Operation<ArgumentBuilder> original) {
-        Predicate<CommandSourceStack> permissionCheck = stack -> "0".equals(GcaSetting.commandSeed) ?
+        Predicate<CommandSourceStack> permissionCheck = stack -> "vanilla".equals(GcaSetting.commandSeed) ?
             predicate.test(stack) : CommandHelper.canUseCommand(stack, GcaSetting.commandSeed);
         return original.call(instance, permissionCheck);
     }
