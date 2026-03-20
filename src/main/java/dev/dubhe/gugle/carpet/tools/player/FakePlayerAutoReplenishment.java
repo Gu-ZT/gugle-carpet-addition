@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.util.ContainerUtil;
 import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
@@ -49,7 +50,7 @@ public class FakePlayerAutoReplenishment {
                     eachItem.setCount(0);
                 }
                 break;
-            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && hasContainer(eachItem)) {
+            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && ContainerUtil.hasContainer(eachItem)) {
                 int result = pickItemFromBox(eachItem, itemStack, half);
                 if (result == 0) {
                     continue;
@@ -58,16 +59,6 @@ public class FakePlayerAutoReplenishment {
                 return;
             }
         }
-    }
-
-    private static boolean hasContainer(ItemStack stack) {
-        //#if MC>=12005
-        return stack.has(DataComponents.CONTAINER);
-        //#else
-        //$$ CompoundTag tag = stack.getTag();
-        //$$ if (tag == null) return false;
-        //$$ return tag.contains("BlockEntityTag") && tag.getCompound("BlockEntityTag").contains("Items", Tag.TAG_LIST);
-        //#endif
     }
 
     // 从潜影盒拿取物品，请注意：在创造模式下使用鼠标中键复制物品（不是指选取方块）时，物品组件仅被浅拷贝。
@@ -134,19 +125,4 @@ public class FakePlayerAutoReplenishment {
         //#endif
     }
 
-    // 如果潜影盒为空，将物品栏组件替换为空以保证潜影盒堆叠的正常运行
-    //#if MC>=12005
-    private static void ifIsEmptyClear(ItemStack shulkerBox) {
-        ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
-        if (contents == null) {
-            return;
-        }
-        // 潜影盒中还有物品
-        if (contents.nonEmptyItems().iterator().hasNext()) {
-            return;
-        }
-        // 潜影盒中已经没有物品了
-        shulkerBox.set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-    }
-    //#endif
 }

@@ -1,11 +1,11 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.util.ContainerUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.Predicate;
@@ -98,7 +98,7 @@ public class FakePlayerAutoReplaceTool {
 
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack itemStack = inventory.getItem(i);
-            if (!itemStack.is(Items.SHULKER_BOX)) continue;
+            if (!ContainerUtil.hasContainer(itemStack)) continue;
             //#if MC>=12005
             ItemContainerContents contents = itemStack.get(DataComponents.CONTAINER);
             if (contents == null) continue;
@@ -110,26 +110,33 @@ public class FakePlayerAutoReplaceTool {
                     ItemStack copy = item.copy();
                     items.set(index, itemBySlot);
                     fakePlayer.setItemSlot(slot, copy);
-                    itemStack.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(items));
+                    ItemContainerContents container = items.stream().allMatch(ItemStack::isEmpty) ?
+                        ItemContainerContents.EMPTY :
+                        ItemContainerContents.fromItems(items);
+                    itemStack.set(DataComponents.CONTAINER, container);
                     return true;
                 }
             }
             //#else
             //$$ CompoundTag nbt = itemStack.getTagElement("BlockEntityTag");
-            //$$ if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) continue;
+            //$$ if (nbt == null) continue;
             //$$ ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
             //$$ for (int index = 0; index < tagList.size(); index++) {
             //$$     CompoundTag tag = tagList.getCompound(index);
             //$$     ItemStack stack = ItemStack.of(tag);
-            //$$     if (predicate.test(stack)) {
-            //$$         ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
-            //$$         ItemStack copy = stack.copy();
-            //$$         fakePlayer.setItemSlot(slot, copy);
-            //$$         CompoundTag newTag = itemBySlot.save(new CompoundTag());
-            //$$         newTag.putByte("Slot", tag.getByte("Slot"));
-            //$$         tagList.set(index, newTag);
+            //$$     if (!predicate.test(stack)) continue;
+            //$$     ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
+            //$$     ItemStack copy = stack.copy();
+            //$$     fakePlayer.setItemSlot(slot, copy);
+            //$$     if (itemBySlot.isEmpty()) {
+            //$$         tagList.remove(index);
+            //$$         if (tagList.isEmpty()) nbt.remove("Items");
             //$$         return true;
             //$$     }
+            //$$     CompoundTag newTag = itemBySlot.save(new CompoundTag());
+            //$$     newTag.putByte("Slot", tag.getByte("Slot"));
+            //$$     tagList.set(index, newTag);
+            //$$     return true;
             //$$ }
             //#endif
         }
