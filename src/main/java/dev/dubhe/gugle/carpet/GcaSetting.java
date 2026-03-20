@@ -243,5 +243,5 @@ public class GcaSetting {
         categories = {GCA, COMMAND},
         validators = Validators.CommandLevel.class
     )
-    public static String commandSeed = "ops";
+    public static String commandSeed = "0";
 }
