@@ -135,8 +135,8 @@ Make fake player to auto replace almost damaged tool
 
 * Type: `String`
 * Default: `false`
-* Options: `true`, `false`
-* Categories: `GCA`, `BOT`, `keep`
+* Options: `true`, `false`, `keep`
+* Categories: `GCA`, `BOT`
 
 > `true`: Tools with Mending will keep 10 durability; other tools will automatically switch after they break.
 
