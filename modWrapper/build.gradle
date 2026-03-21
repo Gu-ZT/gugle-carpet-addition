@@ -21,7 +21,14 @@ ext {
 }
 
 def fullModVersion = project.mod_version + project.getVersionSuffix()
+def versionRange = project.mc_version_range.trim().split(/\s+/)
+if (versionRange.length != 2) {
+    throw new GradleException("mc_version_range must contain exactly two space-separated values: '<start> <end>'")
+}
+def startVersion = versionRange[0]
+def endVersion = versionRange[1]
 
+//version = "v${fullModVersion}-mc${startVersion}-${endVersion}"
 version = 'v' + fullModVersion
 
 group(project.maven_group)
@@ -84,7 +91,7 @@ processResources {
         ArrayList<?> jars = []
 
         mods.each({
-            jars.add(["file": "META-INF/jars/${project.archives_base_name}-mc${it.minecraft_version}-${project.version}.jar"])
+            jars.add(["file": "META-INF/jars/${project.archives_base_name}-mc${it.minecraft_version}-v${fullModVersion}.jar"])
         })
 
         File file = file("build/resources/main/fabric.mod.json")
@@ -115,8 +122,8 @@ publishMods {
         projectId = "662867"
         requires('carpet')
         minecraftVersionRange {
-            start = "1.20"
-            end = "1.21.11"
+            start = startVersion
+            end = endVersion
         }
     }
 
@@ -125,8 +132,8 @@ publishMods {
         projectId = "UHjbX5mk"
         requires('carpet')
         minecraftVersionRange {
-            start = "1.20"
-            end = "1.21.11"
+            start = startVersion
+            end = endVersion
         }
     }
 }
