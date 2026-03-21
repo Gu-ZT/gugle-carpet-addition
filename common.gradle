@@ -1,7 +1,3 @@
-plugins {
-    id "me.modmuss50.mod-publish-plugin" version "0.8.3"
-}
-
 apply plugin: 'fabric-loom'
 apply plugin: 'com.replaymod.preprocess'
 
@@ -129,11 +125,6 @@ base {
     archivesName.set(project.archives_base_name + '-mc' + project.minecraft_version)
 }
 
-String fabric_id = "fabric-api"
-if (mcVersion < 11800) {
-    fabric_id = "fabric"
-}
-
 processResources {
     from "gca.accesswidener"
 
@@ -163,34 +154,6 @@ java {
     withSourcesJar()
     sourceCompatibility = SOURCE_JAVA_VERSION
     targetCompatibility = TARGET_JAVA_VERSION
-}
-
-publishMods {
-    file = remapJar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
-    modLoaders.add("fabric")
-    modLoaders.add("quilt")
-
-    def versions = project.game_versions.toString().split(',')*.trim().findAll { it } as List
-
-    curseforge {
-        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
-        projectId = "662867"
-        versions.each {
-            minecraftVersions.add(it)
-        }
-        requires('carpet')
-    }
-
-    modrinth {
-        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
-        projectId = "UHjbX5mk"
-        versions.each {
-            minecraftVersions.add(it)
-        }
-        requires('carpet')
-    }
 }
 
 jar {

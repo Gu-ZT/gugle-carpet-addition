@@ -45,12 +45,12 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
+          name: 'Artifacts'
           path: ./modWrapper/build/libs/*.jar
 
       - name: Publish
         if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
-        run: ./gradlew publishMods
+        run: ./gradlew :modWrapper:publishMods
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-

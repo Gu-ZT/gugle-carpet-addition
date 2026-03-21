@@ -3,6 +3,7 @@ import groovy.json.JsonSlurper
 
 plugins {
     id("java-library")
+    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
 ext {
@@ -100,4 +101,32 @@ processResources {
 java {
     sourceCompatibility(JavaVersion.VERSION_21)
     targetCompatibility(JavaVersion.VERSION_21)
+}
+
+publishMods {
+    file = jar.archiveFile
+    changelog = "Changelog"
+    type = STABLE
+    modLoaders.add("fabric")
+    modLoaders.add("quilt")
+
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = "662867"
+        requires('carpet')
+        minecraftVersionRange {
+            start = "1.20"
+            end = "1.21.11"
+        }
+    }
+
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        projectId = "UHjbX5mk"
+        requires('carpet')
+        minecraftVersionRange {
+            start = "1.20"
+            end = "1.21.11"
+        }
+    }
 }
