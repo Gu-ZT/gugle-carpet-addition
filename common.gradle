@@ -124,7 +124,10 @@ String fullModVersion = project.mod_version + versionSuffix
 
 version = 'v' + fullModVersion
 group = project.maven_group
-archivesBaseName = project.archives_base_name + '-mc' + project.minecraft_version
+
+base {
+    archivesName.set(project.archives_base_name + '-mc' + project.minecraft_version)
+}
 
 String fabric_id = "fabric-api"
 if (mcVersion < 11800) {
@@ -134,18 +137,19 @@ if (mcVersion < 11800) {
 processResources {
     from "gca.accesswidener"
 
+    from("${rootDir}/icon.png") {
+        into("assets/${project.mod_id}")
+    }
+
     inputs.property "version", project.version
 
     filesMatching("fabric.mod.json") {
-        def valueMap = [
-                "version"          : fullModVersion,
+        expand([
                 "id"               : project.mod_id,
+                "version"          : fullModVersion,
                 "name"             : project.archives_base_name,
-                "minecraft_support": project.minecraft_support_version,
-                "fabric_loader"    : project.loader_version,
-                "fabric_api_id"    : fabric_id
-        ]
-        expand valueMap
+                "minecraft_support": project.minecraft_support_version
+        ])
     }
 
     filesMatching("quickbackupmulti.mixins.json") {
@@ -169,7 +173,7 @@ publishMods {
     modLoaders.add("quilt")
 
     def versions = project.game_versions.toString().split(',')*.trim().findAll { it } as List
-    
+
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
         projectId = "662867"

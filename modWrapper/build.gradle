@@ -1,0 +1,103 @@
+import groovy.json.JsonBuilder
+import groovy.json.JsonSlurper
+
+plugins {
+    id("java-library")
+}
+
+ext {
+    getVersionSuffix = {
+        String buildNumber
+        String buildType = 'build'
+        if (System.getenv("CI_BUILD") == 'false') buildNumber = null
+        else {
+            if (System.getenv("PR_BUILD") != 'false') buildType = 'pr'
+            buildNumber = System.getenv("GITHUB_RUN_NUMBER")
+        }
+        String versionSuffix = (buildNumber != null ? "+${buildType}.${buildNumber}" : "")
+        return versionSuffix
+    }
+}
+
+def fullModVersion = project.mod_version + project.getVersionSuffix()
+
+version = 'v' + fullModVersion
+
+group(project.maven_group)
+
+base {
+    archivesName.set(project.archives_base_name)
+}
+
+def mods = project.parent.subprojects.findAll({
+    it.name != "modWrapper"
+})
+
+mods.collect {
+    evaluationDependsOn(":${it.name}")
+}
+
+jar {
+    // disable cache
+    outputs.upToDateWhen { false }
+
+    dependsOn(mods.collect {
+        it.tasks.remapJar
+    })
+
+    doFirst {
+        delete fileTree("build/tmp/submods/META-INF/jars")
+
+        copy {
+            from {
+                mods.collect {
+                    it.remapJar.outputs.files
+                }
+            }
+
+            into("build/tmp/submods/META-INF/jars")
+        }
+    }
+
+    from("${rootDir}/LICENSE")
+    from("build/tmp/submods")
+}
+
+processResources {
+    // disable cache
+    outputs.upToDateWhen { false }
+
+    from("${rootDir}/icon.png") {
+        into("assets/${project.mod_id}-wrapper")
+    }
+
+    filesMatching("fabric.mod.json") {
+        expand([
+                "id"     : project.mod_id,
+                "version": fullModVersion,
+                "name"   : project.archives_base_name
+        ])
+    }
+
+    doLast {
+        ArrayList<?> jars = []
+
+        mods.each({
+            jars.add(["file": "META-INF/jars/${project.archives_base_name}-mc${it.minecraft_version}-${project.version}.jar"])
+        })
+
+        File file = file("build/resources/main/fabric.mod.json")
+        JsonSlurper slurper = new JsonSlurper()
+        JsonBuilder builder = new JsonBuilder(slurper.parse(file))
+        builder.content.jars = jars
+        BufferedWriter writer = file.newWriter()
+        writer.append(builder.toPrettyString())
+        writer.flush()
+        writer.close()
+    }
+}
+
+java {
+    sourceCompatibility(JavaVersion.VERSION_21)
+    targetCompatibility(JavaVersion.VERSION_21)
+}
