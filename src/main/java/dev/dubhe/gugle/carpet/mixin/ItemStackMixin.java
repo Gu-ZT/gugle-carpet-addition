@@ -107,7 +107,7 @@ abstract class ItemStackMixin {
         // 在物品损坏前获取物品类型，损坏后将只能获取为空气
         Item item = itemStack.getItem();
         original.call(itemStack, i, source, serverPlayer, runnable);
-        if (GcaSetting.fakePlayerAutoReplaceTool && serverPlayer instanceof EntityPlayerMPFake fakePlayer) {
+        if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && serverPlayer instanceof EntityPlayerMPFake fakePlayer) {
             FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, item, equipmentSlot);
         }
     }
@@ -119,7 +119,7 @@ abstract class ItemStackMixin {
     //$$         // 物品耐久耗尽，交给下方的Mixin方法处理
     //$$         return true;
     //$$     }
-    //$$     if (GcaSetting.fakePlayerAutoReplaceTool && player instanceof EntityPlayerMPFake fakePlayer) {
+    //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && player instanceof EntityPlayerMPFake fakePlayer) {
     //$$         FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, itemStack.getItem(), itemStack);
     //$$     }
     //$$     return false;
@@ -129,7 +129,7 @@ abstract class ItemStackMixin {
     //$$ private <T extends LivingEntity> void onShrink(ItemStack itemStack, int i, Operation<Void> original, @Local(argsOnly = true) T livingEntity) {
     //$$     Item item = itemStack.getItem();
     //$$     original.call(itemStack, i);
-    //$$     if (GcaSetting.fakePlayerAutoReplaceTool && livingEntity instanceof EntityPlayerMPFake fakePlayer) {
+    //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && livingEntity instanceof EntityPlayerMPFake fakePlayer) {
     //$$         FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, item, itemStack);
     //$$     }
     //$$ }

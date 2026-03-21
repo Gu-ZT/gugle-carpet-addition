@@ -130,16 +130,20 @@
 
 ### 假人切换工具 (fakePlayerAutoReplaceTool)
 
-让假人自动切换快损坏的工具
+让假人自动切换损坏的工具
 
-* 类型: `boolean`
+* 类型: `String`
 * 默认值: `false`
-* 参考选项: `true`, `false`
+* 参考选项: `true`, `false`, `keep`
 * 分类: `GCA`, `BOT`
 
 ```
 /carpet fakePlayerAutoReplaceTool true
 ```
+
+> 当选项为 `true` 时有经验修补的工具会保留10点耐久, 其他在损坏后自动切换
+
+> 当选项为 `keep` 时所有工具都会保留10点耐久
 
 ### 假人名称前缀 (fakePlayerPrefixName)
 

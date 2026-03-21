@@ -62,11 +62,12 @@ public class GcaSetting {
     )
     public static boolean fakePlayerAutoFish = false;
 
-    // 让假人自动切换快损坏的工具
+    // 让假人自动切换工具
     @Rule(
+        options = {"false", "true", "keep"},
         categories = {GCA, BOT}
     )
-    public static boolean fakePlayerAutoReplaceTool = false;
+    public static String fakePlayerAutoReplaceTool = "false";
 
     public static final String fakePlayerNoneName = "#none";
 
@@ -235,4 +236,12 @@ public class GcaSetting {
     //$$ )
     //$$ public static boolean fakePlayerLocatorBar = true;
     //#endif
+
+    // 允许玩家查看服务器种子
+    @Rule(
+        options = {"vanilla", "true", "false", "ops", "0", "1", "2", "3", "4"},
+        categories = {GCA, COMMAND},
+        validators = GcaValidators.CommandLevelWithVanilla.class
+    )
+    public static String commandSeed = "vanilla";
 }

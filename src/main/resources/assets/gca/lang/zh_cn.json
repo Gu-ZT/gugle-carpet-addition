@@ -27,7 +27,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "让假人自动钓鱼",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换快损坏的工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换损坏的工具",
 
   "carpet.rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
   "carpet.rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",
@@ -109,6 +109,9 @@
 
   "carpet.rule.fakePlayerLocatorBar.name": "假人定位条",
   "carpet.rule.fakePlayerLocatorBar.desc": "在定位条上显示假玩家位置",
+
+  "carpet.rule.commandSeed.name": "seed命令",
+  "carpet.rule.commandSeed.desc": "修改/seed命令的权限等级",
 
   "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",
   "gca.action.attack.continuous": "一直左键： %s",

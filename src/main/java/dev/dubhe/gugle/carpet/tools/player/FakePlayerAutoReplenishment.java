@@ -1,6 +1,7 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.util.ContainerUtil;
 import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.InteractionHand;
@@ -11,6 +12,8 @@ import net.minecraft.world.item.ItemStack;
 //#if MC>=12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemContainerContents;
+
+import java.util.List;
 //#else
 //$$ import net.minecraft.nbt.CompoundTag;
 //$$ import net.minecraft.nbt.Tag;
@@ -47,7 +50,7 @@ public class FakePlayerAutoReplenishment {
                     eachItem.setCount(0);
                 }
                 break;
-            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && hasContainer(eachItem)) {
+            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && ContainerUtil.hasContainer(eachItem)) {
                 int result = pickItemFromBox(eachItem, itemStack, half);
                 if (result == 0) {
                     continue;
@@ -58,36 +61,39 @@ public class FakePlayerAutoReplenishment {
         }
     }
 
-    private static boolean hasContainer(ItemStack stack) {
-        //#if MC>=12005
-        return stack.has(DataComponents.CONTAINER);
-        //#else
-        //$$ CompoundTag tag = stack.getTag();
-        //$$ if (tag == null) return false;
-        //$$ return tag.contains("BlockEntityTag") && tag.getCompound("BlockEntityTag").contains("Items", Tag.TAG_LIST);
-        //#endif
-    }
-
     // 从潜影盒拿取物品，请注意：在创造模式下使用鼠标中键复制物品（不是指选取方块）时，物品组件仅被浅拷贝。
-    private static int pickItemFromBox(ItemStack shulkerBox, ItemStack itemStack, int count) {
+    private static int pickItemFromBox(ItemStack shulkerBox, ItemStack itemStack, int requestCount) {
         //#if MC>=12005
         ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
-        if (contents == null) return 0;
-        // 潜影盒没有容器组件
-        for (ItemStack stack : contents.nonEmptyItems()) {
+        // 空的潜影盒
+        if (contents == null || contents == ItemContainerContents.EMPTY) return 0;
+        // 深拷贝
+        List<ItemStack> list = contents.stream().toList();
+        int count = 0;
+
+        for (ItemStack stack : list) {
             if (ItemStack.isSameItemSameComponents(itemStack, stack)) {
-                int temp;
-                if (stack.getCount() >= count) {
-                    stack.shrink(count);
-                    temp = count;
+                if (stack.getCount() >= requestCount) {
+                    stack.shrink(requestCount);
+                    count = requestCount;
                 } else {
-                    temp = stack.getCount();
+                    count = stack.getCount();
                     stack.setCount(0);
                 }
-                ifIsEmptyClear(shulkerBox);
-                return temp;
+                break;
             }
         }
+
+        if (count > 0) {
+            // 将深拷贝的组件写回潜影盒
+            shulkerBox.set(DataComponents.CONTAINER,
+                list.stream().allMatch(ItemStack::isEmpty) ?
+                    ItemContainerContents.EMPTY :
+                    ItemContainerContents.fromItems(list)
+            );
+        }
+
+        return count;
         //#else
         //$$ CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
         //$$ if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) return 0;
@@ -101,9 +107,9 @@ public class FakePlayerAutoReplenishment {
         //$$     CompoundTag tag = next.getId() == 10 ? (CompoundTag) next : new CompoundTag();
         //$$     ItemStack stack = ItemStack.of(tag);
         //$$     if (!ItemStack.isSameItemSameTags(stack, itemStack)) continue;
-        //$$     if (stack.getCount() > count) {
-        //$$         temp = count;
-        //$$         stack.shrink(count);
+        //$$     if (stack.getCount() > requestCount) {
+        //$$         temp = requestCount;
+        //$$         stack.shrink(requestCount);
         //$$     } else {
         //$$         temp = stack.getCount();
         //$$         stack.setCount(0);
@@ -115,23 +121,8 @@ public class FakePlayerAutoReplenishment {
         //$$     } else iterator.remove();
         //$$     return temp;
         //$$ }
+        //$$ return 0;
         //#endif
-        return 0;
     }
 
-    // 如果潜影盒为空，将物品栏组件替换为空以保证潜影盒堆叠的正常运行
-    //#if MC>=12005
-    private static void ifIsEmptyClear(ItemStack shulkerBox) {
-        ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
-        if (contents == null) {
-            return;
-        }
-        // 潜影盒中还有物品
-        if (contents.nonEmptyItems().iterator().hasNext()) {
-            return;
-        }
-        // 潜影盒中已经没有物品了
-        shulkerBox.set(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-    }
-    //#endif
 }

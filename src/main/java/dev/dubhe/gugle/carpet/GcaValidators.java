@@ -25,6 +25,19 @@ public class GcaValidators {
         }
     }
 
+    public static class CommandLevelWithVanilla extends Validator<String> {
+        public static final List<String> OPTIONS = List.of("vanilla", "true", "false", "ops", "0", "1", "2", "3", "4");
+
+        @Override
+        public @Nullable String validate(@Nullable CommandSourceStack commandSourceStack, CarpetRule<String> carpetRule, String newValue, String userString) {
+            return OPTIONS.contains(newValue) ? newValue : null;
+        }
+
+        public String description() {
+            return "Can be limited to 'vanilla' or command level options";
+        }
+    }
+
     public static class CarpetAmsAdditionLoaded implements Rule.Condition {
         @Override
         public boolean shouldRegister() {

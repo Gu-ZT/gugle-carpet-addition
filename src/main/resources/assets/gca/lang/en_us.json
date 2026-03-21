@@ -27,7 +27,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace almost damaged tool",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace damaged tool",
 
   "carpet.rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
   "carpet.rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",
@@ -109,6 +109,9 @@
 
   "carpet.rule.fakePlayerLocatorBar.name": "Fake Player LocatorBar",
   "carpet.rule.fakePlayerLocatorBar.desc": "Display Fake Player Positions On The Locator Bar",
+
+  "carpet.rule.commandSeed.name": "Command Seed",
+  "carpet.rule.commandSeed.desc": "Sets the required permission level for the /seed command",
 
   "gca.action.attack.interval.12": "Attack every 12 gt: %s",
   "gca.action.attack.continuous": "Attack continuous: %s",
