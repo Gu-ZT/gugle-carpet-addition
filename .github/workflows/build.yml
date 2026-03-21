@@ -31,42 +31,21 @@ jobs:
         with:
           distribution: ${{ matrix.distro }}
           java-version: ${{ matrix.java }}
-
-      - name: validate gradle wrapper
-        uses: gradle/actions/wrapper-validation@v5
-
-      - name: make gradle wrapper executable
-        if: ${{ runner.os != 'Windows' }}
-        run: chmod +x ./gradlew
+          cache: 'gradle'
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v5
 
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
       - name: Build
-        run: ./gradlew build
-
-      - name: Collect build artifacts
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          set -euo pipefail
-          rm -rf artifacts
-          mkdir -p artifacts
-
-          while IFS= read -r -d '' f; do
-            cp -v "$f" artifacts/
-          done < <(
-            find . -type f -path "*/build/libs/*.jar" \
-            ! -name "*-sources.jar" \
-            -print0
-          )
+        run: ./gradlew clean :modWrapper:build
 
       - name: Upload build artifacts
-        if: ${{ runner.os == 'Linux' }}
         uses: actions/upload-artifact@v7
         with:
-          name: Artifacts
-          path: |
-            artifacts/
+          path: ./modWrapper/build/libs/*.jar
 
       - name: Publish
         if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
