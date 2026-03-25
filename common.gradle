@@ -18,11 +18,6 @@ ext {
     }
 }
 
-//preprocess {
-//    mcVersion = vars.get()["MC"] as int
-//    tabIndentation = true
-//}
-
 configurations {
     if (!unobfuscated) {
         modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
@@ -131,8 +126,8 @@ dependencies {
 }
 
 String versionSuffix = project.getVersionSuffix()
-
 String fullModVersion = project.mod_version + versionSuffix
+String versionWithMC = fullModVersion + '-mc' + project.minecraft_version
 
 version = 'v' + fullModVersion
 group = project.maven_group
@@ -148,12 +143,12 @@ processResources {
         into("assets/${project.mod_id}")
     }
 
-    inputs.property "version", project.version
+    inputs.property "version", versionWithMC
 
     filesMatching("fabric.mod.json") {
         expand([
                 "id"               : project.mod_id,
-                "version"          : fullModVersion,
+                "version"          : versionWithMC,
                 "name"             : project.archives_base_name,
                 "minecraft_support": project.minecraft_support_version
         ])
