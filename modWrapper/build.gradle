@@ -51,11 +51,7 @@ jar {
 
     dependsOn(mods.collect {
         def mcVersion = it.findProperty("mcVersion") as int
-        if (mcVersion >= 26_00_00) {
-            return it.tasks.jar
-        } else {
-            return it.tasks.remapJar
-        }
+        mcVersion >= 26_00_00 ? it.tasks.jar : it.tasks.remapJar
     })
 
     doFirst {
@@ -64,7 +60,8 @@ jar {
         copy {
             from {
                 mods.collect {
-                    it.remapJar.outputs.files
+                    def mcVersion = it.findProperty("mcVersion") as int
+                    (mcVersion >= 26_00_00 ? it.tasks.jar : it.tasks.remapJar).outputs.files
                 }
             }
 
@@ -117,8 +114,8 @@ java {
 
 publishMods {
     file = jar.archiveFile
-    changelog = "Changelog"
-    type = STABLE
+    changelog = rootDir.toPath().resolve("Changelog.txt").toFile().text
+    type = BETA
     modLoaders.add("fabric")
     modLoaders.add("quilt")
 

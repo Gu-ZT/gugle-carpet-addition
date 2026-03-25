@@ -1,0 +1,2 @@
+- Supported Minecraft 26.1
+- Single mod file
