@@ -22,7 +22,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,6 +32,11 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
+//#if MC < 260000
+import org.spongepowered.asm.mixin.Shadow;
+//#else
+//$$ import com.llamalad7.mixinextras.sugar.Local;
+//#endif
 
 @Mixin(WanderingTraderSpawner.class)
 abstract class WanderingTraderMixin {
@@ -42,31 +46,40 @@ abstract class WanderingTraderMixin {
     private ServerPlayer gca$player = null;
     @Unique
     private int gca$llama = 0;
+    //#if MC < 260000
     @Shadow
     private int spawnChance;
+    //#endif
 
     @Inject(method = "tick", at = @At("HEAD"))
-    //#if MC >= 12109
-    //$$ private void spawn(ServerLevel serverLevel, boolean bl, CallbackInfo ci) {
-    //#elseif MC >= 12105
-    //$$ private void spawn(ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfo ci) {
-    //#else
-    private void spawn(ServerLevel serverLevel, boolean bl, boolean bl2, CallbackInfoReturnable<Integer> cir) {
-    //#endif
+    private void spawn(ServerLevel serverLevel, boolean bl,
+                       //#if MC < 12109
+                       boolean bl2,
+                       //#endif
+                       //#if MC < 12105
+                       CallbackInfoReturnable<Integer> cir
+                       //#else
+                       //$$ CallbackInfo ci
+                       //#endif
+    ) {
         this.gca$server = serverLevel.getServer();
         this.gca$llama = 0;
     }
 
     @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
-    private int spawn0(RandomSource instance, int i, Operation<Integer> original) {
+    private int spawn0(RandomSource instance, int i, Operation<Integer> original
+                       //#if MC >= 260000
+                       //$$ , @Local(ordinal = 1) int spawnChance
+                       //#endif
+    ) {
         int result = original.call(instance, i);
-        if (result > this.spawnChance) {
+        if (result > spawnChance) {
             this.gca$sendMsg(
                 ComponentTranslate.trans(
                     "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
                     Color.YELLOW,
                     Style.EMPTY,
-                    "i <= %s".formatted(this.spawnChance),
+                    "i <= %s".formatted(spawnChance),
                     result
                 )
             );

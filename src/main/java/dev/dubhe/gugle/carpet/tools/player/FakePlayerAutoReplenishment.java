@@ -68,7 +68,13 @@ public class FakePlayerAutoReplenishment {
         // 空的潜影盒
         if (contents == null || contents == ItemContainerContents.EMPTY) return 0;
         // 深拷贝
-        List<ItemStack> list = contents.stream().toList();
+        List<ItemStack> list = contents
+            //#if MC < 260000
+            .stream()
+            //#else
+            //$$ .allItemsCopyStream()
+            //#endif
+            .toList();
         int count = 0;
 
         for (ItemStack stack : list) {

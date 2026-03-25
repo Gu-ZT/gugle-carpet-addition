@@ -68,7 +68,7 @@ abstract class ItemFrameMixin extends Entity {
     }
 
     @Inject(
-        method = {"interact"},
+        method = "interact",
         at = {
             @At(
                 value = "INVOKE",
@@ -77,7 +77,11 @@ abstract class ItemFrameMixin extends Entity {
         },
         cancellable = true
     )
-    private void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void interact(Player player, InteractionHand hand,
+                          //#if MC >= 260000
+                          //$$ Vec3 position,
+                          //#endif
+                          CallbackInfoReturnable<InteractionResult> cir) {
         if (GcaSetting.betterItemFrameInteraction) {
             if ((!player.getMainHandItem().is(Items.CACTUS) || !player.getOffhandItem().is(this::gca$isGlass)) && (
                 !player.getOffhandItem()

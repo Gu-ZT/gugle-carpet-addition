@@ -20,11 +20,11 @@ abstract class NaturalSpawnerMixin {
         if (GcaSetting.qnmdLC < 0) return;
         ChunkPos chunkPos = levelChunk.getPos();
         double chance = GcaSetting.qnmdLC == 0 ? 1.0 : 1.0 / GcaSetting.qnmdLC;
-        int i = chunkPos.getMinBlockX() + serverLevel.random.nextInt(16);
-        int j = chunkPos.getMinBlockZ() + serverLevel.random.nextInt(16);
+        int i = chunkPos.getMinBlockX() + serverLevel.getRandom().nextInt(16);
+        int j = chunkPos.getMinBlockZ() + serverLevel.getRandom().nextInt(16);
         int k = levelChunk.getHeight(Heightmap.Types.WORLD_SURFACE, i, j) + 1;
         for (int i1 = serverLevel.getMinBuildHeight(); i1 < k; ++i1) {
-            if (serverLevel.random.nextDouble() > chance) continue;
+            if (serverLevel.getRandom().nextDouble() > chance) continue;
             BlockPos blockPos = new BlockPos(i, i1, j);
             if (blockPos.getY() < serverLevel.getMinBuildHeight() + 1) continue;
             NaturalSpawner.spawnCategoryForPosition(mobCategory, serverLevel, levelChunk, blockPos, spawnPredicate, afterSpawnCallback);

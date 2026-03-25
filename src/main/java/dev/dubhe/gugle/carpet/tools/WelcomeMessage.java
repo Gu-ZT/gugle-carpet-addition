@@ -27,6 +27,11 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+//#if MC >= 260000
+//$$ import net.minecraft.core.Holder;
+//$$ import net.minecraft.world.clock.WorldClock;
+//$$ import net.minecraft.world.level.dimension.DimensionType;
+//#endif
 
 public class WelcomeMessage {
     private static final Pattern ARGS_PATTERN = Pattern.compile("\\{%\\w+%}");
@@ -107,7 +112,18 @@ public class WelcomeMessage {
             player.getDisplayName().copy()
         );
         registerReplacer(GcaExtension.id("day_count"), (server, player, args) -> {
-            MutableComponent component = Component.literal(String.valueOf((server.overworld().getDayTime() / 1728000)));
+            //#if MC < 260000
+            long ticks = server.overworld().getDayTime();
+            //#else
+            //$$ Holder<DimensionType> dimension = server.overworld().dimensionTypeRegistration();
+            //$$ Holder<WorldClock> clock = dimension.value().defaultClock().orElse(null);
+            //$$ if (clock == null) {
+            //$$     GcaExtension.LOGGER.warn("No clock found for dimension '{}'", dimension.getRegisteredName());
+            //$$     return Component.literal("No clock found for dimension '%s'".formatted(dimension.getRegisteredName())).withStyle(ChatFormatting.RED);
+            //$$ }
+            //$$ long ticks = server.clockManager().getTotalTicks(clock);
+            //#endif
+            MutableComponent component = Component.literal(String.valueOf(ticks / 1728000));
             if (args == null || args.isJsonNull() || (!args.isJsonPrimitive() && !args.isJsonObject()) || (
                 args.isJsonObject() && args.getAsJsonObject().asMap().isEmpty()
             )) {
