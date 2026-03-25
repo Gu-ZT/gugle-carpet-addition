@@ -24,9 +24,7 @@ ext {
 //}
 
 configurations {
-    if (unobfuscated) {
-        runtimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
-    } else {
+    if (!unobfuscated) {
         modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
     }
 }
@@ -108,34 +106,22 @@ if (mcVersion >= 260000) {
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = TARGET_JAVA_VERSION
 
 dependencies {
+    // from https://github.com/TISUnion/Carpet-TIS-Addition/blob/master/common.gradle#L41-L54
+    def autoImplementation = { dep -> unobfuscated ? implementation(dep) : modImplementation(dep) }
+
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     if (!unobfuscated) {
         mappings loom.layered() {
             officialMojangMappings()
         }
     }
-    // from https://github.com/TISUnion/Carpet-TIS-Addition/blob/master/common.gradle#L41-L54
-    def processDependency = { dep ->
-        // https://github.com/FabricMC/fabric-loader/issues/783
-        if (dep instanceof ModuleDependency) {
-            if (!(dep.group == 'net.fabricmc' && dep.name == 'fabric-loader')) {
-                dep.exclude group: 'net.fabricmc', module: 'fabric-loader'
-            }
-            dep.exclude group: 'com.github.astei', module: 'lazydfu'
-            dep.exclude group: 'com.github.2No2Name', module: 'McTester'
-        }
-        return dep
-    }
-    def autoImplementation = { Object... args -> processDependency(unobfuscated ? implementation(*args) : modImplementation(*args)) }
-    def autoRuntimeOnly = { Object... args -> processDependency(unobfuscated ? runtimeOnly(*args) : modRuntimeOnly(*args)) }
-    def autoCompileOnly = { Object... args -> processDependency(unobfuscated ? compileOnly(*args) : modCompileOnly(*args)) }
 
     autoImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // fabric-carpet
     autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
     // jep
-    include(implementation 'jep:jep:2.24')
+    include(autoImplementation 'jep:jep:2.24')
     // jsr305
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     // mixin-extras
