@@ -21,7 +21,7 @@ public class FakePlayerResident {
     }
 
     public void save() {
-        GcaExtension.LOGGER.info("Saving fake player resident...");
+        GcaExtension.LOGGER.debug("Saving fake player resident...");
         if (!GcaSetting.fakePlayerResident) return;
 
         List<BotInfo> bots = this.server.getPlayerList()
