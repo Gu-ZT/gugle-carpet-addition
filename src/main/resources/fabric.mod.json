@@ -8,7 +8,9 @@
     "Gugle"
   ],
   "contact": {
-    "website": "https://gca.dubhe.dev/",
+    "homepage": "https://gca.dubhe.dev/",
+    "issues": "https://github.com/Gu-ZT/gugle-carpet-addition/issues",
+    "sources": "https://github.com/Gu-ZT/gugle-carpet-addition",
     "repo": "https://github.com/Gu-ZT/gugle-carpet-addition"
   },
   "license": "MIT",
@@ -24,7 +26,6 @@
     "gca.mixins.json"
   ],
   "depends": {
-    "fabricloader": ">=${fabric_loader}",
     "minecraft": "${minecraft_support}",
     "carpet": "*"
   },

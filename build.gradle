@@ -1,15 +1,17 @@
 plugins {
-    id "fabric-loom" version "1.13.6" apply false
+    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
+    id 'net.fabricmc.fabric-loom-remap' version '1.15-SNAPSHOT' apply false
     id "maven-publish"
-    id "com.replaymod.preprocess" version "88169fcbc9"
+    id "com.replaymod.preprocess" version "c5abb4fb12"
 }
 
 preprocess {
+    strictExtraMappings = false
+
     def mc12001 = createNode("1.20.1", 1_20_01, "official")
     def mc12002 = createNode("1.20.2", 1_20_02, "official")
     def mc12003 = createNode("1.20.3", 1_20_03, "official")
     def mc12005 = createNode("1.20.5", 1_20_05, "official")
-
 
     def mc12101 = createNode("1.21.1", 1_21_01, "official")
     def mc12102 = createNode("1.21.2", 1_21_02, "official")
@@ -19,6 +21,7 @@ preprocess {
     def mc12109 = createNode("1.21.9", 1_21_09, "official")
     def mc12110 = createNode("1.21.10", 1_21_10, "official")
     def mc12111 = createNode("1.21.11", 1_21_11, "official")
+    def mc260100 = createNode("26.1", 26_01_00, "official")
 
     mc12001.link(mc12002, null)
     mc12002.link(mc12003, null)
@@ -32,4 +35,9 @@ preprocess {
     mc12106.link(mc12109, file('versions/mapping-1.21.6-1.21.9.txt'))
     mc12109.link(mc12110, null)
     mc12110.link(mc12111, null)
+    mc12111.link(mc260100, null)
+
+    for (final def node in getNodes()) {
+        findProject(node.project).ext.mcVersion = node.mcVersion
+    }
 }

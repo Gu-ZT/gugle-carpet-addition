@@ -34,5 +34,7 @@ for (String version : settings.get("versions")) {
     include(":$version")
     ProjectDescriptor proj = project(":$version")
     proj.setProjectDir(file("versions/$version"))
-    proj.setBuildFileName("../${settings.versions.get(0)}/build.gradle")
+    proj.setBuildFileName("../../common.gradle")
 }
+
+include(":modWrapper")

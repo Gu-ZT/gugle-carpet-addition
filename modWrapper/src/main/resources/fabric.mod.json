@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}-wrapper",
+  "version": "1.0.1",
+  "name": "${name}-wrapper",
+  "description": "Gugle Carpet Addition Wrapper",
+  "authors": [
+    "Cjsah",
+    "Gugle"
+  ],
+  "contact": {
+    "homepage": "https://gca.dubhe.dev/",
+    "issues": "https://github.com/Gu-ZT/gugle-carpet-addition/issues",
+    "sources": "https://github.com/Gu-ZT/gugle-carpet-addition",
+    "repo": "https://github.com/Gu-ZT/gugle-carpet-addition"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+  },
+  "depends": {
+    "minecraft": "*"
+  }
+}

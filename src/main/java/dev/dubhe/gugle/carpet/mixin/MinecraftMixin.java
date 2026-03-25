@@ -17,6 +17,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //#else
 import com.llamalad7.mixinextras.sugar.Local;
 //#endif
+//#if MC >= 260000
+//$$ import java.util.Optional;
+//$$ import net.minecraft.world.level.gamerules.GameRules;
+//#endif
 
 @Mixin(Minecraft.class)
 public class MinecraftMixin {
@@ -32,7 +36,11 @@ public class MinecraftMixin {
         //#if MC <= 12002
         //$$ String string,
         //#endif
-        LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem, boolean bl, CallbackInfo ci
+        LevelStorageSource.LevelStorageAccess levelStorageAccess, PackRepository packRepository, WorldStem worldStem,
+        //#if MC >= 260000
+        //$$ Optional<GameRules> gameRules,
+        //#endif
+        boolean bl, CallbackInfo ci
         //#if MC < 12109
         , @Local Services services
         //#endif

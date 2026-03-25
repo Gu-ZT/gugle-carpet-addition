@@ -50,7 +50,7 @@ public class FastPingFriend {
             pos.z(),
             1.0f,
             1.0f,
-            player.level().random.nextLong()
+            player.level().getRandom().nextLong()
         ));
     }
 }

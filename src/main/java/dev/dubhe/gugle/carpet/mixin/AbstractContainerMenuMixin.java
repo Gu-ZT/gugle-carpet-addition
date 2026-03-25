@@ -3,7 +3,6 @@ package dev.dubhe.gugle.carpet.mixin;
 import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +16,11 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
 //#else
 //$$ import net.minecraft.nbt.Tag;
+//#endif
+//#if MC < 260000
+import net.minecraft.world.inventory.ClickType;
+//#else
+//$$ import net.minecraft.world.inventory.ContainerInput;
 //#endif
 
 @Mixin(AbstractContainerMenu.class)
@@ -37,7 +41,13 @@ abstract class AbstractContainerMenuMixin {
     //#endif
 
     @Inject(method = "doClick", at = @At("HEAD"), cancellable = true)
-    private void doClick(int slotIndex, int button, ClickType clickType, Player player, CallbackInfo ci) {
+    private void doClick(int slotIndex, int button,
+                         //#if MC < 260000
+                         ClickType
+                             //#else
+                             //$$ ContainerInput
+                             //#endif
+                             clickType, Player player, CallbackInfo ci) {
         if (slotIndex < 0) return;
         Slot slot = gca$self.getSlot(slotIndex);
         ItemStack itemStack = slot.getItem();

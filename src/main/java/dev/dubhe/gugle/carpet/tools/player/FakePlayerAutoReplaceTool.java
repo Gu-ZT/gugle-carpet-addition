@@ -29,6 +29,7 @@ import net.minecraft.core.Holder;
 //#else
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.ItemContainerContents;
+
 import java.util.List;
 import java.util.stream.Collectors;
 //#endif
@@ -38,9 +39,9 @@ public class FakePlayerAutoReplaceTool {
     //#if MC>=12005
     public static void autoReplaceTool(Player fakePlayer, Item item, EquipmentSlot equipmentSlot) {
         ItemStack itemStack = fakePlayer.getItemBySlot(equipmentSlot);
-    //#else
-    //$$ public static void autoReplaceTool(Player fakePlayer, Item item, ItemStack itemStack) {
-    //#endif
+        //#else
+        //$$ public static void autoReplaceTool(Player fakePlayer, Item item, ItemStack itemStack) {
+        //#endif
         Predicate<ItemStack> isDamageItem = itemDamagePredicate();
         if (isDamageItem.test(itemStack)) {
             //#if MC < 12005
@@ -102,7 +103,13 @@ public class FakePlayerAutoReplaceTool {
             //#if MC>=12005
             ItemContainerContents contents = itemStack.get(DataComponents.CONTAINER);
             if (contents == null) continue;
-            List<ItemStack> items = contents.stream().collect(Collectors.toList());
+            List<ItemStack> items = contents
+                //#if MC < 260000
+                .stream()
+                //#else
+                //$$ .allItemsCopyStream()
+                //#endif
+                .collect(Collectors.toList());
             for (int index = 0; index < items.size(); index++) {
                 ItemStack item = items.get(index);
                 if (predicate.test(item)) {

@@ -24,8 +24,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-//#if MC>=12104
+//#if MC>=12102 && MC <= 12105
 //$$ import net.minecraft.server.level.ServerLevel;
+//#endif
+//#if MC >= 260000
+//$$ import net.minecraft.world.phys.Vec3;
 //#endif
 
 @Mixin(Player.class)
@@ -48,10 +51,19 @@ abstract class PlayerMixin {
         method = "interactOn",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
+            target =
+                //#if MC < 260000
+                "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
+                //#else
+                //$$ "Lnet/minecraft/world/entity/Entity;interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/InteractionResult;"
+                //#endif
         )
     )
-    private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand, Operation<InteractionResult> original) {
+    private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand,
+                                         //#if MC >= 260000
+                                         //$$ Vec3 pos,
+                                         //#endif
+                                         Operation<InteractionResult> original) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
             if (entity instanceof Player otherPlayer && ClientUtil.isFakePlayer(otherPlayer)) {
@@ -67,7 +79,11 @@ abstract class PlayerMixin {
                 }
             }
         }
-        return original.call(entity, player, hand);
+        return original.call(entity, player, hand
+            //#if MC >= 260000
+            //$$ , pos
+            //#endif
+        );
     }
 
     @Unique
@@ -112,12 +128,15 @@ abstract class PlayerMixin {
 
     @Unique
     private static boolean gca$hasPremission(ServerPlayer player, ServerPlayer otherPlayer) {
-        //#if MC>=12104
-        //$$ if(!(player.level() instanceof ServerLevel serverLevel)) return otherPlayer instanceof EntityPlayerMPFake;
-        //$$ CommandSourceStack stack = player.createCommandSourceStackForNameResolution(serverLevel);
-        //#else
-        CommandSourceStack stack = player.createCommandSourceStack();
-        //#endif
+
+        CommandSourceStack stack = player.createCommandSourceStack(
+            //#if MC>=12102
+            //#if MC<=12105
+            //$$ (ServerLevel)
+            //#endif
+            //$$ player.level()
+            //#endif
+        );
         return otherPlayer instanceof EntityPlayerMPFake || CommandHelper.canUseCommand(stack, GcaSetting.openRealPlayerInventory);
     }
 }
