@@ -1,7 +1,8 @@
-apply plugin: 'fabric-loom'
-apply plugin: 'com.replaymod.preprocess'
+final int mcVersion = project.mcVersion
+final boolean unobfuscated = mcVersion >= 26_00_00
 
-int mcVersion = 1
+apply plugin: unobfuscated ? 'net.fabricmc.fabric-loom' : 'net.fabricmc.fabric-loom-remap'
+apply plugin: 'com.replaymod.preprocess'
 
 ext {
     getVersionSuffix = {
@@ -17,13 +18,17 @@ ext {
     }
 }
 
-preprocess {
-    mcVersion = vars.get()["MC"] as int
-    tabIndentation = true
-}
+//preprocess {
+//    mcVersion = vars.get()["MC"] as int
+//    tabIndentation = true
+//}
 
 configurations {
-    modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
+    if (unobfuscated) {
+        runtimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
+    } else {
+        modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
+    }
 }
 
 repositories {
@@ -69,9 +74,12 @@ loom {
         programArgs proArgs
     }
 
-    mixin {
-        useLegacyMixinAp = true
+    if (!unobfuscated) {
+        mixin {
+            useLegacyMixinAp = true
+        }
     }
+
 }
 
 //remapJar {
@@ -80,7 +88,11 @@ loom {
 
 JavaVersion SOURCE_JAVA_VERSION
 JavaVersion TARGET_JAVA_VERSION
-if (mcVersion >= 12005) {
+
+if (mcVersion >= 260000) {
+    SOURCE_JAVA_VERSION = JavaVersion.VERSION_25
+    TARGET_JAVA_VERSION = JavaVersion.VERSION_25
+} else if (mcVersion >= 12005) {
     SOURCE_JAVA_VERSION = JavaVersion.VERSION_21
     TARGET_JAVA_VERSION = JavaVersion.VERSION_21
 } else if (mcVersion >= 11800) {
@@ -97,13 +109,31 @@ JavaVersion MIXIN_COMPATIBILITY_LEVEL = TARGET_JAVA_VERSION
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings loom.layered() {
-        officialMojangMappings()
+    if (!unobfuscated) {
+        mappings loom.layered() {
+            officialMojangMappings()
+        }
     }
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // from https://github.com/TISUnion/Carpet-TIS-Addition/blob/master/common.gradle#L41-L54
+    def processDependency = { dep ->
+        // https://github.com/FabricMC/fabric-loader/issues/783
+        if (dep instanceof ModuleDependency) {
+            if (!(dep.group == 'net.fabricmc' && dep.name == 'fabric-loader')) {
+                dep.exclude group: 'net.fabricmc', module: 'fabric-loader'
+            }
+            dep.exclude group: 'com.github.astei', module: 'lazydfu'
+            dep.exclude group: 'com.github.2No2Name', module: 'McTester'
+        }
+        return dep
+    }
+    def autoImplementation = { Object... args -> processDependency(unobfuscated ? implementation(*args) : modImplementation(*args)) }
+    def autoRuntimeOnly = { Object... args -> processDependency(unobfuscated ? runtimeOnly(*args) : modRuntimeOnly(*args)) }
+    def autoCompileOnly = { Object... args -> processDependency(unobfuscated ? compileOnly(*args) : modCompileOnly(*args)) }
+
+    autoImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // fabric-carpet
-    modImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
+    autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
     // jep
     include(implementation 'jep:jep:2.24')
     // jsr305

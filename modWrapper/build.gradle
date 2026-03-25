@@ -50,7 +50,12 @@ jar {
     outputs.upToDateWhen { false }
 
     dependsOn(mods.collect {
-        it.tasks.remapJar
+        def mcVersion = it.findProperty("mcVersion") as int
+        if (mcVersion >= 26_00_00) {
+            return it.tasks.jar
+        } else {
+            return it.tasks.remapJar
+        }
     })
 
     doFirst {
