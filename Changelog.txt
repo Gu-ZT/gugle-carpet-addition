@@ -1,1 +1,1 @@
-- Fix an issue where worlds couldn’t be loaded on 1.20.10 and 1.20.11 due to an incorrect MC version range setting.
+- Fix an issue where worlds couldn’t be loaded on 1.21.10 and 1.21.11 due to an incorrect MC version range setting.

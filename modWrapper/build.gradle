@@ -118,7 +118,7 @@ publishMods {
     type = BETA
     modLoaders.add("fabric")
     modLoaders.add("quilt")
-    displayName = rootProject.mod_id + ' v' + fullModVersion
+    displayName = rootProject.mod_id.toUpperCase() + ' v' + fullModVersion
 
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
