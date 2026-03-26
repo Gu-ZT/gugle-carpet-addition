@@ -2,36 +2,18 @@ package dev.dubhe.gugle.carpet.tools.player;
 
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.util.ContainerUtil;
+import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.function.Predicate;
-
-//#if MC >= 12100
-import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
-import net.minecraft.world.item.enchantment.Enchantment;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.core.Holder;
-//#else
-//$$ import net.minecraft.world.item.enchantment.EnchantmentHelper;
-//$$ import net.minecraft.world.item.enchantment.Enchantments;
-//#endif
-
-//#if MC < 12005
-//$$ import net.minecraft.nbt.CompoundTag;
-//$$ import net.minecraft.nbt.ListTag;
-//$$ import net.minecraft.nbt.Tag;
-//$$ import java.util.Optional;
-//#else
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.ItemContainerContents;
-
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
+//#if MC < 12005
+//$$ import java.util.Optional;
 //#endif
 
 public class FakePlayerAutoReplaceTool {
@@ -42,10 +24,13 @@ public class FakePlayerAutoReplaceTool {
         //#else
         //$$ public static void autoReplaceTool(Player fakePlayer, Item item, ItemStack itemStack) {
         //#endif
-        Predicate<ItemStack> isDamageItem = itemDamagePredicate();
-        if (isDamageItem.test(itemStack)) {
+        if (itemStack.isEmpty() || (
+            itemStack.isDamageableItem() &&
+            ("keep".equals(GcaSetting.fakePlayerAutoReplaceTool) || InventoryUtil.hasMendingEnchant(itemStack)) &&
+            itemStack.getMaxDamage() - itemStack.getDamageValue() <= 10
+        )) {
             //#if MC < 12005
-            //$$ Optional<EquipmentSlot> optional = getEquipmentSlot(fakePlayer, itemStack);
+            //$$ Optional<EquipmentSlot> optional = InventoryUtil.getEquipmentSlot(fakePlayer, itemStack);
             //$$ if (optional.isEmpty()) {
             //$$     return;
             //$$ }
@@ -64,22 +49,12 @@ public class FakePlayerAutoReplaceTool {
         }
     }
 
-    //#if MC<12005
-    //$$ private static Optional<EquipmentSlot> getEquipmentSlot(Player fakePlayer, ItemStack itemStack) {
-    //$$     for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-    //$$         if (fakePlayer.getItemBySlot(equipmentSlot) == itemStack) {
-    //$$             return Optional.of(equipmentSlot);
-    //$$         }
-    //$$     }
-    //$$     return Optional.empty();
-    //$$ }
-    //#endif
-
     public static boolean replaceTool(EquipmentSlot slot, Predicate<ItemStack> predicate, Player fakePlayer) {
         if (predicate.test(fakePlayer.getItemBySlot(slot))) {
             return true;
         }
         Inventory inventory = fakePlayer.getInventory();
+        List<ItemStack> shulkerItems = new ArrayList<>(inventory.getContainerSize());
         // 从背包补货
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack itemStack = inventory.getItem(i);
@@ -92,107 +67,18 @@ public class FakePlayerAutoReplaceTool {
                 inventory.setItem(i, itemBySlot);
                 fakePlayer.setItemSlot(slot, copy);
                 return true;
+            } else if (GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox && ContainerUtil.hasContainer(itemStack)) {
+                shulkerItems.add(itemStack);
             }
         }
         // 从潜影盒补货
-        if (!GcaSetting.fakePlayerAutoReplenishmentFormShulkerBox) return false;
-
-        for (int i = 0; i < inventory.getContainerSize(); i++) {
-            ItemStack itemStack = inventory.getItem(i);
-            if (!ContainerUtil.hasContainer(itemStack)) continue;
-            //#if MC>=12005
-            ItemContainerContents contents = itemStack.get(DataComponents.CONTAINER);
-            if (contents == null) continue;
-            List<ItemStack> items = contents
-                //#if MC < 260000
-                .stream()
-                //#else
-                //$$ .allItemsCopyStream()
-                //#endif
-                .collect(Collectors.toList());
-            for (int index = 0; index < items.size(); index++) {
-                ItemStack item = items.get(index);
-                if (predicate.test(item)) {
-                    ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
-                    ItemStack copy = item.copy();
-                    items.set(index, itemBySlot);
-                    fakePlayer.setItemSlot(slot, copy);
-                    ItemContainerContents container = items.stream().allMatch(ItemStack::isEmpty) ?
-                        ItemContainerContents.EMPTY :
-                        ItemContainerContents.fromItems(items);
-                    itemStack.set(DataComponents.CONTAINER, container);
-                    return true;
-                }
-            }
-            //#else
-            //$$ CompoundTag nbt = itemStack.getTagElement("BlockEntityTag");
-            //$$ if (nbt == null) continue;
-            //$$ ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
-            //$$ for (int index = 0; index < tagList.size(); index++) {
-            //$$     CompoundTag tag = tagList.getCompound(index);
-            //$$     ItemStack stack = ItemStack.of(tag);
-            //$$     if (!predicate.test(stack)) continue;
-            //$$     ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
-            //$$     ItemStack copy = stack.copy();
-            //$$     fakePlayer.setItemSlot(slot, copy);
-            //$$     if (itemBySlot.isEmpty()) {
-            //$$         tagList.remove(index);
-            //$$         if (tagList.isEmpty()) nbt.remove("Items");
-            //$$         return true;
-            //$$     }
-            //$$     CompoundTag newTag = itemBySlot.save(new CompoundTag());
-            //$$     newTag.putByte("Slot", tag.getByte("Slot"));
-            //$$     tagList.set(index, newTag);
-            //$$     return true;
-            //$$ }
-            //#endif
-        }
-        return false;
-    }
-
-    private static Predicate<ItemStack> itemDamagePredicate() {
-        boolean keepTool = "keep".equals(GcaSetting.fakePlayerAutoReplaceTool);
-        return itemStack -> {
-            if (itemStack.isEmpty()) {
-                return true;
-            }
-            if (itemStack.isDamageableItem()) {
-                // 有经验修补的物品，保留10点耐久
-                if (keepTool || hasMending(itemStack)) {
-                    int remaining = itemStack.getMaxDamage() - itemStack.getDamageValue();
-                    return remaining <= 10;
-                }
-                return false;
-            }
-            return false;
-        };
+        return ContainerUtil.replenishmentTool(fakePlayer, slot, shulkerItems, predicate);
     }
 
     private static Predicate<ItemStack> itemReplacePredicate(Item item) {
         boolean keepTool = "keep".equals(GcaSetting.fakePlayerAutoReplaceTool);
-        return itemStack -> {
-            if (itemStack.getItem().getClass() == item.getClass()) {
-                if (keepTool || hasMending(itemStack)) {
-                    return itemStack.getMaxDamage() - itemStack.getDamageValue() > 10;
-                }
-                return true;
-            }
-            return false;
-        };
-    }
-
-    private static boolean hasMending(ItemStack itemStack) {
-        //#if MC>=12100
-        ItemEnchantments enchantments = itemStack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
-        for (Object2IntMap.Entry<Holder<Enchantment>> entry : enchantments.entrySet()) {
-            Holder<Enchantment> key = entry.getKey();
-            if (key.value().effects().has(EnchantmentEffectComponents.REPAIR_WITH_XP)) {
-                return true;
-            }
-        }
-        return false;
-        //#else
-        //$$ return EnchantmentHelper.getItemEnchantmentLevel(Enchantments.MENDING, itemStack) > 0;
-        //#endif
+        return itemStack -> itemStack.getItem().getClass() == item.getClass() &&
+            ((!keepTool && !InventoryUtil.hasMendingEnchant(itemStack)) ||
+                itemStack.getMaxDamage() - itemStack.getDamageValue() > 10);
     }
 }
