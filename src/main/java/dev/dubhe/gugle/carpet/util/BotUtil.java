@@ -40,13 +40,13 @@ public class BotUtil {
     }
 
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
-        return spawnBot(server, bot, true);
+        return spawnBot(server, bot, true, false);
     }
 
-    public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction) {
+    public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction, boolean isRespawn) {
         ServerLevel level = server.getLevel(bot.dimension());
         GameProfile gameProfile = GameProfileUtil.getGameProfile(server, bot.name());
-        if (gameProfile == null) return false;
+        if (gameProfile == null || level == null) return false;
         String name = gameProfile.getName();
 
         SpawningBots.add(name);
@@ -70,7 +70,8 @@ public class BotUtil {
             //#if MC >= 12110
             //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
             //#endif
-            instance.stopRiding();
+            // respawn fake player keep riding
+            if (!isRespawn) instance.stopRiding();
             instance.teleportTo(
                 level,
                 bot.pos().x,

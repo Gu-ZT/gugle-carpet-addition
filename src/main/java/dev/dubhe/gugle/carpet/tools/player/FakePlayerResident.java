@@ -53,7 +53,7 @@ public class FakePlayerResident {
                 GcaExtension.LOGGER.warn("player {} is already exist.", bot.name());
                 continue;
             }
-            if (!BotUtil.spawnBot(this.server, bot, GcaSetting.fakePlayerReloadAction)) {
+            if (!BotUtil.spawnBot(this.server, bot, GcaSetting.fakePlayerReloadAction, true)) {
                 GcaExtension.LOGGER.warn("{} is not loaded.", bot.name());
             }
         }

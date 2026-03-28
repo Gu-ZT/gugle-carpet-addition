@@ -15,7 +15,7 @@ import java.util.function.Predicate;
 
 @Mixin(TickCommand.class)
 public class TickCommandMixin {
-    @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;"))
+    @WrapOperation(method = "register", at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/builder/LiteralArgumentBuilder;requires(Ljava/util/function/Predicate;)Lcom/mojang/brigadier/builder/ArgumentBuilder;", remap = false))
     private static ArgumentBuilder modifyPermission(LiteralArgumentBuilder instance, Predicate predicate, Operation<ArgumentBuilder> original) {
         Predicate<CommandSourceStack> permissionCheck = stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandTick);
         return original.call(instance, permissionCheck);
