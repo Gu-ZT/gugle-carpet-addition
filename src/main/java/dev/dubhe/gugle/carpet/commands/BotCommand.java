@@ -472,7 +472,7 @@ public class BotCommand {
         var page = PageInfo.of(context, actionInfo == null ? List.of() : actionInfo.ofActions());
         if (page == null) return 0;
         page.pageComponents(
-            "Bot %s' Action List".formatted(name),
+            "Bot §b%s§r's Action List".formatted(name),
             "/bot action %s list".formatted(name),
             info -> botActionToComponent(info, name)
         ).forEach(context.getSource()::sendSystemMessage);
