@@ -244,8 +244,15 @@ public class GcaSetting {
     // Fix carpet
     @Rule(
         options = {"true", "false", "ops", "0", "1", "2", "3", "4"},
-        categories = {GCA, COMMAND}
+        categories = {GCA, COMMAND, EXPERIMENTAL}
     )
     public static String commandTick = "3";
     //#endif
+
+    // 列表中一页显示的条目数
+    @Rule(
+        categories = {GCA}
+    )
+    public static int gcaPageSize = 8;
+    
 }
