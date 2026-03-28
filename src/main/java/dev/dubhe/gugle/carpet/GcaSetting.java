@@ -88,16 +88,14 @@ public class GcaSetting {
     // 方便快捷的假人管理菜单
     @Rule(
         categories = {GCA, BOT, COMMAND},
-        options = {"ops", "0", "1", "2", "3", "4", "true", "false"},
-        validators = Validators.CommandLevel.class
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
     )
     public static String commandBot = "ops";
 
     // 待办事项清单
     @Rule(
         categories = {GCA, COMMAND},
-        options = {"ops", "0", "1", "2", "3", "4", "true", "false"},
-        validators = Validators.CommandLevel.class
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
     )
     public static String commandTodo = "ops";
 
@@ -105,7 +103,6 @@ public class GcaSetting {
     @Rule(
         categories = {GCA, COMMAND},
         options = {"ops", "0", "1", "2", "3", "4", "true", "false"},
-        validators = Validators.CommandLevel.class,
         conditions = GcaValidators.CarpetAmsAdditionLoaded.class
     )
     public static String commandHere = "ops";
@@ -113,16 +110,14 @@ public class GcaSetting {
     // 快速定位玩家
     @Rule(
         categories = {GCA, COMMAND},
-        options = {"ops", "0", "1", "2", "3", "4", "true", "false"},
-        validators = Validators.CommandLevel.class
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
     )
     public static String commandWhereis = "ops";
 
     // 地标管理菜单
     @Rule(
         categories = {GCA, COMMAND},
-        options = {"ops", "0", "1", "2", "3", "4", "true", "false"},
-        validators = Validators.CommandLevel.class
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
     )
     public static String commandLoc = "ops";
 
@@ -244,4 +239,13 @@ public class GcaSetting {
         validators = GcaValidators.CommandLevelWithVanilla.class
     )
     public static String commandSeed = "vanilla";
+
+    //#if MC >= 12003
+    // Fix carpet
+    @Rule(
+        options = {"true", "false", "ops", "0", "1", "2", "3", "4"},
+        categories = {GCA, COMMAND}
+    )
+    public static String commandTick = "3";
+    //#endif
 }
