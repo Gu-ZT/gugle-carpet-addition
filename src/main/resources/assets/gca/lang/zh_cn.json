@@ -2,6 +2,9 @@
   "carpet.category.GCA": "GCA",
   "carpet.category.BOT": "假人",
 
+  "carpet.rule.gcaPageSize.name": "GCA页面大小",
+  "carpet.rule.gcaPageSize.desc": "设置GCA列表每页的条目数",
+
   "carpet.rule.openFakePlayerInventory.name": "假人背包",
   "carpet.rule.openFakePlayerInventory.desc": "允许玩家打开假人背包",
 
@@ -55,6 +58,9 @@
 
   "carpet.rule.commandBot.name": "假人管理",
   "carpet.rule.commandBot.desc": "一个假人管理菜单",
+
+  "carpet.rule.commandBotAction.name": "假人动作管理",
+  "carpet.rule.commandBotAction.desc": "一个假人动作管理菜单",
 
   "carpet.rule.commandLoc.name": "地标管理",
   "carpet.rule.commandLoc.desc": "地标管理菜单",

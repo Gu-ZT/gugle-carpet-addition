@@ -125,45 +125,8 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Loc List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (LocationInfo node : page.page()) {
-            context.getSource().sendSystemMessage(locToComponent(node));
-        }
-        Component prevPage = page.pageNum() <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        "/loc list " + (page.pageNum() - 1)
-                    ))
-            );
-        Component nextPage = page.pageNum() >= page.maxPage() ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        "/loc list " + (page.pageNum() + 1)
-                    ))
-            );
-        context.getSource().sendSystemMessage(
-            Component.literal("=======")
-                .withStyle(ChatFormatting.YELLOW)
-                .append(" ")
-                .append(prevPage)
-                .append(" ")
-                .append(Component.literal("(Loc %s/%s)".formatted(page.pageNum(), page.maxPage())).withStyle(ChatFormatting.YELLOW))
-                .append(" ")
-                .append(nextPage)
-                .append(" ")
-                .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
-        );
+        page.pageComponents("Loc List", "/loc list", LocCommand::locToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 

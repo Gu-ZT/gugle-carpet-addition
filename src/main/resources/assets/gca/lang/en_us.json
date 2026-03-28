@@ -2,6 +2,9 @@
   "carpet.category.GCA": "GCA",
   "carpet.category.BOT": "BOT",
 
+  "carpet.rule.gcaPageSize.name": "GCA List Page Size",
+  "carpet.rule.gcaPageSize.desc": "Set the number of entries per page on the GCA list page",
+
   "carpet.rule.openFakePlayerInventory.name": "Fake Player Inventory",
   "carpet.rule.openFakePlayerInventory.desc": "Allow player to open the fake player's inventory",
 
@@ -55,6 +58,9 @@
 
   "carpet.rule.commandBot.name": "Bot Management",
   "carpet.rule.commandBot.desc": "A Bot Management Menu",
+
+  "carpet.rule.commandBotAction.name": "Bot Action Management",
+  "carpet.rule.commandBotAction.desc": "A Bot Action Management Menu",
 
   "carpet.rule.commandLoc.name": "Loc Management",
   "carpet.rule.commandLoc.desc": "A Loc Management Menu",

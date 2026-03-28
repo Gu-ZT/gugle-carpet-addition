@@ -92,6 +92,13 @@ public class GcaSetting {
     )
     public static String commandBot = "ops";
 
+    // 方便快捷的假人动作管理
+    @Rule(
+        categories = {GCA, BOT, COMMAND},
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
+    )
+    public static String commandBotAction = "ops";
+
     // 待办事项清单
     @Rule(
         categories = {GCA, COMMAND},
@@ -254,5 +261,5 @@ public class GcaSetting {
         categories = {GCA}
     )
     public static int gcaPageSize = 8;
-    
+
 }

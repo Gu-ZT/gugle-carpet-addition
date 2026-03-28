@@ -172,6 +172,24 @@ public class BotCommand {
                                 )
                         )
                 )
+                .then(
+                    Commands.literal("action")
+                        .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotAction))
+                        .then(
+                            Commands.argument("player", StringArgumentType.string())
+                                .suggests(BotCommand::suggestPlayer)
+                                .executes(BotCommand::groupList)
+                                .then(
+                                    Commands.literal("list").executes(BotCommand::groupList)
+                                        .then(
+                                            Commands.argument("page", IntegerArgumentType.integer(1))
+                                                .executes(BotCommand::groupList)
+                                        )
+                                )
+
+
+                        )
+                )
         );
     }
 
@@ -205,14 +223,8 @@ public class BotCommand {
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.of(context, group.bots);
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group %s (Page %s/%s) =======".formatted(groupName, page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotInfo bot : page.page()) {
-            context.getSource().sendSystemMessage(botToComponent(bot));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot group show");
+        page.pageComponents("Bot Group " + groupName, "/bot group show", BotCommand::botToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -336,14 +348,8 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotGroupInfo group : page.page()) {
-            context.getSource().sendSystemMessage(botGroupToComponent(group));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot group list");
+        page.pageComponents("Bot Group List", "/bot group list", BotCommand::botGroupToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -472,14 +478,8 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotInfo bot : page.page()) {
-            context.getSource().sendSystemMessage(botToComponent(bot));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot list");
+        page.pageComponents("Bot List", "/bot list", BotCommand::botToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -519,39 +519,13 @@ public class BotCommand {
         return component.append(" ").append(delete);
     }
 
-    private static void listComponent(CommandContext<CommandSourceStack> context, int page, int maxPage, String command) {
-        Component prevPage = page <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        command + " " + (page - 1)
-                    ))
-            );
-        Component nextPage = page >= maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        command + " " + (page + 1)
-                    ))
-            );
-        context.getSource().sendSystemMessage(
-            Component.literal("=======")
-                .withStyle(ChatFormatting.YELLOW)
-                .append(" ")
-                .append(prevPage)
-                .append(" ")
-                .append(Component.literal("(Page %s/%s)".formatted(page, maxPage)).withStyle(ChatFormatting.YELLOW))
-                .append(" ")
-                .append(nextPage)
-                .append(" ")
-                .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
-        );
+    private static int listBotActions(CommandContext<CommandSourceStack> context) {
+
+
+
+
+        return Command.SINGLE_SUCCESS;
+
     }
 
     private static CompletableFuture<Suggestions> suggestPlayer(
