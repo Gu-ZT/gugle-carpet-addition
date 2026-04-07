@@ -63,7 +63,7 @@ loom {
 
     runConfigs.client {
         ideConfigGenerated = true
-        def proArgs = ["--username Dev"]
+        def proArgs = ["--username", "Dev"]
         programArgs proArgs
     }
 

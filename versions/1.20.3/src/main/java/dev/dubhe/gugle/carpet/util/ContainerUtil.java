@@ -4,10 +4,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -18,17 +18,14 @@ public class ContainerUtil {
         return tag.contains("BlockEntityTag") && tag.getCompound("BlockEntityTag").contains("Items", Tag.TAG_LIST);
     }
 
-    public static int pickItemFromShulker(ItemStack handItem, List<ItemStack> shulkerItems, int count) {
+    public static int pickItemFromShulker(Player player, ItemStack handItem, List<ItemStack> shulkerItems, int count) {
         for (ItemStack shulkerBox : shulkerItems) {
             CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
             if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) return 0;
-            ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND);
-            Iterator<Tag> iterator = tagList.iterator();
-            int index = -1;
-            while (iterator.hasNext()) {
-                index += 1;
-                Tag next = iterator.next();
-                CompoundTag tag = next.getId() == 10 ? (CompoundTag) next : new CompoundTag();
+            ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND).copy();
+
+            for (int index = 0; index < tagList.size(); index++) {
+                CompoundTag tag = tagList.getCompound(index);
                 ItemStack stack = ItemStack.of(tag);
                 if (!ItemStack.isSameItemSameTags(handItem, stack)) continue;
                 int picked;
@@ -39,18 +36,14 @@ public class ContainerUtil {
                     picked = stack.getCount();
                     stack.setCount(0);
                 }
-                if (!stack.isEmpty()) {
-                    CompoundTag newTag = stack.save(new CompoundTag());
-                    newTag.putByte("Slot", tag.getByte("Slot"));
-                    tagList.set(index, newTag);
-                } else iterator.remove();
+                updateShulkerBoxContainer(player, shulkerBox, tagList, index, stack);
                 return picked;
             }
         }
         return 0;
     }
 
-    public static boolean replenishmentTool(Player fakePlayer, EquipmentSlot slot, List<ItemStack> shulkerItems, Predicate<ItemStack> predicate) {
+    public static boolean replenishmentTool(Player player, EquipmentSlot slot, List<ItemStack> shulkerItems, Predicate<ItemStack> predicate) {
         for (ItemStack shulkerBox : shulkerItems) {
             CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
             if (nbt == null) continue;
@@ -59,21 +52,43 @@ public class ContainerUtil {
                 CompoundTag tag = tagList.getCompound(index);
                 ItemStack stack = ItemStack.of(tag);
                 if (!predicate.test(stack)) continue;
-                ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
+                ItemStack itemBySlot = player.getItemBySlot(slot);
                 ItemStack copy = stack.copy();
-                fakePlayer.setItemSlot(slot, copy);
-                if (itemBySlot.isEmpty()) {
-                    tagList.remove(index);
-                    if (tagList.isEmpty()) nbt.remove("Items");
-                    return true;
-                }
-                CompoundTag newTag = itemBySlot.save(new CompoundTag());
-                newTag.putByte("Slot", tag.getByte("Slot"));
-                tagList.set(index, newTag);
+                player.setItemSlot(slot, copy);
+                updateShulkerBoxContainer(player, shulkerBox, tagList, index, itemBySlot);
                 return true;
             }
         }
         return false;
     }
+
+    private static void updateShulkerBoxContainer(Player player, ItemStack shulkerBox, ListTag listTag, int index, ItemStack stack) {
+        if (shulkerBox.getCount() > 1) {
+            ItemStack newShulker = shulkerBox.copyWithCount(1);
+            shulkerBox.shrink(1);
+            if (!player.addItem(newShulker)) {
+                ItemEntity itemEntity = player.drop(newShulker, false);
+                if (itemEntity != null) {
+                    itemEntity.setNoPickUpDelay();
+                    itemEntity.setTarget(player.getUUID());
+                }
+            }
+            shulkerBox = newShulker;
+        }
+
+        CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
+        assert nbt != null;
+
+        if (stack.isEmpty()) {
+            listTag.remove(index);
+            if (listTag.isEmpty()) nbt.remove("Items");
+        } else {
+            CompoundTag newTag = stack.save(new CompoundTag());
+            newTag.putByte("Slot", listTag.getCompound(index).getByte("Slot"));
+            listTag.set(index, newTag);
+            nbt.put("Items", listTag);
+        }
+    }
+
 
 }
