@@ -2,6 +2,7 @@ package dev.dubhe.gugle.carpet.util;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
@@ -16,7 +17,7 @@ public class ContainerUtil {
     }
 
     // 从潜影盒拿取物品，请注意：在创造模式下使用鼠标中键复制物品（不是指选取方块）时，物品组件仅被浅拷贝。
-    public static int pickItemFromShulker(ItemStack handItem, List<ItemStack> shulkerItems, int count) {
+    public static int pickItemFromShulker(Player player, ItemStack handItem, List<ItemStack> shulkerItems, int count) {
         for (ItemStack shulkerBox : shulkerItems) {
             ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
             // 空的潜影盒
@@ -40,18 +41,15 @@ public class ContainerUtil {
                     picked = stack.getCount();
                     stack.setCount(0);
                 }
-                shulkerBox.set(DataComponents.CONTAINER,
-                    list.stream().allMatch(ItemStack::isEmpty) ?
-                        ItemContainerContents.EMPTY :
-                        ItemContainerContents.fromItems(list)
-                );
+
+                updateShulkerBoxContainer(player, shulkerBox, list);
                 return picked;
             }
         }
         return 0;
     }
 
-    public static boolean replenishmentTool(Player fakePlayer, EquipmentSlot slot, List<ItemStack> shulkerItems, Predicate<ItemStack> predicate) {
+    public static boolean replenishmentTool(Player player, EquipmentSlot slot, List<ItemStack> shulkerItems, Predicate<ItemStack> predicate) {
         for (ItemStack shulkerBox : shulkerItems) {
             ItemContainerContents contents = shulkerBox.get(DataComponents.CONTAINER);
             // 空的潜影盒
@@ -68,20 +66,41 @@ public class ContainerUtil {
             for (int index = 0; index < list.size(); index++) {
                 ItemStack item = list.get(index);
                 if (predicate.test(item)) {
-                    ItemStack itemBySlot = fakePlayer.getItemBySlot(slot);
+                    ItemStack itemBySlot = player.getItemBySlot(slot);
                     ItemStack copy = item.copy();
                     list.set(index, itemBySlot);
-                    fakePlayer.setItemSlot(slot, copy);
-                    ItemContainerContents container = list.stream().allMatch(ItemStack::isEmpty) ?
-                        ItemContainerContents.EMPTY :
-                        ItemContainerContents.fromItems(list);
-                    shulkerBox.set(DataComponents.CONTAINER, container);
+                    player.setItemSlot(slot, copy);
+                    updateShulkerBoxContainer(player, shulkerBox, list);
                     return true;
                 }
             }
         }
 
         return false;
+    }
+
+    private static void updateShulkerBoxContainer(Player player, ItemStack shulkerBox, List<ItemStack> items) {
+        ItemContainerContents container = items.stream().allMatch(ItemStack::isEmpty) ?
+            ItemContainerContents.EMPTY :
+            ItemContainerContents.fromItems(items);
+
+        if (shulkerBox.getCount() == 1) {
+            shulkerBox.set(DataComponents.CONTAINER, container);
+            return;
+        }
+
+        if (shulkerBox.getCount() > 1) {
+            ItemStack newShulker = shulkerBox.copyWithCount(1);
+            shulkerBox.shrink(1);
+            newShulker.set(DataComponents.CONTAINER, container);
+            if (!player.addItem(newShulker)) {
+                ItemEntity itemEntity = player.drop(newShulker, false);
+                if (itemEntity != null) {
+                    itemEntity.setNoPickUpDelay();
+                    itemEntity.setTarget(player.getUUID());
+                }
+            }
+        }
     }
 
 }

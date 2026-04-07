@@ -20,10 +20,10 @@ public class FakePlayerAutoReplenishment {
         int half = handItem.getMaxStackSize() / 2;
         if (half <= base) return;
         NonNullList<ItemStack> itemStackList = InventoryUtil.getItems(fakePlayer);
-        replenishment(handItem, itemStackList, half);
+        replenishment(fakePlayer, handItem, itemStackList, half);
     }
 
-    private static void replenishment(ItemStack handItem, NonNullList<ItemStack> backpackItems, int count) {
+    private static void replenishment(Player player, ItemStack handItem, NonNullList<ItemStack> backpackItems, int count) {
         List<ItemStack> shulkerItems = new ArrayList<>(backpackItems.size());
         for (ItemStack eachItem : backpackItems) {
             if (eachItem.isEmpty() || (eachItem == handItem)) {
@@ -42,7 +42,7 @@ public class FakePlayerAutoReplenishment {
                 shulkerItems.add(eachItem);
             }
         }
-        int picked = ContainerUtil.pickItemFromShulker(handItem, shulkerItems, count);
+        int picked = ContainerUtil.pickItemFromShulker(player, handItem, shulkerItems, count);
         if (picked > 0) {
             handItem.grow(picked);
         }
