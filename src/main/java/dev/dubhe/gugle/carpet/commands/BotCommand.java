@@ -8,7 +8,6 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -18,12 +17,10 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
-import dev.dubhe.gugle.carpet.entry.BotRecordActionInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -50,7 +47,6 @@ import static net.minecraft.commands.Commands.literal;
 public class BotCommand {
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
-    private static final GcaConfig<BotRecordActionInfo> BOT_ACTION_CONFIG = GcaConfig.create("bot_action", BotRecordActionInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(ModCommands.root(dispatcher, "bot")
@@ -147,37 +143,12 @@ public class BotCommand {
                     )
                 )
             )
-            .then(literal("action")
-                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotAction))
-                .then(argument("player", StringArgumentType.string())
-                    .suggests(BotCommand::suggestPlayer)
-                    .executes(BotCommand::botActionList)
-                    .then(literal("list")
-                        .executes(BotCommand::botActionList)
-                        .then(argument("page", IntegerArgumentType.integer(1))
-                            .executes(BotCommand::botActionList)
-                        )
-                    )
-                    .then(literal("create")
-                        .then(argument("desc", StringArgumentType.string())
-                            .then(argument("action", StringArgumentType.greedyString())
-                                .executes(BotCommand::botActionAdd)
-                            )
-                        )
-                    )
-                    .then(literal("remove")
-                        .then(argument("id", LongArgumentType.longArg()))
-                        .executes(BotCommand::botActionRemove)
-                    )
-                )
-            )
         );
     }
 
     private static void tryInit(CommandContext<CommandSourceStack> context) {
         BOT_CONFIG.tryInit(context);
         BOT_GROUP_CONFIG.tryInit(context);
-        BOT_ACTION_CONFIG.tryInit(context);
     }
 
     @Nullable
@@ -465,57 +436,6 @@ public class BotCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int botActionList(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String name = StringArgumentType.getString(context, "player");
-        BotRecordActionInfo actionInfo = BOT_ACTION_CONFIG.getContents().get(name);
-        var page = PageInfo.of(context, actionInfo == null ? List.of() : actionInfo.ofActions());
-        if (page == null) return 0;
-        page.pageComponents(
-            "Bot §b%s§r's Action List".formatted(name),
-            "/bot action %s list".formatted(name),
-            info -> botActionToComponent(info, name)
-        ).forEach(context.getSource()::sendSystemMessage);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int botActionAdd(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String name = StringArgumentType.getString(context, "player");
-        String desc = StringArgumentType.getString(context, "desc");
-        String action = StringArgumentType.getString(context, "action");
-        if (!BOT_CONFIG.getContents().containsKey(name)) {
-            context.getSource().sendFailure(Component.literal("Bot %s is not exist.".formatted(name)));
-            return 0;
-        }
-        BotRecordActionInfo actionInfo = BOT_ACTION_CONFIG.getContents()
-            .computeIfAbsent(name, BotRecordActionInfo::create);
-        List<BotRecordActionInfo.BotExecActionInfo> actions = new ArrayList<>(actionInfo.ofActions());
-        actions.add(new BotRecordActionInfo.BotExecActionInfo(IdUtil.nextId(), desc, action));
-        BOT_ACTION_CONFIG.update(actionInfo.ofActions(actions));
-        context.getSource().sendSuccess(() -> Component.literal("Action %s is added.".formatted(desc)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int botActionRemove(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String name = StringArgumentType.getString(context, "player");
-        BotRecordActionInfo actionInfo = BOT_ACTION_CONFIG.getContents().get(name);
-        if (actionInfo == null) {
-            context.getSource().sendFailure(Component.literal("Bot %s is not exist.".formatted(name)));
-            return 0;
-        }
-        long id = LongArgumentType.getLong(context, "id");
-        List<BotRecordActionInfo.BotExecActionInfo> actions = new ArrayList<>(actionInfo.ofActions());
-        if (!actions.removeIf(it -> it.id() == id)) {
-            context.getSource().sendFailure(Component.literal("Action %s is not exist.".formatted(id)));
-            return 0;
-        }
-        BOT_ACTION_CONFIG.update(actionInfo.ofActions(actions));
-        context.getSource().sendSuccess(() -> Component.literal("Action %s is removed.".formatted(id)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
     private static MutableComponent botToComponent(BotInfo botInfo) {
         MutableComponent desc = Component.literal(botInfo.desc()).withStyle(
             Style.EMPTY
@@ -550,35 +470,6 @@ public class BotCommand {
         component.append(" ").append(load);
         component.append(" ").append(remove);
         return component.append(" ").append(delete);
-    }
-
-    private static MutableComponent botActionToComponent(BotRecordActionInfo.BotExecActionInfo info, String name) {
-        String command = "/player %s %s".formatted(name, info.action());
-        MutableComponent desc = Component.literal(info.desc()).withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command)))
-        );
-        MutableComponent exec = Component.literal("[▶]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Execution Action")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, command))
-        );
-
-        MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Action")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.SUGGEST_COMMAND,
-                    "/bot action %s remove %s".formatted(name, info.id())
-                ))
-        );
-        return Component.literal("▶ ")
-            .append(desc).append(" ")
-            .append(exec).append(" ")
-            .append(delete);
     }
 
     private static CompletableFuture<Suggestions> suggestPlayer(
