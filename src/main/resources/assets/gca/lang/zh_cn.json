@@ -2,6 +2,9 @@
   "carpet.category.GCA": "GCA",
   "carpet.category.BOT": "假人",
 
+  "carpet.rule.gcaPageSize.name": "GCA页面大小",
+  "carpet.rule.gcaPageSize.desc": "设置GCA列表每页的条目数",
+
   "carpet.rule.openFakePlayerInventory.name": "假人背包",
   "carpet.rule.openFakePlayerInventory.desc": "允许玩家打开假人背包",
 
@@ -55,6 +58,9 @@
 
   "carpet.rule.commandBot.name": "假人管理",
   "carpet.rule.commandBot.desc": "一个假人管理菜单",
+
+  "carpet.rule.commandBotAction.name": "假人动作管理",
+  "carpet.rule.commandBotAction.desc": "一个假人动作管理菜单",
 
   "carpet.rule.commandLoc.name": "地标管理",
   "carpet.rule.commandLoc.desc": "地标管理菜单",
@@ -110,7 +116,7 @@
   "carpet.rule.fakePlayerLocatorBar.name": "假人定位条",
   "carpet.rule.fakePlayerLocatorBar.desc": "在定位条上显示假玩家位置",
 
-  "carpet.rule.commandSeed.name": "seed命令",
+  "carpet.rule.commandSeed.name": "/seed命令",
   "carpet.rule.commandSeed.desc": "修改/seed命令的权限等级",
 
   "gca.action.attack.interval.12": "间隔 12 gt攻击：%s",

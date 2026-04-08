@@ -108,7 +108,7 @@ abstract class ItemStackMixin {
         Item item = itemStack.getItem();
         original.call(itemStack, i, source, serverPlayer, runnable);
         if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && serverPlayer instanceof EntityPlayerMPFake fakePlayer) {
-            FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, item, equipmentSlot);
+            FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, item, equipmentSlot);
         }
     }
     //#else
@@ -120,7 +120,7 @@ abstract class ItemStackMixin {
     //$$         return true;
     //$$     }
     //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && player instanceof EntityPlayerMPFake fakePlayer) {
-    //$$         FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, itemStack.getItem(), itemStack);
+    //$$         FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, itemStack.getItem(), itemStack);
     //$$     }
     //$$     return false;
     //$$ }
@@ -130,7 +130,7 @@ abstract class ItemStackMixin {
     //$$     Item item = itemStack.getItem();
     //$$     original.call(itemStack, i);
     //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && livingEntity instanceof EntityPlayerMPFake fakePlayer) {
-    //$$         FakePlayerAutoReplaceTool.autoReplaceTool(fakePlayer, item, itemStack);
+    //$$         FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, item, itemStack);
     //$$     }
     //$$ }
     //#endif

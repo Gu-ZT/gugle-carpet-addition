@@ -44,4 +44,13 @@ public class GcaValidators {
             return !CARPET_AMS_ADDITION;
         }
     }
+
+    public static class PositiveNumber extends Validator<Integer> {
+        @Override
+        public @Nullable Integer validate(@Nullable CommandSourceStack source, CarpetRule<Integer> currentRule, Integer newValue, String string) {
+            return newValue.doubleValue() > 0 ? newValue : null;
+        }
+        @Override
+        public String description() { return "Must be a positive number";}
+    }
 }

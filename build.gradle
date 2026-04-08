@@ -1,8 +1,7 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.15-SNAPSHOT' apply false
-    id 'net.fabricmc.fabric-loom-remap' version '1.15-SNAPSHOT' apply false
-    id "maven-publish"
-    id "com.replaymod.preprocess" version "c5abb4fb12"
+    id('net.fabricmc.fabric-loom').version("${loom_version}").apply(false)
+    id('net.fabricmc.fabric-loom-remap').version("${loom_version}").apply(false)
+    id('com.replaymod.preprocess').version("${preprocessor_version}")
 }
 
 preprocess {

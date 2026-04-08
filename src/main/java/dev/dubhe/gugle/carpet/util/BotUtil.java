@@ -25,8 +25,10 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
 //#endif
 //#if MC >= 12005
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 //#endif
+
 public class BotUtil {
     private static final Set<String> SpawningBots = new HashSet<>();
 
@@ -46,7 +48,7 @@ public class BotUtil {
     public static boolean spawnBot(MinecraftServer server, BotInfo bot, boolean applyAction) {
         ServerLevel level = server.getLevel(bot.dimension());
         GameProfile gameProfile = GameProfileUtil.getGameProfile(server, bot.name());
-        if (gameProfile == null) return false;
+        if (gameProfile == null || level == null) return false;
         String name = gameProfile.getName();
 
         SpawningBots.add(name);
@@ -70,7 +72,6 @@ public class BotUtil {
             //#if MC >= 12110
             //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
             //#endif
-            instance.stopRiding();
             instance.teleportTo(
                 level,
                 bot.pos().x,
@@ -88,7 +89,8 @@ public class BotUtil {
             instance.setHealth(20.0F);
             ((EntityInvoker) instance).invokeUnsetRemoved();
             //#if MC >= 12005
-            instance.getAttribute(Attributes.STEP_HEIGHT).setBaseValue(0.6F);
+            AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
+            if (attribute != null) attribute.setBaseValue(0.6F);
             //#else
             //$$ instance.setMaxUpStep(0.6F);
             //#endif

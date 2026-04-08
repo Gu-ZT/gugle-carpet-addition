@@ -23,7 +23,6 @@ import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.ClickEvent;
@@ -42,136 +41,108 @@ import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.Nullable;
 
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+
 public class BotCommand {
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-            ModCommands.root(dispatcher, "bot")
-                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBot))
+        dispatcher.register(ModCommands.root(dispatcher, "bot")
+            .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBot))
+            .executes(BotCommand::list)
+            .then(literal("list")
                 .executes(BotCommand::list)
-                .then(
-                    Commands.literal("list").executes(BotCommand::list)
-                        .then(
-                            Commands.argument("page", IntegerArgumentType.integer(1))
-                                .executes(BotCommand::list)
-                        )
+                .then(argument("page", IntegerArgumentType.integer(1))
+                    .executes(BotCommand::list)
                 )
-                .then(
-                    Commands.literal("add")
-                        .then(
-                            Commands.argument("player", EntityArgument.player())
-                                .then(
-                                    Commands.argument("desc", StringArgumentType.greedyString())
-                                        .executes(BotCommand::add)
-                                )
-                        )
+            )
+            .then(literal("add")
+                .then(argument("player", EntityArgument.player())
+                    .then(argument("desc", StringArgumentType.greedyString())
+                        .executes(BotCommand::add)
+                    )
                 )
-                .then(
-                    Commands.literal("load")
-                        .then(
-                            Commands.argument("player", StringArgumentType.string())
-                                .suggests(BotCommand::suggestPlayer)
-                                .executes(BotCommand::load)
-                        )
+            )
+            .then(literal("load")
+                .then(argument("player", StringArgumentType.string())
+                    .suggests(BotCommand::suggestPlayer)
+                    .executes(BotCommand::load)
                 )
-                .then(
-                    Commands.literal("remove")
-                        .then(
-                            Commands.argument("player", StringArgumentType.string())
-                                .suggests(BotCommand::suggestPlayer)
-                                .executes(BotCommand::remove)
-                        )
+            )
+            .then(literal("remove")
+                .then(argument("player", StringArgumentType.string())
+                    .suggests(BotCommand::suggestPlayer)
+                    .executes(BotCommand::remove)
                 )
-                .then(
-                    Commands.literal("group")
+            )
+            .then(literal("group")
+                .executes(BotCommand::groupList)
+                .then(literal("create")
+                    .then(argument("name", StringArgumentType.greedyString())
+                        .executes(BotCommand::groupCreate)
+                    )
+                )
+                .then(literal("generated")
+                    .then(argument("name", StringArgumentType.word())
+                        .executes(BotCommand::groupGenerated)
+                        .then(argument("count", IntegerArgumentType.integer(1, 32))
+                            .executes(BotCommand::groupGenerated)
+                            .then(argument("load", BoolArgumentType.bool())
+                                .executes(BotCommand::groupGenerated)
+                            )
+                        )
+                    )
+                )
+                .then(literal("list")
+                    .executes(BotCommand::groupList)
+                    .then(argument("page", IntegerArgumentType.integer(1))
                         .executes(BotCommand::groupList)
-                        .then(
-                            Commands.literal("create")
-                                .then(
-                                    Commands.argument("name", StringArgumentType.greedyString())
-                                        .executes(BotCommand::groupCreate)
-                                )
-                        )
-                        .then(
-                            Commands.literal("generated")
-                                .then(
-                                    Commands.argument("name", StringArgumentType.word())
-                                        .executes(BotCommand::groupGenerated)
-                                        .then(
-                                            Commands.argument("count", IntegerArgumentType.integer(1, 32))
-                                                .then(
-                                                    Commands.argument("load", BoolArgumentType.bool())
-                                                        .executes(BotCommand::groupGenerated)
-                                                )
-                                                .executes(BotCommand::groupGenerated)
-                                        )
-                                )
-                        )
-                        .then(
-                            Commands.literal("list").executes(BotCommand::groupList)
-                                .then(
-                                    Commands.argument("page", IntegerArgumentType.integer(1))
-                                        .executes(BotCommand::groupList)
-                                )
-                        )
-                        .then(
-                            Commands.literal("remove")
-                                .then(
-                                    Commands.argument("name", StringArgumentType.greedyString())
-                                        .executes(BotCommand::groupRemove)
-                                )
-                        )
-                        .then(
-                            Commands.literal("add")
-                                .then(
-                                    Commands.argument("bot", StringArgumentType.string())
-                                        .suggests(BotCommand::suggestPlayer)
-                                        .then(
-                                            Commands.argument("group", StringArgumentType.greedyString())
-                                                .suggests(BotCommand::suggestGroup)
-                                                .executes(BotCommand::groupAddBot)
-                                        )
-                                )
-                        )
-                        .then(
-                            Commands.literal("remove")
-                                .then(
-                                    Commands.argument("bot", StringArgumentType.string())
-                                        .suggests(BotCommand::suggestPlayer)
-                                        .then(
-                                            Commands.argument("group", StringArgumentType.greedyString())
-                                                .suggests(BotCommand::suggestGroup)
-                                                .executes(BotCommand::groupRemoveBot)
-                                        )
-                                )
-                        )
-                        .then(
-                            Commands.literal("load")
-                                .then(
-                                    Commands.argument("group", StringArgumentType.greedyString())
-                                        .suggests(BotCommand::suggestGroup)
-                                        .executes(BotCommand::groupLoadBot)
-                                )
-                        )
-                        .then(
-                            Commands.literal("unload")
-                                .then(
-                                    Commands.argument("group", StringArgumentType.greedyString())
-                                        .suggests(BotCommand::suggestGroup)
-                                        .executes(BotCommand::groupUnloadBot)
-                                )
-                        )
-                        .then(
-                            Commands.literal("info")
-                                .then(
-                                    Commands.argument("group", StringArgumentType.greedyString())
-                                        .suggests(BotCommand::suggestGroup)
-                                        .executes(BotCommand::groupInfo)
-                                )
-                        )
+                    )
                 )
+                .then(literal("remove")
+                    .then(argument("name", StringArgumentType.greedyString())
+                        .executes(BotCommand::groupRemove)
+                    )
+                )
+                .then(literal("add")
+                    .then(argument("bot", StringArgumentType.string())
+                        .suggests(BotCommand::suggestPlayer)
+                        .then(argument("group", StringArgumentType.greedyString())
+                            .suggests(BotCommand::suggestGroup)
+                            .executes(BotCommand::groupAddBot)
+                        )
+                    )
+                )
+                .then(literal("remove")
+                    .then(argument("bot", StringArgumentType.string())
+                        .suggests(BotCommand::suggestPlayer)
+                        .then(argument("group", StringArgumentType.greedyString())
+                            .suggests(BotCommand::suggestGroup)
+                            .executes(BotCommand::groupRemoveBot)
+                        )
+                    )
+                )
+                .then(literal("load")
+                    .then(argument("group", StringArgumentType.greedyString())
+                        .suggests(BotCommand::suggestGroup)
+                        .executes(BotCommand::groupLoadBot)
+                    )
+                )
+                .then(literal("unload")
+                    .then(argument("group", StringArgumentType.greedyString())
+                        .suggests(BotCommand::suggestGroup)
+                        .executes(BotCommand::groupUnloadBot)
+                    )
+                )
+                .then(literal("info")
+                    .then(argument("group", StringArgumentType.greedyString())
+                        .suggests(BotCommand::suggestGroup)
+                        .executes(BotCommand::groupInfo)
+                    )
+                )
+            )
         );
     }
 
@@ -203,16 +174,10 @@ public class BotCommand {
         String groupName = StringArgumentType.getString(context, "group");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
-        PageInfo<BotInfo> page = PageInfo.of(context, group.bots);
+        PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group %s (Page %s/%s) =======".formatted(groupName, page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotInfo bot : page.page()) {
-            context.getSource().sendSystemMessage(botToComponent(bot));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot group show");
+        page.pageComponents("Bot Group " + groupName, "/bot group info " + groupName, BotCommand::botToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -336,14 +301,8 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot Group List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotGroupInfo group : page.page()) {
-            context.getSource().sendSystemMessage(botGroupToComponent(group));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot group list");
+        page.pageComponents("Bot Group List", "/bot group list", BotCommand::botGroupToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -472,14 +431,8 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Bot List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (BotInfo bot : page.page()) {
-            context.getSource().sendSystemMessage(botToComponent(bot));
-        }
-        listComponent(context, page.pageNum(), page.maxPage(), "/bot list");
+        page.pageComponents("Bot List", "/bot list", BotCommand::botToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -517,41 +470,6 @@ public class BotCommand {
         component.append(" ").append(load);
         component.append(" ").append(remove);
         return component.append(" ").append(delete);
-    }
-
-    private static void listComponent(CommandContext<CommandSourceStack> context, int page, int maxPage, String command) {
-        Component prevPage = page <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        command + " " + (page - 1)
-                    ))
-            );
-        Component nextPage = page >= maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                    .applyFormat(ChatFormatting.GREEN)
-                    .withClickEvent(ComponentUtil.createClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        command + " " + (page + 1)
-                    ))
-            );
-        context.getSource().sendSystemMessage(
-            Component.literal("=======")
-                .withStyle(ChatFormatting.YELLOW)
-                .append(" ")
-                .append(prevPage)
-                .append(" ")
-                .append(Component.literal("(Page %s/%s)".formatted(page, maxPage)).withStyle(ChatFormatting.YELLOW))
-                .append(" ")
-                .append(nextPage)
-                .append(" ")
-                .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
-        );
     }
 
     private static CompletableFuture<Suggestions> suggestPlayer(

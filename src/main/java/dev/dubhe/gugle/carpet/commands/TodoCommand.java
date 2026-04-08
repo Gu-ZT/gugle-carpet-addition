@@ -132,45 +132,8 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.getContents().values());
         if (page == null) return 0;
-        context.getSource().sendSystemMessage(
-            Component.literal("======= Todo List (Page %s/%s) =======".formatted(page.pageNum(), page.maxPage()))
-                .withStyle(ChatFormatting.YELLOW)
-        );
-        for (TodoInfo todo : page.page()) {
-            context.getSource().sendSystemMessage(TodoToComponent(todo));
-        }
-        Component prevPage = page.pageNum() <= 1 ?
-                             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-                             Component.literal("<<<").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtil.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         "/todo list " + (page.pageNum() - 1)
-                                     ))
-                             );
-        Component nextPage = page.pageNum() >= page.maxPage() ?
-                             Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-                             Component.literal(">>>").withStyle(
-                                 Style.EMPTY
-                                     .applyFormat(ChatFormatting.GREEN)
-                                     .withClickEvent(ComponentUtil.createClickEvent(
-                                         ClickEvent.Action.RUN_COMMAND,
-                                         "/todo list " + (page.pageNum() + 1)
-                                     ))
-                             );
-        context.getSource().sendSystemMessage(
-            Component.literal("=======")
-                .withStyle(ChatFormatting.YELLOW)
-                .append(" ")
-                .append(prevPage)
-                .append(" ")
-                .append(Component.literal("(Todo %s/%s)".formatted(page.pageNum(), page.maxPage())).withStyle(ChatFormatting.YELLOW))
-                .append(" ")
-                .append(nextPage)
-                .append(" ")
-                .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW))
-        );
+        page.pageComponents("Todo List", "/todo list", TodoCommand::TodoToComponent)
+            .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }
 

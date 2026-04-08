@@ -63,7 +63,7 @@ loom {
 
     runConfigs.client {
         ideConfigGenerated = true
-        def proArgs = ["--username Dev"]
+        def proArgs = ["--username", "Dev"]
         programArgs proArgs
     }
 
@@ -126,10 +126,9 @@ dependencies {
 }
 
 String versionSuffix = project.getVersionSuffix()
-String fullModVersion = project.mod_version + versionSuffix
-String versionWithMC = fullModVersion + '-mc' + project.minecraft_version
+String versionWithMC = "${project.mod_version}-mc${project.minecraft_version}${versionSuffix}"
 
-version = 'v' + fullModVersion
+version = 'v' + project.mod_version + versionSuffix
 group = project.maven_group
 
 base {

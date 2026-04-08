@@ -33,6 +33,7 @@
     "ServerPlayerMixin",
     "SignBlockMixin",
     "SlotMixin",
+    "TickCommandMixin",
     "TransferCommandMixin",
     "WanderingTraderMixin"
   ],
