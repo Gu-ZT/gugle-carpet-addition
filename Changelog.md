@@ -1,0 +1,5 @@
+- Fix an issue where `FakePlayerResident` would stop riding after reconnecting.
+- Fix incorrect handling of stacked shulker boxes when restocking a fake player’s shulker boxes.
+- Implement the `commandTick` feature defined by Carpet but not previously implemented; it can control the permission level required to use tick commands.
+- Add the `gcaPageSize` option to control how many lines are shown per page for all GCA pages.
+- Fix an issue where tool restocking would also damage the newly-restocked tool after the tool was damaged by item use.
