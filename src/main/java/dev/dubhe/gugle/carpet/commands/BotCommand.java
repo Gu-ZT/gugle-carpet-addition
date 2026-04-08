@@ -174,9 +174,9 @@ public class BotCommand {
         String groupName = StringArgumentType.getString(context, "group");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
-        PageInfo<BotInfo> page = PageInfo.of(context, group.bots);
+        PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
-        page.pageComponents("Bot Group " + groupName, "/bot group show", BotCommand::botToComponent)
+        page.pageComponents("Bot Group " + groupName, "/bot group info " + groupName, BotCommand::botToComponent)
             .forEach(context.getSource()::sendSystemMessage);
         return Command.SINGLE_SUCCESS;
     }

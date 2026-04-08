@@ -18,8 +18,17 @@ import java.util.function.Function;
 
 public record PageInfo<T>(int pageSize, int pageNum, int maxPage, List<T> page) {
     @Nullable
+    public static <T> PageInfo<T> ofAll(CommandContext<CommandSourceStack> context, Collection<T> collection) {
+        return of(context, collection, Math.max(collection.size(), GcaSetting.gcaPageSize));
+    }
+
+    @Nullable
     public static <T> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection) {
-        final int pageSize = GcaSetting.gcaPageSize;
+        return of(context, collection, GcaSetting.gcaPageSize);
+    }
+
+    @Nullable
+    public static <T> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection, int pageSize) {
         int pageNum = getPage(context);
         int size = collection.size();
         int maxPage = size / pageSize + 1;
