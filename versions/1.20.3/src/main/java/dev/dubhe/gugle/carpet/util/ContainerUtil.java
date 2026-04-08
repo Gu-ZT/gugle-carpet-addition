@@ -21,7 +21,7 @@ public class ContainerUtil {
     public static int pickItemFromShulker(Player player, ItemStack handItem, List<ItemStack> shulkerItems, int count) {
         for (ItemStack shulkerBox : shulkerItems) {
             CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
-            if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) return 0;
+            if (nbt == null || !nbt.contains("Items", Tag.TAG_LIST)) continue;
             ListTag tagList = nbt.getList("Items", Tag.TAG_COMPOUND).copy();
 
             for (int index = 0; index < tagList.size(); index++) {
@@ -78,6 +78,7 @@ public class ContainerUtil {
 
         CompoundTag nbt = shulkerBox.getTagElement("BlockEntityTag");
         assert nbt != null;
+        nbt.put("Items", listTag);
 
         if (stack.isEmpty()) {
             listTag.remove(index);
@@ -86,7 +87,6 @@ public class ContainerUtil {
             CompoundTag newTag = stack.save(new CompoundTag());
             newTag.putByte("Slot", listTag.getCompound(index).getByte("Slot"));
             listTag.set(index, newTag);
-            nbt.put("Items", listTag);
         }
     }
 
