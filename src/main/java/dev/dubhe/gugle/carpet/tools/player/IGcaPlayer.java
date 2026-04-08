@@ -5,7 +5,7 @@ public interface IGcaPlayer {
         throw new AssertionError();
     }
 
-    default  PlayerInventoryContainer getInventoryContainer() {
+    default PlayerInventoryContainer getInventoryContainer() {
         throw new AssertionError();
     }
 }

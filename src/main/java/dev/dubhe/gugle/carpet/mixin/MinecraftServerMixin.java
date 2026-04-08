@@ -1,5 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,7 @@ public class MinecraftServerMixin {
 
     @Inject(method = "stopServer", at = @At("HEAD"))
     public void saveResidentPoint1(CallbackInfo ci) {
+        FakePlayerAutoReplaceTool.clear();
         if (this.gca$Resident == null) return;
         if (this.gca$server.isSingleplayer()) return;
         this.gca$Resident.save();
