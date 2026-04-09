@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.server.level.ClientInformation;
 //#endif
 
-@Mixin(value = EntityPlayerMPFake.class, remap = false)
+@Mixin(value = EntityPlayerMPFake.class)
 public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
     public EntityPlayerMPFakeMixin(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile
         //#if MC > 12001
@@ -41,7 +41,7 @@ public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
     }
 
     //#if MC >= 12104
-    //$$ @Inject(method = "isSpawningPlayer", at = @At("RETURN"), cancellable = true)
+    //$$ @Inject(method = "isSpawningPlayer", at = @At("RETURN"), cancellable = true, remap = false)
     //$$ private static void isSpawningPlayer(String username, CallbackInfoReturnable<Boolean> cir) {
     //$$     cir.setReturnValue(cir.getReturnValue() && BotUtil.isGcaSpawningBot(username));
     //$$ }
