@@ -115,7 +115,7 @@ java {
 publishMods {
     file = jar.archiveFile
     changelog = rootDir.toPath().resolve("Changelog.md").toFile().text
-    type = BETA
+    type = STABLE
     modLoaders.add("fabric")
     modLoaders.add("quilt")
     displayName = rootProject.mod_id.toUpperCase() + ' v' + fullModVersion
