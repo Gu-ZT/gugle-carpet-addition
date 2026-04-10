@@ -1,0 +1,3 @@
+[submodule "ModWrapper"]
+	path = ModWrapper
+	url = https://github.com/Cjsah/ModWrapper.git
