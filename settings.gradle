@@ -37,4 +37,4 @@ for (String version : settings.get("versions")) {
     proj.setBuildFileName("../../common.gradle")
 }
 
-//include(":modWrapper")
+include(":ModWrapper")

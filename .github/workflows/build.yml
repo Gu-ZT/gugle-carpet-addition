@@ -7,7 +7,7 @@ on:
       - .github/workflows/**
       - src/**
       - versions/**
-      - modWrapper/**
+      - ModWrapper/**
       - build.gradle
       - common.gradle
       - gradle.properties
@@ -42,17 +42,17 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Build
-        run: ./gradlew clean :modWrapper:build
+        run: ./gradlew clean :ModWrapper:build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v7
         with:
           name: 'Artifacts'
-          path: ./modWrapper/build/libs/*.jar
+          path: ./ModWrapper/build/libs/*.jar
 
       - name: Publish
         if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
-        run: ./gradlew :modWrapper:publishMods
+        run: ./gradlew :ModWrapper:publishMods
         env:
           CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
