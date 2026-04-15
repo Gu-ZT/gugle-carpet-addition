@@ -1,1 +1,1 @@
-- Fix startup failure caused by a failed Mixin injection.
+- Fix an issue where in some cases, exiting a singleplayer world wouldn’t save FakePlayerResident data.

@@ -1,5 +1,6 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import dev.dubhe.gugle.carpet.api.inject.IFakeResident;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
 import net.minecraft.server.MinecraftServer;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftServer.class)
-public class MinecraftServerMixin {
+public class MinecraftServerMixin implements IFakeResident {
 
     @Unique
     @Nullable
@@ -43,5 +44,12 @@ public class MinecraftServerMixin {
     @Inject(method = "saveEverything", at = @At("HEAD"))
     public void saveResidentPoint2(boolean bl, boolean bl2, boolean bl3, CallbackInfoReturnable<Boolean> cir) {
         if (this.gca$Resident != null) this.gca$Resident.save();
+    }
+
+    @SuppressWarnings("AddedMixinMembersNamePattern")
+    @Override
+    @Nullable
+    public FakePlayerResident getGCAResident() {
+        return this.gca$Resident;
     }
 }
