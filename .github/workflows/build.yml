@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v5
+        with:
+          submodules: recursive
 
       - name: Setup Java ${{ matrix.java }}
         uses: actions/setup-java@v5
