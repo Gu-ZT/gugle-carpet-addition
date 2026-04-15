@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import net.minecraft.server.level.ClientInformation;
 //#endif
 
-@Mixin(value = EntityPlayerMPFake.class)
+@Mixin(EntityPlayerMPFake.class)
 public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
     public EntityPlayerMPFakeMixin(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile
         //#if MC > 12001

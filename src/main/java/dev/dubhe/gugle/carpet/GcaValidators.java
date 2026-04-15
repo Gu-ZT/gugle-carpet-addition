@@ -5,9 +5,9 @@ import carpet.api.settings.Rule;
 import carpet.api.settings.Validator;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import javax.annotation.Nullable;
 
 public class GcaValidators {
     public static final boolean CARPET_AMS_ADDITION = FabricLoader.getInstance().isModLoaded("carpet-ams-addition");
