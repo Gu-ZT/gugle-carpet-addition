@@ -22,11 +22,8 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -113,37 +110,8 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.pageComponents("Loc List", "/loc list", LocCommand::locToComponent)
-            .forEach(context.getSource()::sendSystemMessage);
+        page.sendPageComponents(context, "Loc List", "/loc list", ComponentUtil::locationComponent);
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static MutableComponent locToComponent(LocationInfo loc) {
-        MutableComponent component = Component.literal(loc.desc()).withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(loc.name())))
-        );
-        List<MutableComponent> pos = PosUtil.pos(loc.desc(), loc.pos(), loc.dimension());
-        MutableComponent info = Component.literal("[i]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.YELLOW)
-                .withHoverEvent(ComponentUtil.createHoverEvent(
-                    HoverEvent.Action.SHOW_TEXT,
-                    Component.literal("View loc point information")
-                ))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/loc info %s".formatted(loc.name())))
-        );
-        MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove loc point")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/loc remove %s".formatted(loc.id())))
-        );
-        return Component.literal("▶ ").append(component)
-            .append(" ").append(pos.getFirst())
-            .append(" ").append(info)
-            .append(" ").append(remove);
     }
 
     public static int info(CommandContext<CommandSourceStack> context) {

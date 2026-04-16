@@ -15,14 +15,9 @@ import dev.dubhe.gugle.carpet.entry.TodoInfo;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 
 public class TodoCommand {
     private static final GcaConfig<TodoInfo> TODO_CONFIG = GcaConfig.create("todo", TodoInfo.CODEC);
@@ -119,39 +114,7 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.pageComponents("Todo List", "/todo list", TodoCommand::TodoToComponent)
-            .forEach(context.getSource()::sendSystemMessage);
+        page.sendPageComponents(context, "Todo List", "/todo list", ComponentUtil::todoComponent);
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static MutableComponent TodoToComponent(TodoInfo todo) {
-        MutableComponent component = Component.literal(todo.desc()).withStyle(
-            Style.EMPTY
-                .withStrikethrough(todo.success())
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(todo.name())))
-        );
-        MutableComponent success = Component.literal("[✔]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(todo.id())))
-        );
-        MutableComponent unSuccess = Component.literal("[❌]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(todo.id())))
-        );
-        MutableComponent remove = Component.literal("[\uD83D\uDDD1]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove todo")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/todo remove %s".formatted(todo.id())))
-        );
-        return Component.literal(todo.success() ? "☑" : "☐")
-            .append(" ").append(component)
-            .append(" ").append(todo.success() ? unSuccess : success)
-            .append(" ").append(remove);
     }
 }
