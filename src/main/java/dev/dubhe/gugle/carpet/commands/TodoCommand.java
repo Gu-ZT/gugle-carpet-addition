@@ -8,8 +8,6 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
@@ -20,14 +18,11 @@ import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-
-import java.util.concurrent.CompletableFuture;
 
 public class TodoCommand {
     private static final GcaConfig<TodoInfo> TODO_CONFIG = GcaConfig.create("todo", TodoInfo.CODEC);
@@ -48,7 +43,7 @@ public class TodoCommand {
                     Commands.literal("remove")
                         .then(
                             Commands.argument("id", LongArgumentType.longArg())
-                                .suggests(TodoCommand::suggestId)
+                                .suggests(TODO_CONFIG::suggestKeys)
                                 .executes(TodoCommand::remove)
                         )
                 )
@@ -64,7 +59,7 @@ public class TodoCommand {
                     Commands.literal("success")
                         .then(
                             Commands.argument("id", LongArgumentType.longArg())
-                                .suggests(TodoCommand::suggestId)
+                                .suggests(TODO_CONFIG::suggestKeys)
                                 .executes(TodoCommand::success)
                                 .then(
                                     Commands.argument("success", BoolArgumentType.bool())
@@ -73,14 +68,6 @@ public class TodoCommand {
                         )
                 )
         );
-    }
-
-    private static CompletableFuture<Suggestions> suggestId(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        TODO_CONFIG.tryInit(context);
-        return SharedSuggestionProvider.suggest(TODO_CONFIG.getContents().keySet(), builder);
     }
 
     public static int add(CommandContext<CommandSourceStack> context) {

@@ -8,11 +8,13 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
@@ -23,7 +25,6 @@ import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -37,7 +38,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -67,13 +67,13 @@ public class BotCommand {
             )
             .then(literal("load")
                 .then(argument("player", StringArgumentType.string())
-                    .suggests(BotCommand::suggestPlayer)
+                    .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::load)
                 )
             )
             .then(literal("remove")
                 .then(argument("player", StringArgumentType.string())
-                    .suggests(BotCommand::suggestPlayer)
+                    .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::remove)
                 )
             )
@@ -108,43 +108,81 @@ public class BotCommand {
                 )
                 .then(literal("add")
                     .then(argument("bot", StringArgumentType.string())
-                        .suggests(BotCommand::suggestPlayer)
+                        .suggests(BOT_CONFIG::suggestKeys)
                         .then(argument("group", StringArgumentType.greedyString())
-                            .suggests(BotCommand::suggestGroup)
+                            .suggests(BOT_GROUP_CONFIG::suggestKeys)
                             .executes(BotCommand::groupAddBot)
                         )
                     )
                 )
                 .then(literal("remove")
                     .then(argument("bot", StringArgumentType.string())
-                        .suggests(BotCommand::suggestPlayer)
+                        .suggests(BOT_CONFIG::suggestKeys)
                         .then(argument("group", StringArgumentType.greedyString())
-                            .suggests(BotCommand::suggestGroup)
+                            .suggests(BOT_GROUP_CONFIG::suggestKeys)
                             .executes(BotCommand::groupRemoveBot)
                         )
                     )
                 )
                 .then(literal("load")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupLoadBot)
                     )
                 )
                 .then(literal("unload")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupUnloadBot)
                     )
                 )
                 .then(literal("info")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupInfo)
+                    )
+                )
+            )
+            .then(literal("action")
+                .then(argument("bot", StringArgumentType.string())
+                    .then(actionAddCommand(dispatcher))
+                    .then(literal("remove")
+                        .then(argument("id", LongArgumentType.longArg())
+//                            .executes()
+                        )
                     )
                 )
             )
         );
     }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> actionAddCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> node = literal("add");
+
+        CommandNode<CommandSourceStack> playerOperateNode = dispatcher.getRoot()
+            .getChild("player")
+            .getChild("player");
+
+        loopCommand(node, playerOperateNode, context -> {
+            String input = context.getInput();
+            System.out.println(input);
+            return Command.SINGLE_SUCCESS;
+        });
+
+        return node;
+    }
+
+    private static void loopCommand(ArgumentBuilder<CommandSourceStack, ?> node, CommandNode<CommandSourceStack> parent, Command<CommandSourceStack> execute) {
+        for (CommandNode<CommandSourceStack> child : parent.getChildren()) {
+            ArgumentBuilder<CommandSourceStack, ?> builder = child.createBuilder();
+            if (builder.getCommand() != null) {
+                builder.executes(execute);
+            }
+            loopCommand(builder, child, execute);
+            node.then(builder);
+        }
+    }
+
 
     private static void tryInit(CommandContext<CommandSourceStack> context) {
         BOT_CONFIG.tryInit(context);
@@ -470,20 +508,6 @@ public class BotCommand {
         component.append(" ").append(load);
         component.append(" ").append(remove);
         return component.append(" ").append(delete);
-    }
-
-    private static CompletableFuture<Suggestions> suggestPlayer(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        return SharedSuggestionProvider.suggest(BOT_CONFIG.getContents().keySet(), builder);
-    }
-
-    private static CompletableFuture<Suggestions> suggestGroup(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        return SharedSuggestionProvider.suggest(BOT_GROUP_CONFIG.getContents().keySet(), builder);
     }
 
     record GroupNode(BotGroupInfo group, List<BotInfo> bots) {

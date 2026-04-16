@@ -5,12 +5,15 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.entry.IWithName;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.LevelResource;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +26,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 public class GcaConfig<T extends IWithName> {
@@ -105,6 +109,14 @@ public class GcaConfig<T extends IWithName> {
         } catch (IOException e) {
             GcaExtension.LOGGER.error("Failed to create config file: {}", this.filename, e);
         }
+    }
+
+    public CompletableFuture<Suggestions> suggestKeys(
+        final CommandContext<CommandSourceStack> context,
+        final SuggestionsBuilder builder
+    ) {
+        this.tryInit(context);
+        return SharedSuggestionProvider.suggest(this.contents.keySet(), builder);
     }
 
     private Path getFilePath() {

@@ -9,8 +9,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
@@ -22,7 +20,6 @@ import dev.dubhe.gugle.carpet.util.PosUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.ClickEvent;
@@ -36,7 +33,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -60,13 +56,13 @@ public class LocCommand {
                 )
                 .then(literal("remove")
                     .then(argument("id", LongArgumentType.longArg())
-                        .suggests(LocCommand::suggestId)
+                        .suggests(LOCATION_CONFIG::suggestKeys)
                         .executes(LocCommand::remove)
                     )
                 )
                 .then(literal("info")
                     .then(argument("id", LongArgumentType.longArg())
-                        .suggests(LocCommand::suggestId)
+                        .suggests(LOCATION_CONFIG::suggestKeys)
                         .executes(LocCommand::info)
                     )
                 )
@@ -76,14 +72,6 @@ public class LocCommand {
                     )
                 )
         );
-    }
-
-    private static CompletableFuture<Suggestions> suggestId(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        LOCATION_CONFIG.tryInit(context);
-        return SharedSuggestionProvider.suggest(LOCATION_CONFIG.getContents().keySet(), builder);
     }
 
     private static RequiredArgumentBuilder<CommandSourceStack, ?> locAppendCommand() {

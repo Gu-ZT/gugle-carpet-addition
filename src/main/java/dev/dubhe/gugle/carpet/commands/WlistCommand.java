@@ -42,7 +42,6 @@ public class WlistCommand {
                 .then(
                     Commands.literal("permission")
                         .requires(stack ->
-                            //
                             //#if MC>=12111
                             //$$ Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(stack)
                             //#else
