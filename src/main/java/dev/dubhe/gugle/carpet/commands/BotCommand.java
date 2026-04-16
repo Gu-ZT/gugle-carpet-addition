@@ -17,6 +17,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.BotExecuterInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
@@ -42,6 +43,7 @@ import static net.minecraft.commands.Commands.literal;
 public class BotCommand {
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
+    private static final GcaConfig<BotExecuterInfo> BOT_ACTION_CONFIG = GcaConfig.create("bot_action", BotExecuterInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(ModCommands.root(dispatcher, "bot")
@@ -139,11 +141,23 @@ public class BotCommand {
                 )
             )
             .then(literal("action")
-                .then(argument("bot", StringArgumentType.string())
+                .then(argument("name", StringArgumentType.string())
+                    .executes(BotCommand::actionList)
+                    .then(literal("list")
+                        .executes(BotCommand::actionList)
+                        .then(argument("page", IntegerArgumentType.integer(1))
+                            .executes(BotCommand::actionList)
+                        )
+                    )
                     .then(actionAddCommand(dispatcher))
                     .then(literal("remove")
                         .then(argument("id", LongArgumentType.longArg())
-//                            .executes()
+                            .executes(BotCommand::actionRemove)
+                        )
+                    )
+                    .then(literal("execute")
+                        .then(argument("id", LongArgumentType.longArg())
+                            .executes(BotCommand::actionExecute)
                         )
                     )
                 )
@@ -153,17 +167,10 @@ public class BotCommand {
 
     private static ArgumentBuilder<CommandSourceStack, ?> actionAddCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> node = literal("add");
-
         CommandNode<CommandSourceStack> playerOperateNode = dispatcher.getRoot()
             .getChild("player")
             .getChild("player");
-
-        loopCommand(node, playerOperateNode, context -> {
-            String input = context.getInput();
-            System.out.println(input);
-            return Command.SINGLE_SUCCESS;
-        });
-
+        loopCommand(node, playerOperateNode, BotCommand::actionAdd);
         return node;
     }
 
@@ -181,6 +188,7 @@ public class BotCommand {
     private static void tryInit(CommandContext<CommandSourceStack> context) {
         BOT_CONFIG.tryInit(context);
         BOT_GROUP_CONFIG.tryInit(context);
+        BOT_ACTION_CONFIG.tryInit(context);
     }
 
     // Bot
@@ -418,6 +426,33 @@ public class BotCommand {
         }
         source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
         return bots.size();
+    }
+
+    // Action
+
+    private static int actionList(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        String botName = StringArgumentType.getString(context, "name");
+        PageInfo<BotExecuterInfo> page = PageInfo.of(context, BOT_ACTION_CONFIG.getContents().values());
+        if (page == null) return 0;
+        page.sendPageComponents(context, "Bot List", "/bot list", ComponentUtil::botComponent);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int actionAdd(CommandContext<CommandSourceStack> context) {
+        String input = context.getInput();
+        System.out.println(input);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int actionRemove(CommandContext<CommandSourceStack> context) {
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int actionExecute(CommandContext<CommandSourceStack> context) {
+
+        return Command.SINGLE_SUCCESS;
     }
 
     record GroupNode(BotGroupInfo group, List<BotInfo> bots) {
