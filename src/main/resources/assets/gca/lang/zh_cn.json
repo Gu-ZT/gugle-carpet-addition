@@ -32,6 +32,9 @@
   "carpet.rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
   "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换损坏的工具",
 
+  "carpet.rule.fakePlayerToolDamagedNotification.name": "假人工具损坏通知",
+  "carpet.rule.fakePlayerToolDamagedNotification.desc": "假人工具损坏或补货失败后发送一条全服广播",
+
   "carpet.rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
   "carpet.rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",
 
@@ -135,5 +138,8 @@
 
   "gca.player.ender_chest": "%s 的末影箱",
   "gca.player.other_controller": "%s 的额外控制面板",
-  "gca.player.inventory": "%s 的背包"
+  "gca.player.inventory": "%s 的背包",
+
+  "gca.tool.damaged": "%s 的工具 %s 已损坏!",
+  "gca.tool.restock.failed": "%s 补货 %s 失败!"
 }
