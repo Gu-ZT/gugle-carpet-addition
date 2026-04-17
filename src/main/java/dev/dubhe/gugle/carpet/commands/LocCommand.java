@@ -14,7 +14,6 @@ import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
-import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.PosUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
@@ -110,7 +109,7 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.sendPageComponents(context, "Loc List", "/loc list", ComponentUtil::locationComponent);
+        page.sendMessage(context, "Loc List", "/loc list");
         return Command.SINGLE_SUCCESS;
     }
 

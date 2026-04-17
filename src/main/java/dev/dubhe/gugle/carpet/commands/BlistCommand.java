@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.PermissionUtil;
@@ -108,8 +108,8 @@ public class BlistCommand {
         UserBanList banned = source.getServer().getPlayerList().getBans();
         String reason = getReason(context);
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             if (banned.isBanned(info.profile())) continue;
             UserBanListEntry ban = new UserBanListEntry(info.profile(), null, source.getTextName(), null, reason);
             banned.add(ban);
@@ -128,8 +128,8 @@ public class BlistCommand {
         CommandSourceStack source = context.getSource();
         UserBanList banned = source.getServer().getPlayerList().getBans();
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             if (!banned.isBanned(info.profile())) continue;
             banned.remove(info.profile());
             counter++;
@@ -163,8 +163,8 @@ public class BlistCommand {
     private static int permissionAdd(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         BLIST_PERMISSION_CONFIG.tryInit(context);
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), true), false);
             counter++;
             context.getSource()
@@ -180,8 +180,8 @@ public class BlistCommand {
     private static int permissionRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         BLIST_PERMISSION_CONFIG.tryInit(context);
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             BLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), false), false);
             counter++;
             context.getSource()

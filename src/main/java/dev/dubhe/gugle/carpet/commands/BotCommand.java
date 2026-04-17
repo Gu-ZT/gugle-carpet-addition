@@ -22,7 +22,6 @@ import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
-import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -233,7 +232,7 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.sendPageComponents(context, "Bot List", "/bot list", ComponentUtil::botComponent);
+        page.sendMessage(context, "Bot List", "/bot list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -298,7 +297,7 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.sendPageComponents(context, "Bot Group List", "/bot group list", ComponentUtil::botGroupComponent);
+        page.sendMessage(context, "Bot Group List", "/bot group list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -332,7 +331,7 @@ public class BotCommand {
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
-        page.sendPageComponents(context, "Bot Group " + groupName, "/bot group info " + groupName, ComponentUtil::botComponent);
+        page.sendMessage(context, "Bot Group " + groupName, "/bot group info " + groupName);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -433,9 +432,12 @@ public class BotCommand {
     private static int actionList(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String botName = StringArgumentType.getString(context, "name");
-        PageInfo<BotExecuterInfo> page = PageInfo.of(context, BOT_ACTION_CONFIG.getContents().values());
+        List<BotExecuterInfo> actions = BOT_ACTION_CONFIG.getContents().values().stream()
+            .filter(it -> it.bot().equals(botName))
+            .toList();
+        PageInfo<BotExecuterInfo> page = PageInfo.of(context, actions);
         if (page == null) return 0;
-        page.sendPageComponents(context, "Bot List", "/bot list", ComponentUtil::botComponent);
+        page.sendMessage(context, "Bot Action List", "/bot " + botName + " action list");
         return Command.SINGLE_SUCCESS;
     }
 

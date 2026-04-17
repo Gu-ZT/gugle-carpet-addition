@@ -12,7 +12,6 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.entry.TodoInfo;
-import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
@@ -114,7 +113,7 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.getContents().values());
         if (page == null) return 0;
-        page.sendPageComponents(context, "Todo List", "/todo list", ComponentUtil::todoComponent);
+        page.sendMessage(context, "Todo List", "/todo list");
         return Command.SINGLE_SUCCESS;
     }
 }

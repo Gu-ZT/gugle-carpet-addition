@@ -13,7 +13,7 @@ import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.commands.CommandBuildContext;
@@ -56,7 +56,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
-        PlayerGameProfileInfo info = PlayerGameProfileInfo.of(player);
+        PlayerGameProfileCache info = PlayerGameProfileCache.of(player);
         Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(info.name());
         if (consumer != null) consumer.accept(player);
         if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);

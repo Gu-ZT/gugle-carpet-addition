@@ -11,7 +11,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
-import dev.dubhe.gugle.carpet.entry.IWithName;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.MinecraftServer;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-public class GcaConfig<T extends IWithName> {
+public class GcaConfig<T extends IConfigNode> {
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
     public static final Map<String, GcaConfig<?>> CONFIGS = new LinkedHashMap<>();
 
@@ -44,12 +43,12 @@ public class GcaConfig<T extends IWithName> {
         this.codec = Codec.unboundedMap(Codec.STRING, codec);
     }
 
-    public static <T extends IWithName> GcaConfig<T> create(String name, Codec<T> codec) {
+    public static <T extends IConfigNode> GcaConfig<T> create(String name, Codec<T> codec) {
         return create(name, codec, true);
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends IWithName> GcaConfig<T> create(String name, Codec<T> codec, boolean global) {
+    public static <T extends IConfigNode> GcaConfig<T> create(String name, Codec<T> codec, boolean global) {
         Supplier<GcaConfig<T>> factory = () -> new GcaConfig<>(name, codec);
         return global ? (GcaConfig<T>) CONFIGS.computeIfAbsent(name, key -> factory.get()) : factory.get();
     }

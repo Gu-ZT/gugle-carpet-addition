@@ -11,10 +11,10 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.config.IConfigNode;
 import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
-import dev.dubhe.gugle.carpet.entry.IWithName;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
 import dev.dubhe.gugle.carpet.entry.TodoInfo;
@@ -109,7 +109,7 @@ public class ConfigUpdater {
         updateResident(NameMapper.of(levelPath, "fake_player", "residents"), access, services, onlineMode);
     }
 
-    private static <T, R extends IWithName> void updateMapping(NameMapper fileMapper, Class<T> tClass, Codec<R> codec, Function<T, R> function) {
+    private static <T, R extends IConfigNode> void updateMapping(NameMapper fileMapper, Class<T> tClass, Codec<R> codec, Function<T, R> function) {
         updateNormalResolver(fileMapper, codec, entry -> function.apply(GSON.fromJson(entry.getValue(), tClass)));
     }
 
@@ -173,7 +173,7 @@ public class ConfigUpdater {
         });
     }
 
-    private static <T extends IWithName> void updateNormalResolver(NameMapper fileMapper, Codec<T> codec, Function<Map.Entry<String, JsonElement>, T> function) {
+    private static <T extends IConfigNode> void updateNormalResolver(NameMapper fileMapper, Codec<T> codec, Function<Map.Entry<String, JsonElement>, T> function) {
         updateResolver(fileMapper, codec, json -> GSON.fromJson(json, JsonObject.class)
             .entrySet()
             .stream()
@@ -182,7 +182,7 @@ public class ConfigUpdater {
             .toList());
     }
 
-    private static <T extends IWithName> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
+    private static <T extends IConfigNode> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
         LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
