@@ -39,18 +39,6 @@ public record TodoInfo(
                 .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name())))
         );
-        Component success = Component.literal("[✔]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(this.id)))
-        );
-        Component unSuccess = Component.literal("[❌]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(this.id)))
-        );
         Component remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
@@ -59,8 +47,26 @@ public record TodoInfo(
         );
         return Component.literal(this.success ? "☑" : "☐")
             .append(" ").append(component)
-            .append(" ").append(this.success ? unSuccess : success)
+            .append(" ").append(this.success ? successComponent() : unsuccessComponent())
             .append(" ").append(remove);
+    }
+
+    private Component successComponent() {
+        return Component.literal("[✔]").withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.GREEN)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo done")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s".formatted(this.id)))
+        );
+    }
+
+    private Component unsuccessComponent() {
+        return Component.literal("[❌]").withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.RED)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Make todo undone")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/todo success %s false".formatted(this.id)))
+        );
     }
 
 }
