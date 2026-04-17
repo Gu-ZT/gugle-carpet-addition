@@ -25,7 +25,7 @@ public record BotExecutorInfo(
     @Override
     public Component component(MinecraftServer server, String... args) {
         String name = args[0];
-        String command = "/player %s %s".formatted(name, this.desc);
+        String command = "/player %s %s".formatted(name, this.action);
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
