@@ -194,14 +194,14 @@ public class BotCommand {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.get(name);
+        if (bot == null) {
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Bot %s is not exist.", name));
+            return 0;
+        }
         return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
     }
 
-    private static boolean spawnBot(CommandSourceStack source, @Nullable BotInfo bot) {
-        if (bot == null) {
-            source.sendFailure(Component.literal("%s is not exist."));
-            return false;
-        }
+    private static boolean spawnBot(CommandSourceStack source, BotInfo bot) {
         //#if MC>=12002
         if (
             //#if MC < 12104
@@ -210,17 +210,17 @@ public class BotCommand {
             //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
             //#endif
         ) {
-            source.sendFailure(Component.literal("Player %s is currently logging on".formatted(bot.name())));
+            source.sendFailure(ComponentTranslate.formatNames("Player %s is currently logging on", bot.name()));
             return false;
         }
         //#endif
         if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
-            source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
+            source.sendFailure(ComponentTranslate.formatNames("player %s is already exist.", bot.name()));
             return false;
         }
         boolean success = BotUtil.spawnBot(source.getServer(), bot);
         if (!success) {
-            source.sendFailure(Component.literal("%s is not loaded.".formatted(bot.name())));
+            source.sendFailure(ComponentTranslate.formatNames("%s is not loaded.", bot.name()));
         }
         return success;
 
@@ -239,14 +239,12 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
-            source.sendFailure(Component.literal("%s is not a fake player.".formatted(
-                p.getGameProfile().getName()
-            )));
+            source.sendFailure(ComponentTranslate.formatNames("%s is not a fake player.", p.getGameProfile().getName()));
             return 0;
         }
         String name = player.getGameProfile().getName();
         if (BOT_CONFIG.contains(name)) {
-            source.sendFailure(Component.literal("%s is already save.".formatted(name)));
+            source.sendFailure(ComponentTranslate.formatNames("%s is already save.", name));
             return 0;
         }
         BOT_CONFIG.update(BotInfo.create(
@@ -255,7 +253,7 @@ public class BotCommand {
             player,
             ((ServerPlayerInterface) player).getActionPack()
         ));
-        source.sendSuccess(() -> Component.literal("%s is added.".formatted(name)), false);
+        source.sendSuccess(() -> ComponentTranslate.formatNames("%s is added.", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -263,10 +261,10 @@ public class BotCommand {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         if (BOT_CONFIG.remove(name) == null) {
-            context.getSource().sendFailure(Component.literal("Bot %s is not exist.".formatted(name)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Bot %s is not exist.", name));
             return 0;
         }
-        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(name)), false);
+        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("%s is removed.", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -277,7 +275,7 @@ public class BotCommand {
         tryInit(context);
         BotGroupInfo groupInfo = BOT_GROUP_CONFIG.get(groupName);
         if (groupInfo == null) {
-            context.getSource().sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Group %s is not found.", groupName));
             return null;
         }
         List<BotInfo> bots = groupInfo.bots().stream()
@@ -301,13 +299,12 @@ public class BotCommand {
     private static int groupCreate(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
-        CommandSourceStack source = context.getSource();
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Group %s already exists.", groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
-        source.sendSuccess(() -> Component.literal("Group %s created successfully.".formatted(groupName)), false);
+        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("Group %s created successfully.", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -315,10 +312,10 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         if (BOT_GROUP_CONFIG.remove(groupName) == null) {
-            context.getSource().sendFailure(Component.literal("Bot Group %s is not exist.".formatted(groupName)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Bot Group %s is not exist.", groupName));
             return 0;
         }
-        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(groupName)), false);
+        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("%s is removed.", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -330,7 +327,7 @@ public class BotCommand {
         if (page == null) return 0;
         page.sendMessage(
             context,
-            ComponentTranslate.format("Bot Group %s", ComponentTranslate.name(groupName)),
+            ComponentTranslate.formatNames("Bot Group %s", groupName),
             "/bot group info " + groupName
         );
         return Command.SINGLE_SUCCESS;
@@ -341,15 +338,14 @@ public class BotCommand {
         String botName = StringArgumentType.getString(context, "bot");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
-        CommandSourceStack source = context.getSource();
         List<String> bots = new ArrayList<>(group.group.bots());
         if (bots.contains(botName)) {
-            source.sendFailure(Component.literal("Bot %s is already added.".formatted(botName)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Bot %s is already added.", botName));
             return 0;
         }
         bots.add(botName);
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        source.sendSuccess(() -> Component.literal("Bot %s is added to %s successfully.".formatted(botName, groupName)), false);
+        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("Bot %s is added to %s successfully.", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -358,14 +354,13 @@ public class BotCommand {
         String botName = StringArgumentType.getString(context, "bot");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
-        CommandSourceStack source = context.getSource();
         List<String> bots = new ArrayList<>(group.group.bots());
         if (!bots.remove(botName)) {
-            source.sendFailure(Component.literal("Bot %s is not found in the %s.".formatted(botName, groupName)));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Bot %s is not found in the %s.", botName, groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        source.sendSuccess(() -> Component.literal("Bot %s is removed from %s successfully.".formatted(botName, groupName)), false);
+        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("Bot %s is removed from %s successfully.", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -397,7 +392,7 @@ public class BotCommand {
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
         CommandSourceStack source = context.getSource();
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
+            source.sendFailure(ComponentTranslate.formatNames("Group %s already exists.", groupName));
             return 0;
         }
         ServerPlayer player = source.getPlayer();
@@ -410,7 +405,7 @@ public class BotCommand {
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
             if (BOT_CONFIG.contains(botName)) {
-                source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
+                source.sendFailure(ComponentTranslate.formatNames("Bot %s already exists.", botName));
                 continue;
             }
             BotInfo bot = BotInfo.create(botName, botName, player, new EntityPlayerActionPack(player));
@@ -423,7 +418,7 @@ public class BotCommand {
                 spawnBot(source, bot);
             }
         }
-        source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
+        source.sendSuccess(() -> ComponentTranslate.formatNames("Group %s generated successfully.", groupName), false);
         return bots.size();
     }
 
@@ -441,7 +436,7 @@ public class BotCommand {
         if (page == null) return 0;
         page.sendMessage(
             context,
-            ComponentTranslate.format("Bot %s's Action List", ComponentTranslate.name(botName)),
+            ComponentTranslate.formatNames("Bot %s's Action List", botName),
             "/bot action " + botName + " list"
         );
         return Command.SINGLE_SUCCESS;

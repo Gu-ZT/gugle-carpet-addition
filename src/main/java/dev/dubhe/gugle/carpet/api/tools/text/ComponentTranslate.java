@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +44,13 @@ public class ComponentTranslate {
 
     public static Component name(String name) {
         return Component.literal(name).withStyle(ChatFormatting.AQUA);
+    }
+
+    public static MutableComponent formatNames(String text, Object... args) {
+        Object[] names = Arrays.stream(args)
+            .map(it -> it instanceof String str ? name(str) : it)
+            .toArray();
+        return format(text, names);
     }
 
     public static void updateLanguage(String lang) {
