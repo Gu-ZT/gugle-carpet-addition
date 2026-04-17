@@ -50,14 +50,14 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         }
     }
 
-    public void sendMessage(CommandContext<CommandSourceStack> context, Object title, String command) {
+    public void sendMessage(CommandContext<CommandSourceStack> context, Object title, String command, String... args) {
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         List<Component> components = new ArrayList<>(this.page.size() + 2);
         components.add(ComponentTranslate.format("======= %s (Page %s/%s) =======", title, this.pageNum, this.pageSize)
             .withStyle(ChatFormatting.YELLOW));
         for (T node : this.page) {
-            components.add(node.component(server));
+            components.add(node.component(server, args));
         }
         Component prevPage = this.pageNum <= 1 ?
             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :

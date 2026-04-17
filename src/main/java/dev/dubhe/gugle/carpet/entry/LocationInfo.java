@@ -38,7 +38,7 @@ public record LocationInfo(
     }
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         String name = this.name();
         Component component = Component.literal(this.desc).withStyle(
             Style.EMPTY

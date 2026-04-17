@@ -1,14 +1,15 @@
 package dev.dubhe.gugle.carpet.entry;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.config.IComponentNode;
-import net.minecraft.commands.CommandSourceStack;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
 
 public record BotExecutorInfo(
     long id,
@@ -21,21 +22,34 @@ public record BotExecutorInfo(
         Codec.STRING.fieldOf("action").forGetter(BotExecutorInfo::action)
     ).apply(instance, BotExecutorInfo::new));
 
-    public boolean execute(CommandSourceStack source, BotInfo bot) throws CommandSyntaxException {
-        MinecraftServer server = source.getServer();
-        ServerPlayer player = server.getPlayerList().getPlayerByName(bot.name());
-        if (player == null) {
-            source.sendFailure(ComponentTranslate.formatNames("Bot %s is not online.", bot.name()));
-            return false;
-        }
-        return server.getCommands().getDispatcher().execute(
-            "player %s %s".formatted(bot.name(), this.action),
-            server.createCommandSourceStack()
-        ) > 0;
-    }
-
     @Override
-    public Component component(MinecraftServer server) {
-        return Component.literal(this.desc);
+    public Component component(MinecraftServer server, String... args) {
+        String name = args[0];
+        String command = "/player %s %s".formatted(name, this.desc);
+        Component desc = Component.literal(this.desc).withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.GRAY)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command)))
+        );
+        Component execute = Component.literal("[▶]").withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.GREEN)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Execute action")))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+        );
+        Component delete = Component.literal("[\uD83D\uDDD1]").withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.RED)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove action")))
+                .withClickEvent(ComponentUtil.createClickEvent(
+                    ClickEvent.Action.SUGGEST_COMMAND,
+                    "/bot action %s remove %s".formatted(name, this.id)
+                ))
+        );
+
+        return Component.literal("▶ ")
+            .append(desc).append(" ")
+            .append(execute).append(" ")
+            .append(delete);
     }
 }

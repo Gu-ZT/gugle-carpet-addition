@@ -13,7 +13,7 @@ public record NameBooleanInfo(String name, boolean status) implements IConfigNod
     ).apply(instance, NameBooleanInfo::new));
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         return Component.literal(this.name + ": " + this.status);
     }
 }

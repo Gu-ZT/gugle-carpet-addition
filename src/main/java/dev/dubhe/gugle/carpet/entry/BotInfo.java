@@ -90,7 +90,7 @@ public record BotInfo(
     }
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)

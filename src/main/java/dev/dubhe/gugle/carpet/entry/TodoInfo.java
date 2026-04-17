@@ -32,7 +32,7 @@ public record TodoInfo(
     }
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         Component component = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .withStrikethrough(this.success)

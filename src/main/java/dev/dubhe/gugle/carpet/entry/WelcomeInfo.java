@@ -31,7 +31,7 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
     }
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         return Component.literal(KEY);
     }
 

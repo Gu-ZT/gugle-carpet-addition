@@ -21,7 +21,7 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
     ).apply(instance, BotGroupInfo::new));
 
     @Override
-    public Component component(MinecraftServer server) {
+    public Component component(MinecraftServer server, String... args) {
         Component name = Component.literal(this.name).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
