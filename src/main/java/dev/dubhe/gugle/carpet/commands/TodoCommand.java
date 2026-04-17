@@ -90,7 +90,7 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         long id = LongArgumentType.getLong(context, "id");
         boolean success = getSuccess(context);
-        TodoInfo todo = TODO_CONFIG.getContents().get(String.valueOf(id));
+        TodoInfo todo = TODO_CONFIG.get(String.valueOf(id));
         if (todo == null) {
             context.getSource().sendFailure(Component.literal("No such todo id %s".formatted(id)));
             return 0;
@@ -111,7 +111,7 @@ public class TodoCommand {
 
     public static int list(CommandContext<CommandSourceStack> context) {
         TODO_CONFIG.tryInit(context);
-        PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.getContents().values());
+        PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.values());
         if (page == null) return 0;
         page.sendMessage(context, "Todo List", "/todo list");
         return Command.SINGLE_SUCCESS;

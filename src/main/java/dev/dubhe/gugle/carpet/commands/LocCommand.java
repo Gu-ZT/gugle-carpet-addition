@@ -107,7 +107,7 @@ public class LocCommand {
 
     public static int list(CommandContext<CommandSourceStack> context) {
         LOCATION_CONFIG.tryInit(context);
-        PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.getContents().values());
+        PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.values());
         if (page == null) return 0;
         page.sendMessage(context, "Loc List", "/loc list");
         return Command.SINGLE_SUCCESS;
@@ -116,7 +116,7 @@ public class LocCommand {
     public static int info(CommandContext<CommandSourceStack> context) {
         LOCATION_CONFIG.tryInit(context);
         long id = LongArgumentType.getLong(context, "id");
-        LocationInfo location = LOCATION_CONFIG.getContents().get(String.valueOf(id));
+        LocationInfo location = LOCATION_CONFIG.get(String.valueOf(id));
         if (location == null) {
             context.getSource().sendFailure(Component.literal("No such loc id %s".formatted(id)));
             return 0;

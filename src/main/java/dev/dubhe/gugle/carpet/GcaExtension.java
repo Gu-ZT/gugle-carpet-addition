@@ -86,7 +86,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public @Nullable Map<String, String> canHasTranslations(String lang) {
-        return ComponentTranslate.getTranslations(lang);
+        return ComponentTranslate.fetchLanguage(lang);
     }
 
     @Override

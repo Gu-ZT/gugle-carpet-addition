@@ -16,6 +16,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotExecuterInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
@@ -31,7 +32,6 @@ import net.minecraft.server.players.PlayerList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,6 @@ import static net.minecraft.commands.Commands.literal;
 public class BotCommand {
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
-    private static final GcaConfig<BotExecuterInfo> BOT_ACTION_CONFIG = GcaConfig.create("bot_action", BotExecuterInfo.CODEC);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(ModCommands.root(dispatcher, "bot")
@@ -187,7 +186,6 @@ public class BotCommand {
     private static void tryInit(CommandContext<CommandSourceStack> context) {
         BOT_CONFIG.tryInit(context);
         BOT_GROUP_CONFIG.tryInit(context);
-        BOT_ACTION_CONFIG.tryInit(context);
     }
 
     // Bot
@@ -195,7 +193,7 @@ public class BotCommand {
     private static int load(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
-        BotInfo bot = BOT_CONFIG.getContents().get(name);
+        BotInfo bot = BOT_CONFIG.get(name);
         return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
     }
 
@@ -230,7 +228,7 @@ public class BotCommand {
 
     private static int list(CommandContext<CommandSourceStack> context) {
         tryInit(context);
-        PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
+        PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
         if (page == null) return 0;
         page.sendMessage(context, "Bot List", "/bot list");
         return Command.SINGLE_SUCCESS;
@@ -247,7 +245,7 @@ public class BotCommand {
             return 0;
         }
         String name = player.getGameProfile().getName();
-        if (BOT_CONFIG.getContents().containsKey(name)) {
+        if (BOT_CONFIG.contains(name)) {
             source.sendFailure(Component.literal("%s is already save.".formatted(name)));
             return 0;
         }
@@ -277,14 +275,13 @@ public class BotCommand {
     @Nullable
     private static GroupNode getGroupNode(CommandContext<CommandSourceStack> context, String groupName) {
         tryInit(context);
-        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
-        BotGroupInfo groupInfo = BOT_GROUP_CONFIG.getContents().get(groupName);
+        BotGroupInfo groupInfo = BOT_GROUP_CONFIG.get(groupName);
         if (groupInfo == null) {
             context.getSource().sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
             return null;
         }
         List<BotInfo> bots = groupInfo.bots().stream()
-            .map(botContents::get)
+            .map(BOT_CONFIG::get)
             .filter(Objects::nonNull)
             .toList();
         if (bots.size() != groupInfo.bots().size()) {
@@ -295,7 +292,7 @@ public class BotCommand {
 
     private static int groupList(CommandContext<CommandSourceStack> context) {
         tryInit(context);
-        PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
+        PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.values());
         if (page == null) return 0;
         page.sendMessage(context, "Bot Group List", "/bot group list");
         return Command.SINGLE_SUCCESS;
@@ -305,7 +302,7 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         CommandSourceStack source = context.getSource();
-        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
+        if (BOT_GROUP_CONFIG.contains(groupName)) {
             source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
             return 0;
         }
@@ -331,7 +328,11 @@ public class BotCommand {
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
-        page.sendMessage(context, "Bot Group " + groupName, "/bot group info " + groupName);
+        page.sendMessage(
+            context,
+            ComponentTranslate.format("Bot Group %s", ComponentTranslate.name(groupName)),
+            "/bot group info " + groupName
+        );
         return Command.SINGLE_SUCCESS;
     }
 
@@ -395,7 +396,7 @@ public class BotCommand {
         int groupCount = IntegerArgumentType.getInteger(context, "count");
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
         CommandSourceStack source = context.getSource();
-        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
+        if (BOT_GROUP_CONFIG.contains(groupName)) {
             source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
             return 0;
         }
@@ -405,11 +406,10 @@ public class BotCommand {
             return 0;
         }
 
-        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
         List<BotInfo> bots = new ArrayList<>();
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
-            if (botContents.containsKey(botName)) {
+            if (BOT_CONFIG.contains(botName)) {
                 source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
                 continue;
             }
@@ -432,12 +432,18 @@ public class BotCommand {
     private static int actionList(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String botName = StringArgumentType.getString(context, "name");
-        List<BotExecuterInfo> actions = BOT_ACTION_CONFIG.getContents().values().stream()
-            .filter(it -> it.bot().equals(botName))
-            .toList();
-        PageInfo<BotExecuterInfo> page = PageInfo.of(context, actions);
+        BotInfo bot = BOT_CONFIG.get(botName);
+        if (bot == null) {
+            context.getSource().sendFailure(Component.literal("%s is not exist."));
+            return 0;
+        }
+        PageInfo<BotExecuterInfo> page = PageInfo.of(context, bot.executors());
         if (page == null) return 0;
-        page.sendMessage(context, "Bot Action List", "/bot " + botName + " action list");
+        page.sendMessage(
+            context,
+            ComponentTranslate.format("Bot %s's Action List", ComponentTranslate.name(botName)),
+            "/bot action " + botName + " list"
+        );
         return Command.SINGLE_SUCCESS;
     }
 

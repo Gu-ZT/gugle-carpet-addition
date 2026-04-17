@@ -78,8 +78,17 @@ public class GcaConfig<T extends IConfigNode> {
         return removed;
     }
 
-    public Map<String, T> getContents() {
-        return this.contents;
+    public boolean contains(String name) {
+        return this.contents.containsKey(name);
+    }
+
+    @Nullable
+    public T get(String name) {
+        return this.contents.get(name);
+    }
+
+    public Collection<T> values() {
+        return this.contents.values();
     }
 
     @Nullable

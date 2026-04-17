@@ -20,6 +20,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
+
 //#if MC < 12105
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
 //#endif
@@ -32,7 +34,8 @@ public record BotInfo(
     ResourceKey<Level> dimension,
     GameType mode,
     boolean flying,
-    BotActionInfo actions
+    BotActionInfo actions,
+    List<BotExecuterInfo> executors
 ) implements IConfigNode {
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
@@ -46,7 +49,8 @@ public record BotInfo(
         ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(BotInfo::dimension),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
-        BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions)
+        BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions),
+        BotExecuterInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors)
     ).apply(instance, BotInfo::new));
 
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
@@ -66,7 +70,22 @@ public record BotInfo(
             player.level().dimension(),
             player.gameMode.getGameModeForPlayer(),
             player.getAbilities().flying,
-            BotActionInfo.fromActionPack(actionPack)
+            BotActionInfo.fromActionPack(actionPack),
+            List.of()
+        );
+    }
+
+    public BotInfo ofExecutors(List<BotExecuterInfo> executors) {
+        return new BotInfo(
+            this.name,
+            this.desc,
+            this.pos,
+            this.facing,
+            this.dimension,
+            this.mode,
+            this.flying,
+            this.actions,
+            executors
         );
     }
 
