@@ -11,19 +11,19 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.entry.BotExecuterInfo;
+import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
@@ -139,7 +139,8 @@ public class BotCommand {
                 )
             )
             .then(literal("action")
-                .then(argument("name", StringArgumentType.string())
+                .then(argument("player", StringArgumentType.string())
+                    .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::actionList)
                     .then(literal("list")
                         .executes(BotCommand::actionList)
@@ -147,7 +148,9 @@ public class BotCommand {
                             .executes(BotCommand::actionList)
                         )
                     )
-                    .then(actionAddCommand(dispatcher))
+                    .then(literal("add")
+                        .then(actionAddCommand(dispatcher))
+                    )
                     .then(literal("remove")
                         .then(argument("id", LongArgumentType.longArg())
                             .executes(BotCommand::actionRemove)
@@ -164,7 +167,7 @@ public class BotCommand {
     }
 
     private static ArgumentBuilder<CommandSourceStack, ?> actionAddCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
-        LiteralArgumentBuilder<CommandSourceStack> node = literal("add");
+        ArgumentBuilder<CommandSourceStack, ?> node = argument("desc", StringArgumentType.string());
         CommandNode<CommandSourceStack> playerOperateNode = dispatcher.getRoot()
             .getChild("player")
             .getChild("player");
@@ -190,14 +193,20 @@ public class BotCommand {
 
     // Bot
 
-    private static int load(CommandContext<CommandSourceStack> context) {
+    @Nullable
+    private static BotInfo getBot(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.get(name);
         if (bot == null) {
             context.getSource().sendFailure(ComponentTranslate.formatNames("Bot %s is not exist.", name));
-            return 0;
         }
+        return bot;
+    }
+
+    private static int load(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
         return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
     }
 
@@ -429,10 +438,10 @@ public class BotCommand {
         String botName = StringArgumentType.getString(context, "name");
         BotInfo bot = BOT_CONFIG.get(botName);
         if (bot == null) {
-            context.getSource().sendFailure(Component.literal("%s is not exist."));
+            context.getSource().sendFailure(ComponentTranslate.formatNames("%s is not exist.", botName));
             return 0;
         }
-        PageInfo<BotExecuterInfo> page = PageInfo.of(context, bot.executors());
+        PageInfo<BotExecutorInfo> page = PageInfo.of(context, bot.executors());
         if (page == null) return 0;
         page.sendMessage(
             context,
@@ -443,19 +452,46 @@ public class BotCommand {
     }
 
     private static int actionAdd(CommandContext<CommandSourceStack> context) {
-        String input = context.getInput();
-        System.out.println(input);
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        String input = context.getInput()
+            .substring(11)
+            .split("\\s", 3)[2]
+            .trim();
+        long id = IdUtil.nextId();
+        String desc = StringArgumentType.getString(context, "desc");
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        executors.add(new BotExecutorInfo(id, desc, input));
+        BOT_CONFIG.update(bot.withExecutors(executors));
         return Command.SINGLE_SUCCESS;
     }
 
     private static int actionRemove(CommandContext<CommandSourceStack> context) {
-
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        long id = LongArgumentType.getLong(context, "id");
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        if (!executors.removeIf(it -> it.id() == id)) {
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Action id %s is not found for bot ", id, bot.name()));
+            return 0;
+        }
+        BOT_CONFIG.update(bot.withExecutors(executors));
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int actionExecute(CommandContext<CommandSourceStack> context) {
-
-        return Command.SINGLE_SUCCESS;
+    private static int actionExecute(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        long id = LongArgumentType.getLong(context, "id");
+        BotExecutorInfo executor = bot.executors().stream()
+            .filter(it -> it.id() == id)
+            .findFirst()
+            .orElse(null);
+        if (executor == null) {
+            context.getSource().sendFailure(ComponentTranslate.formatNames("Action id %s is not found for bot ", id, bot.name()));
+            return 0;
+        }
+        return executor.execute(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
     }
 
     record GroupNode(BotGroupInfo group, List<BotInfo> bots) {

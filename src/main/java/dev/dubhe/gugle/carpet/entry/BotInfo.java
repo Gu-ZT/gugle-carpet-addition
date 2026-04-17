@@ -35,7 +35,7 @@ public record BotInfo(
     GameType mode,
     boolean flying,
     BotActionInfo actions,
-    List<BotExecuterInfo> executors
+    List<BotExecutorInfo> executors
 ) implements IConfigNode {
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
@@ -50,7 +50,7 @@ public record BotInfo(
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions),
-        BotExecuterInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors)
+        BotExecutorInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors)
     ).apply(instance, BotInfo::new));
 
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
@@ -75,7 +75,7 @@ public record BotInfo(
         );
     }
 
-    public BotInfo ofExecutors(List<BotExecuterInfo> executors) {
+    public BotInfo withExecutors(List<BotExecutorInfo> executors) {
         return new BotInfo(
             this.name,
             this.desc,

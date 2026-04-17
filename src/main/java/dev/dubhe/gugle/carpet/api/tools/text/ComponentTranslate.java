@@ -48,7 +48,7 @@ public class ComponentTranslate {
 
     public static MutableComponent formatNames(String text, Object... args) {
         Object[] names = Arrays.stream(args)
-            .map(it -> it instanceof String str ? name(str) : it)
+            .map(it -> it instanceof String str ? name(str) : name(it.toString()))
             .toArray();
         return format(text, names);
     }
