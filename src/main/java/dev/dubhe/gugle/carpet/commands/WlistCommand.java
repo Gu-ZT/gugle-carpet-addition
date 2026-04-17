@@ -8,7 +8,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.NameBooleanInfo;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.PermissionUtil;
@@ -42,7 +42,6 @@ public class WlistCommand {
                 .then(
                     Commands.literal("permission")
                         .requires(stack ->
-                            //
                             //#if MC>=12111
                             //$$ Commands.hasPermission(Commands.LEVEL_GAMEMASTERS).test(stack)
                             //#else
@@ -74,7 +73,7 @@ public class WlistCommand {
                                         playerList.getPlayers()
                                             .stream()
                                             .filter(player -> !playerList.getWhiteList()
-                                                .isWhiteListed(PlayerGameProfileInfo.of(player).profile()))
+                                                .isWhiteListed(PlayerGameProfileCache.of(player).profile()))
                                             .map(player -> player.getGameProfile().getName()),
                                         suggestionsBuilder
                                     );
@@ -103,8 +102,8 @@ public class WlistCommand {
         UserWhiteList whiteList = source.getServer().getPlayerList().getWhiteList();
 
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             if (whiteList.isWhiteListed(info.profile())) continue;
             UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(info.profile());
             whiteList.add(userWhiteListEntry);
@@ -120,8 +119,8 @@ public class WlistCommand {
         UserWhiteList whiteList = source.getServer().getPlayerList().getWhiteList();
 
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             if (whiteList.isWhiteListed(info.profile())) {
                 UserWhiteListEntry userWhiteListEntry = new UserWhiteListEntry(info.profile());
                 whiteList.remove(userWhiteListEntry);
@@ -153,8 +152,8 @@ public class WlistCommand {
         WLIST_PERMISSION_CONFIG.tryInit(context);
 
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), true), false);
             counter++;
             context.getSource()
@@ -172,8 +171,8 @@ public class WlistCommand {
 
 
         int counter = 0;
-        List<PlayerGameProfileInfo> profiles = CommandUtil.parseGameProfiles(context, "targets");
-        for (PlayerGameProfileInfo info : profiles) {
+        List<PlayerGameProfileCache> profiles = CommandUtil.parseGameProfiles(context, "targets");
+        for (PlayerGameProfileCache info : profiles) {
             WLIST_PERMISSION_CONFIG.update(new NameBooleanInfo(info.uuid().toString(), false), false);
             counter++;
             context.getSource()

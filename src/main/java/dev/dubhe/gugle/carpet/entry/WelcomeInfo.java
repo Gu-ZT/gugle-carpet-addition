@@ -5,7 +5,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.config.IConfigNode;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -16,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) implements IWithName {
+public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) implements IConfigNode {
     public static final String KEY = "info";
     public static final Codec<WelcomeInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.listOf().fieldOf("message").forGetter(WelcomeInfo::messages),
@@ -26,6 +28,11 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
     @Override
     public String name() {
         return KEY;
+    }
+
+    @Override
+    public Component component(MinecraftServer server, String... args) {
+        return Component.literal(KEY);
     }
 
     public static WelcomeInfo defaultInfo() {

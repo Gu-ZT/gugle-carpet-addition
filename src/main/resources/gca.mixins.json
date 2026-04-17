@@ -35,6 +35,7 @@
     "SlotMixin",
     "TickCommandMixin",
     "TransferCommandMixin",
+    "TranslationsMixin",
     "WanderingTraderMixin"
   ],
   "server": [

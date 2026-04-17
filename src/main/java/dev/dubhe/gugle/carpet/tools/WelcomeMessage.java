@@ -74,7 +74,7 @@ public class WelcomeMessage {
     }
 
     private static WelcomeInfo getOrCreateWelcomeInfo() {
-        WelcomeInfo info = WELCOME_CONFIG.getContents().get(WelcomeInfo.KEY);
+        WelcomeInfo info = WELCOME_CONFIG.get(WelcomeInfo.KEY);
         if (info == null) {
             info = WelcomeInfo.defaultInfo();
             WELCOME_CONFIG.update(info);

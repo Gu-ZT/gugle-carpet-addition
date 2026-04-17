@@ -1,25 +1,22 @@
 package dev.dubhe.gugle.carpet.api.tools.text;
 
-import carpet.CarpetSettings;
 import carpet.utils.Translations;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import dev.dubhe.gugle.carpet.GcaExtension;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
-import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class ComponentTranslate {
 
-    private final @Nullable Map<String, String> lang = ComponentTranslate.getTranslations(CarpetSettings.language);
+    private static String lang = "";
+    private static final Map<String, String> language = new HashMap<>();
 
     public static Component trans(String key, Object... args) {
         return trans(key, null, args);
@@ -30,49 +27,42 @@ public class ComponentTranslate {
     }
 
     public static Component trans(String key, @Nullable TextColor color, Style style, Object... args) {
-        ComponentTranslate componentTranslate = new ComponentTranslate();
         if (color != null) style = style.withColor(color);
-        if (componentTranslate.lang != null) {
-            try {
-                return Component
-                    .translatableWithFallback(key, componentTranslate.lang.get(key), args)
-                    .setStyle(style);
-            } catch (ClassCastException | NullPointerException e) {
-                GcaExtension.LOGGER.error(e.getMessage(), e);
-            }
+        // 不太懂这里为什么要try catch
+        try {
+            return Component.translatableWithFallback(key, language.get(key), args).setStyle(style);
+        } catch (ClassCastException | NullPointerException e) {
+            GcaExtension.LOGGER.error(e.getMessage(), e);
+            return Component.translatable(key, args);
         }
-        return Component.translatable(key, args);
     }
 
-    public static @Nullable Map<String, String> getTranslations(String lang) {
-        String dataJSON;
-        try {
-            dataJSON = IOUtils.toString(
-                Objects.requireNonNull(
-                    Translations.class
-                        .getClassLoader()
-                        .getResourceAsStream(String.format("assets/gca/lang/%s.json", lang))
-                ),
-                StandardCharsets.UTF_8
-            );
-        } catch (NullPointerException | IOException e) {
-            try {
-                dataJSON = IOUtils.toString(
-                    Objects.requireNonNull(
-                        Translations.class
-                            .getClassLoader()
-                            .getResourceAsStream("assets/gca/lang/en_us.json")
-                    ),
-                    StandardCharsets.UTF_8
-                );
-            } catch (NullPointerException | IOException ex) {
-                return null;
-            }
-        }
-        Gson gson = new GsonBuilder().enableComplexMapKeySerialization().create();
-        return gson.fromJson(
-            dataJSON, new TypeToken<Map<String, String>>() {
-            }.getType()
-        );
+    @SuppressWarnings("NoTranslation")
+    public static MutableComponent format(String text, Object... args) {
+        return Component.translatableWithFallback("gca.format.empty", text, args);
+    }
+
+    public static Component name(String name) {
+        return Component.literal(name).withStyle(ChatFormatting.AQUA);
+    }
+
+    public static MutableComponent formatNames(String text, Object... args) {
+        Object[] names = Arrays.stream(args)
+            .map(it -> it instanceof String str ? name(str) : name(it.toString()))
+            .toArray();
+        return format(text, names);
+    }
+
+    public static void updateLanguage(String lang) {
+        ComponentTranslate.lang = lang;
+        String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
+        Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
+        language.clear();
+        language.putAll(translations);
+    }
+
+    public static Map<String, String> fetchLanguage(String lang) {
+        if (!ComponentTranslate.lang.equals(lang)) updateLanguage(lang);
+        return language;
     }
 }

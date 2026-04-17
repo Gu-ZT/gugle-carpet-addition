@@ -3,32 +3,34 @@ package dev.dubhe.gugle.carpet.entry;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.config.IComponentNode;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
-public record PageInfo<T>(int pageSize, int pageNum, int maxPage, List<T> page) {
+public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int maxPage, List<T> page) {
     @Nullable
-    public static <T> PageInfo<T> ofAll(CommandContext<CommandSourceStack> context, Collection<T> collection) {
+    public static <T extends IComponentNode> PageInfo<T> ofAll(CommandContext<CommandSourceStack> context, Collection<T> collection) {
         return of(context, collection, Math.max(collection.size(), GcaSetting.gcaPageSize));
     }
 
     @Nullable
-    public static <T> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection) {
+    public static <T extends IComponentNode> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection) {
         return of(context, collection, GcaSetting.gcaPageSize);
     }
 
     @Nullable
-    public static <T> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection, int pageSize) {
+    public static <T extends IComponentNode> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection, int pageSize) {
         int pageNum = getPage(context);
         int size = collection.size();
         int maxPage = size / pageSize + 1;
@@ -48,12 +50,14 @@ public record PageInfo<T>(int pageSize, int pageNum, int maxPage, List<T> page) 
         }
     }
 
-    public List<Component> pageComponents(String title, String command, Function<T, Component> nodeComponent) {
+    public void sendMessage(CommandContext<CommandSourceStack> context, Object title, String command, String... args) {
+        CommandSourceStack source = context.getSource();
+        MinecraftServer server = source.getServer();
         List<Component> components = new ArrayList<>(this.page.size() + 2);
-        components.add(Component.literal("======= %s (Page %s/%s) =======".formatted(title, this.pageNum, this.maxPage))
+        components.add(ComponentTranslate.format("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
             .withStyle(ChatFormatting.YELLOW));
         for (T node : this.page) {
-            components.add(nodeComponent.apply(node));
+            components.add(node.component(server, args));
         }
         Component prevPage = this.pageNum <= 1 ?
             Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
@@ -87,6 +91,6 @@ public record PageInfo<T>(int pageSize, int pageNum, int maxPage, List<T> page) 
             .append(" ")
             .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW)));
 
-        return components;
+        components.forEach(source::sendSystemMessage);
     }
 }

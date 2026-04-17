@@ -22,7 +22,7 @@ public class PermissionUtil {
         ServerPlayer player = stack.getPlayer();
         if (player == null) return false;
         String uuid = player.getGameProfile().getId().toString();
-        return Optional.ofNullable(permission.getContents().get(uuid)).map(NameBooleanInfo::status).orElse(false);
+        return Optional.ofNullable(permission.get(uuid)).map(NameBooleanInfo::status).orElse(false);
     }
 
 }
