@@ -142,6 +142,7 @@ public class BotCommand {
                 )
             )
             .then(literal("action")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotAction))
                 .then(argument("player", StringArgumentType.string())
                     .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::actionList)
@@ -237,7 +238,8 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Bot List", "/bot list");
+        String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
+        page.sendMessage(context, "Bot List", "/bot list", actionPermission);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -332,10 +334,12 @@ public class BotCommand {
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
+        String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
         page.sendMessage(
             context,
             ComponentHelper.fmtHlt("Bot Group %s", groupName),
-            "/bot group info " + groupName
+            "/bot group info " + groupName,
+            actionPermission
         );
         return Command.SINGLE_SUCCESS;
     }

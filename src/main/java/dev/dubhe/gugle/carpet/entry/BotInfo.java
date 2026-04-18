@@ -11,6 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -91,6 +92,7 @@ public record BotInfo(
 
     @Override
     public Component component(MinecraftServer server, String... args) {
+        boolean showAction = args.length > 1 && "true".equals(args[0]);
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -125,12 +127,18 @@ public record BotInfo(
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot action %s".formatted(this.name)))
         );
 
-        return Component.literal("▶ ")
+        MutableComponent result = Component.literal("▶ ")
             .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
             .append(desc).append(" ")
             .append(spawn).append(" ")
-            .append(kill).append(" ")
-            .append(action).append(" ")
-            .append(remove);
+            .append(kill).append(" ");
+
+        if (showAction) {
+            result.append(action).append(" ");
+        }
+
+        result.append(remove);
+
+        return result;
     }
 }

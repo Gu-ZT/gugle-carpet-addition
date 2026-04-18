@@ -54,10 +54,10 @@ import net.minecraft.world.InteractionResultHolder;
 abstract class ItemStackMixin {
     //#if MC>=12005
     @Shadow
-    public abstract Item getItem();
-
-    @Shadow
     @Final
+        //#if MC >= 260000
+        //$$ private
+        //#endif
     PatchedDataComponentMap components;
     //#endif
 

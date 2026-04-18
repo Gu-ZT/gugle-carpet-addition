@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
-    public static String MOD_ID = "gca";
-    public static String MOD_NAME = "GugleCarpetAddition";
+    public static final String MOD_ID = "gca";
+    public static final String MOD_NAME = "GugleCarpetAddition";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
     public static final List<Map.Entry<Long, Runnable>> PLAN_FUNCTION = new ArrayList<>();

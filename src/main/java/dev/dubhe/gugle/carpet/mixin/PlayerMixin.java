@@ -90,7 +90,7 @@ abstract class PlayerMixin {
     private InteractionResult openInventory(ServerPlayer player, ServerPlayer otherPlayer) {
         SimpleMenuProvider provider;
         if (!(otherPlayer instanceof IGcaPlayer gcaPlayer)) return InteractionResult.PASS;
-        if (player.isShiftKeyDown() && gca$hasPremission(player, otherPlayer)) {
+        if (player.isShiftKeyDown() && gca$hasPermission(player, otherPlayer)) {
             // 打开末影箱
             if (SettingUtil.openFakePlayerEnderChest(player)) {
                 provider = new SimpleMenuProvider(
@@ -110,7 +110,7 @@ abstract class PlayerMixin {
                     ComponentHelper.tr("gca.player.other_controller", otherPlayer.getDisplayName())
                 );
             }
-        } else if (GcaSetting.openFakePlayerInventory && gca$hasPremission(player, otherPlayer)) {
+        } else if (GcaSetting.openFakePlayerInventory && gca$hasPermission(player, otherPlayer)) {
             // 打开物品栏
             provider = new SimpleMenuProvider(
                 (i, inventory, p) -> new PlayerInventoryMenu(
@@ -127,8 +127,7 @@ abstract class PlayerMixin {
     }
 
     @Unique
-    private static boolean gca$hasPremission(ServerPlayer player, ServerPlayer otherPlayer) {
-
+    private static boolean gca$hasPermission(ServerPlayer player, ServerPlayer otherPlayer) {
         CommandSourceStack stack = player.createCommandSourceStack(
             //#if MC>=12102
             //#if MC<=12105
