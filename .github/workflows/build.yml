@@ -79,14 +79,14 @@ jobs:
             if echo "$SECRETS_JSON" | jq -e --arg key "$MODRINTH_TOKEN_NAME" 'has($key)' > /dev/null 2>&1; then
               echo "modrinth_token_name=$MODRINTH_TOKEN_NAME" >> $GITHUB_OUTPUT
             else
-              echo "::warning::Modrinth token '$MODRINTH_TOKEN_NAME' not found in secrets, falling back to default MODRINTH_TOKEN"
+              echo "::warning::Modrinth token '$MODRINTH_TOKEN_NAME' not found in secrets, falling back to default."
               echo "modrinth_token_name=MODRINTH_TOKEN" >> $GITHUB_OUTPUT
             fi
           
             if echo "$SECRETS_JSON" | jq -e --arg key "$CF_TOKEN_NAME" 'has($key)' > /dev/null 2>&1; then
               echo "curseforge_token_name=$CF_TOKEN_NAME" >> $GITHUB_OUTPUT
             else
-              echo "::warning::CurseForge token '$CF_TOKEN_NAME' not found in secrets, falling back to default CURSEFORGE_TOKEN"
+              echo "::warning::CurseForge token '$CF_TOKEN_NAME' not found in secrets, falling back to default."
               echo "curseforge_token_name=CURSEFORGE_TOKEN" >> $GITHUB_OUTPUT
             fi
           else
