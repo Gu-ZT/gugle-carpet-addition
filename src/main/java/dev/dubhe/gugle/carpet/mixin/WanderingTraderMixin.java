@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
@@ -75,7 +75,7 @@ abstract class WanderingTraderMixin {
         int result = original.call(instance, i);
         if (result > spawnChance) {
             this.gca$sendMsg(
-                ComponentTranslate.trans(
+                ComponentHelper.tr(
                     "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
                     Color.YELLOW,
                     Style.EMPTY,
@@ -92,7 +92,7 @@ abstract class WanderingTraderMixin {
         int result = original.call(instance, i);
         if (result != 0) {
             this.gca$sendMsg(
-                ComponentTranslate.trans(
+                ComponentHelper.tr(
                     "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
                     Color.YELLOW,
                     Style.EMPTY,
@@ -113,7 +113,7 @@ abstract class WanderingTraderMixin {
     @Inject(method = "spawn", at = @At(value = "RETURN", ordinal = 2))
     private void spawn2(ServerLevel serverLevel, CallbackInfoReturnable<Boolean> cir) {
         this.gca$sendMsg(
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 "carpet.rule.wanderingTraderSpawnFailedWarning.tip.03",
                 Color.YELLOW,
                 Style.EMPTY,
@@ -125,7 +125,7 @@ abstract class WanderingTraderMixin {
     @Inject(method = "spawn", at = @At(value = "RETURN", ordinal = 4))
     private void spawnSuccess(ServerLevel serverLevel, CallbackInfoReturnable<Boolean> cir) {
         this.gca$sendMsg(
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 "carpet.rule.wanderingTraderSpawnFailedWarning.tip.04",
                 Color.YELLOW,
                 Style.EMPTY,
@@ -155,7 +155,7 @@ abstract class WanderingTraderMixin {
         if (!GcaSetting.wanderingTraderSpawnRemind) return;
         Vec3 center = blockPos3.getCenter();
         this.gca$server.getPlayerList().broadcastSystemMessage(
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 "carpet.rule.wanderingTraderSpawnRemind.tip",
                 Color.YELLOW,
                 Style.EMPTY,
@@ -182,7 +182,7 @@ abstract class WanderingTraderMixin {
         if (!GcaSetting.wanderingTraderSpawnFailedWarning) return;
         if (this.gca$server == null) return;
         this.gca$server.getPlayerList().broadcastSystemMessage(
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 "carpet.rule.wanderingTraderSpawnFailedWarning.tip.01",
                 Color.YELLOW,
                 Style.EMPTY

@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.entry.TodoInfo;
@@ -80,10 +80,10 @@ public class TodoCommand {
         long id = LongArgumentType.getLong(context, "id");
         TodoInfo removed = TODO_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(ComponentTranslate.formatNames("No such todo id %s", id));
+            context.getSource().sendFailure(ComponentHelper.formatNames("No such todo id %s", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("Todo %s is removed.", removed.desc()), false);
+        context.getSource().sendSuccess(() -> ComponentHelper.formatNames("Todo %s is removed.", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -93,12 +93,12 @@ public class TodoCommand {
         boolean success = getSuccess(context);
         TodoInfo todo = TODO_CONFIG.get(String.valueOf(id));
         if (todo == null) {
-            context.getSource().sendFailure(ComponentTranslate.formatNames("No such todo id %s", id));
+            context.getSource().sendFailure(ComponentHelper.formatNames("No such todo id %s", id));
             return 0;
         }
         TODO_CONFIG.update(todo.ofSuccess(success));
         context.getSource()
-            .sendSuccess(() -> ComponentTranslate.formatNames("Todo %%s has be %s.".formatted(success ? "done" : "undone"), todo.desc()), false);
+            .sendSuccess(() -> ComponentHelper.formatNames("Todo %%s has be %s.".formatted(success ? "done" : "undone"), todo.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 

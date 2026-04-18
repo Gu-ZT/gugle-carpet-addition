@@ -3,7 +3,7 @@ package dev.dubhe.gugle.carpet;
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.commands.BlistCommand;
 import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.commands.HereCommand;
@@ -86,7 +86,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public @Nullable Map<String, String> canHasTranslations(String lang) {
-        return ComponentTranslate.fetchLanguage(lang);
+        return ComponentHelper.fetchLanguage(lang);
     }
 
     @Override

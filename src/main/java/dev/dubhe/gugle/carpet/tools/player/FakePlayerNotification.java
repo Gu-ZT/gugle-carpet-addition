@@ -1,6 +1,6 @@
 package dev.dubhe.gugle.carpet.tools.player;
 
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -13,7 +13,7 @@ public class FakePlayerNotification {
         Component playerName = player.getDisplayName();
         Component itemName = stack.getDisplayName();
 
-        Component msg = ComponentTranslate.trans(key, playerName, itemName);
+        Component msg = ComponentHelper.tr(key, playerName, itemName);
 
         player.level().getServer().getPlayerList().broadcastSystemMessage(msg, false);
     }

@@ -3,7 +3,7 @@ package dev.dubhe.gugle.carpet.entry;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.IComponentNode;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
@@ -54,7 +54,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         List<Component> components = new ArrayList<>(this.page.size() + 2);
-        components.add(ComponentTranslate.format("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
+        components.add(ComponentHelper.format("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
             .withStyle(ChatFormatting.YELLOW));
         for (T node : this.page) {
             components.add(node.component(server, args));

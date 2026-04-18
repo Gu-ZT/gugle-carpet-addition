@@ -2,7 +2,7 @@ package dev.dubhe.gugle.carpet.mixin;
 
 import carpet.CarpetSettings;
 import carpet.utils.Translations;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class TranslationsMixin {
     @Inject(method = "updateLanguage", at = @At("HEAD"))
     private static void updateLanguage(CallbackInfo ci) {
-        ComponentTranslate.updateLanguage(CarpetSettings.language);
+        ComponentHelper.updateLanguage(CarpetSettings.language);
     }
 }

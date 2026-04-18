@@ -10,7 +10,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
@@ -99,10 +99,10 @@ public class LocCommand {
         long id = LongArgumentType.getLong(context, "id");
         LocationInfo removed = LOCATION_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(ComponentTranslate.formatNames("No such loc id %s", id));
+            context.getSource().sendFailure(ComponentHelper.formatNames("No such loc id %s", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentTranslate.formatNames("Loc %s is removed.", removed.desc()), false);
+        context.getSource().sendSuccess(() -> ComponentHelper.formatNames("Loc %s is removed.", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -119,7 +119,7 @@ public class LocCommand {
         long id = LongArgumentType.getLong(context, "id");
         LocationInfo location = LOCATION_CONFIG.get(String.valueOf(id));
         if (location == null) {
-            context.getSource().sendFailure(ComponentTranslate.formatNames("No such loc id %s", id));
+            context.getSource().sendFailure(ComponentHelper.formatNames("No such loc id %s", id));
             return 0;
         }
         for (Component component : LocCommand.info(location)) {

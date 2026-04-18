@@ -13,20 +13,20 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ComponentTranslate {
+public class ComponentHelper {
 
     private static String lang = "";
     private static final Map<String, String> language = new HashMap<>();
 
-    public static Component trans(String key, Object... args) {
-        return trans(key, null, args);
+    public static Component tr(String key, Object... args) {
+        return tr(key, null, args);
     }
 
-    public static Component trans(String key, @Nullable TextColor color, Object... args) {
-        return trans(key, color, Style.EMPTY, args);
+    public static Component tr(String key, @Nullable TextColor color, Object... args) {
+        return tr(key, color, Style.EMPTY, args);
     }
 
-    public static Component trans(String key, @Nullable TextColor color, Style style, Object... args) {
+    public static Component tr(String key, @Nullable TextColor color, Style style, Object... args) {
         if (color != null) style = style.withColor(color);
         // 不太懂这里为什么要try catch
         try {
@@ -54,7 +54,7 @@ public class ComponentTranslate {
     }
 
     public static void updateLanguage(String lang) {
-        ComponentTranslate.lang = lang;
+        ComponentHelper.lang = lang;
         String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
         Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
         language.clear();
@@ -62,7 +62,7 @@ public class ComponentTranslate {
     }
 
     public static Map<String, String> fetchLanguage(String lang) {
-        if (!ComponentTranslate.lang.equals(lang)) updateLanguage(lang);
+        if (!ComponentHelper.lang.equals(lang)) updateLanguage(lang);
         return language;
     }
 }

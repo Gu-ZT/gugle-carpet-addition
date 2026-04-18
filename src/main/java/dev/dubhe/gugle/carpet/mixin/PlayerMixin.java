@@ -3,7 +3,7 @@ package dev.dubhe.gugle.carpet.mixin;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.tools.player.IClientMenuTick;
 import dev.dubhe.gugle.carpet.tools.player.IGcaPlayer;
 import dev.dubhe.gugle.carpet.tools.player.PlayerInventoryMenu;
@@ -98,7 +98,7 @@ abstract class PlayerMixin {
                         i, inventory,
                         gcaPlayer.getEnderChestContainer()
                     ),
-                    ComponentTranslate.trans("gca.player.ender_chest", otherPlayer.getDisplayName())
+                    ComponentHelper.tr("gca.player.ender_chest", otherPlayer.getDisplayName())
                 );
             } else {
                 // 打开额外功能菜单
@@ -107,7 +107,7 @@ abstract class PlayerMixin {
                         i, inventory,
                         gcaPlayer.getEnderChestContainer()
                     ),
-                    ComponentTranslate.trans("gca.player.other_controller", otherPlayer.getDisplayName())
+                    ComponentHelper.tr("gca.player.other_controller", otherPlayer.getDisplayName())
                 );
             }
         } else if (GcaSetting.openFakePlayerInventory && gca$hasPremission(player, otherPlayer)) {
@@ -117,7 +117,7 @@ abstract class PlayerMixin {
                     i, inventory,
                     gcaPlayer.getInventoryContainer()
                 ),
-                ComponentTranslate.trans("gca.player.inventory", otherPlayer.getDisplayName())
+                ComponentHelper.tr("gca.player.inventory", otherPlayer.getDisplayName())
             );
         } else {
             return InteractionResult.PASS;
