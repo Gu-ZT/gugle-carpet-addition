@@ -54,7 +54,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         CommandSourceStack source = context.getSource();
         MinecraftServer server = source.getServer();
         List<Component> components = new ArrayList<>(this.page.size() + 2);
-        components.add(ComponentHelper.format("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
+        components.add(ComponentHelper.fmt("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
             .withStyle(ChatFormatting.YELLOW));
         for (T node : this.page) {
             components.add(node.component(server, args));

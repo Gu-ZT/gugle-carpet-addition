@@ -80,10 +80,10 @@ public class TodoCommand {
         long id = LongArgumentType.getLong(context, "id");
         TodoInfo removed = TODO_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(ComponentHelper.formatNames("No such todo id %s", id));
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such todo id %s", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentHelper.formatNames("Todo %s is removed.", removed.desc()), false);
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Todo %s is removed.", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -93,12 +93,12 @@ public class TodoCommand {
         boolean success = getSuccess(context);
         TodoInfo todo = TODO_CONFIG.get(String.valueOf(id));
         if (todo == null) {
-            context.getSource().sendFailure(ComponentHelper.formatNames("No such todo id %s", id));
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such todo id %s", id));
             return 0;
         }
         TODO_CONFIG.update(todo.ofSuccess(success));
         context.getSource()
-            .sendSuccess(() -> ComponentHelper.formatNames("Todo %%s has be %s.".formatted(success ? "done" : "undone"), todo.desc()), false);
+            .sendSuccess(() -> ComponentHelper.fmtHlt("Todo %%s has be %s.".formatted(success ? "done" : "undone"), todo.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 

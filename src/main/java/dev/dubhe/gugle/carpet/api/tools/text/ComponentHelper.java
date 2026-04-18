@@ -38,19 +38,23 @@ public class ComponentHelper {
     }
 
     @SuppressWarnings("NoTranslation")
-    public static MutableComponent format(String text, Object... args) {
+    public static MutableComponent fmt(String text, Object... args) {
         return Component.translatableWithFallback("gca.format.empty", text, args);
     }
 
-    public static Component name(String name) {
+    public static Component highlight(String name) {
         return Component.literal(name).withStyle(ChatFormatting.AQUA);
     }
 
-    public static MutableComponent formatNames(String text, Object... args) {
-        Object[] names = Arrays.stream(args)
-            .map(it -> it instanceof String str ? name(str) : name(it.toString()))
+    public static MutableComponent fmtHlt(String text, Object... args) {
+        Object[] highlights = Arrays.stream(args)
+            .map(it -> {
+                if (it instanceof String str) return highlight(str);
+                if (it instanceof Component component) return component;
+                return highlight(it.toString());
+            })
             .toArray();
-        return format(text, names);
+        return fmt(text, highlights);
     }
 
     public static void updateLanguage(String lang) {
