@@ -92,7 +92,7 @@ public record BotInfo(
 
     @Override
     public Component component(MinecraftServer server, String... args) {
-        boolean showAction = args.length > 1 && "true".equals(args[0]);
+        boolean showAction = args.length > 0 && "true".equals(args[0]);
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
@@ -120,12 +120,6 @@ public record BotInfo(
                     "/bot remove %s".formatted(this.name)
                 ))
         );
-        Component action = Component.literal("[⚙]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("%d actions".formatted(this.executors.size()))))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot action %s".formatted(this.name)))
-        );
 
         MutableComponent result = Component.literal("▶ ")
             .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
@@ -134,6 +128,12 @@ public record BotInfo(
             .append(kill).append(" ");
 
         if (showAction) {
+            Component action = Component.literal("[⚙]").withStyle(
+                Style.EMPTY
+                    .applyFormat(ChatFormatting.GRAY)
+                    .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("%d actions".formatted(this.executors.size()))))
+                    .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot action %s".formatted(this.name)))
+            );
             result.append(action).append(" ");
         }
 
