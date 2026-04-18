@@ -140,6 +140,6 @@
   "gca.player.other_controller": "%s's Other Controller",
   "gca.player.inventory": "%s's Inventory",
 
-  "gca.tool.damaged": "%s's Tool %s is damaged!",
+  "gca.tool.damaged": "%s's Tool %s is broken!",
   "gca.tool.restock.failed": "%s failed to restock %s!"
 }

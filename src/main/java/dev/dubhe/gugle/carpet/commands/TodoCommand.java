@@ -97,8 +97,15 @@ public class TodoCommand {
             return 0;
         }
         TODO_CONFIG.update(todo.ofSuccess(success));
-        context.getSource()
-            .sendSuccess(() -> ComponentHelper.fmtHlt("Todo %%s has be %s.".formatted(success ? "done" : "undone"), todo.desc()), false);
+        if (success) {
+            Component name = context.getSource().getDisplayName();
+            context.getSource().getServer().getPlayerList().broadcastSystemMessage(
+                ComponentHelper.fmtHlt("%s has completed Todo %s.", name, todo.desc()),
+                false
+            );
+        } else {
+            context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Set Todo %s as incomplete.", todo.desc()), false);
+        }
         return Command.SINGLE_SUCCESS;
     }
 

@@ -1,3 +1,3 @@
 - Add fake player action management.
-  - `/player action <bot> <list|add|remove>`
+  - `/bot action <bot> <list|add|remove>`
 - Added the `fakePlayerToolDamagedNotification` option, which broadcasts a server-wide notification when a tool breaks or restocking fails.

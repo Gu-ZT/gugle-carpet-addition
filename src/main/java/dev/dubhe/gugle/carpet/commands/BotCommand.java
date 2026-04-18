@@ -476,7 +476,7 @@ public class BotCommand {
             .findFirst()
             .orElse(null);
         if (executor == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Action id %s is not found for bot ", id, bot.name()));
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Action id %s is not found for bot %s", id, bot.name()));
             return 0;
         }
 

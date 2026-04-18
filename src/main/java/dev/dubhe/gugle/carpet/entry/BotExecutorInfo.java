@@ -24,6 +24,9 @@ public record BotExecutorInfo(
 
     @Override
     public Component component(MinecraftServer server, String... args) {
+        if (args.length == 0) {
+            return Component.literal("Error: No player name provided").withStyle(ChatFormatting.RED);
+        }
         String name = args[0];
         String command = "/player %s %s".formatted(name, this.action);
         Component desc = Component.literal(this.desc).withStyle(
