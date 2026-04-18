@@ -47,7 +47,7 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
         );
         Component info = Component.literal("[i]").withStyle(
             Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
+                .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,

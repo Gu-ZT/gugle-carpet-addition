@@ -97,19 +97,19 @@ public record BotInfo(
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
         );
         boolean notOnline = server.getPlayerList().getPlayerByName(this.name) == null;
-        Component load = Component.literal("[↑]").withStyle(
+        Component spawn = Component.literal("[↑]").withStyle(
             Style.EMPTY
                 .applyFormat(notOnline ? ChatFormatting.GREEN : ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load bot")))
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot load %s".formatted(this.name)))
         );
-        Component remove = Component.literal("[↓]").withStyle(
+        Component kill = Component.literal("[↓]").withStyle(
             Style.EMPTY
                 .applyFormat(notOnline ? ChatFormatting.GRAY : ChatFormatting.RED)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload bot")))
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/player %s kill".formatted(this.name)))
         );
-        Component delete = Component.literal("[\uD83D\uDDD1]").withStyle(
+        Component remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
@@ -118,12 +118,19 @@ public record BotInfo(
                     "/bot remove %s".formatted(this.name)
                 ))
         );
+        Component action = Component.literal("[⚙]").withStyle(
+            Style.EMPTY
+                .applyFormat(ChatFormatting.GRAY)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("%d actions".formatted(this.executors.size()))))
+                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot action %s".formatted(this.name)))
+        );
 
         return Component.literal("▶ ")
             .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
             .append(desc).append(" ")
-            .append(load).append(" ")
-            .append(remove).append(" ")
-            .append(delete);
+            .append(spawn).append(" ")
+            .append(kill).append(" ")
+            .append(action).append(" ")
+            .append(remove);
     }
 }
