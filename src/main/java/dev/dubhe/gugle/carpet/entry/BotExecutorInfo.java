@@ -25,7 +25,7 @@ public record BotExecutorInfo(
     ).apply(instance, BotExecutorInfo::new));
 
     public String command(String name) {
-        return "player %s %s".formatted(name, this.action);
+        return "/player %s %s".formatted(name, this.action);
     }
 
     public BotExecutorInfo withStartup(boolean startup) {
@@ -41,7 +41,7 @@ public record BotExecutorInfo(
         String command = this.command(name);
         Component tooltip = Component.literal("")
             .append(Component.literal(String.valueOf(this.id)).withStyle(ChatFormatting.AQUA))
-            .append(Component.literal("\n/" + command));
+            .append(Component.literal("\n" + command));
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)

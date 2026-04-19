@@ -124,17 +124,17 @@ public class BotUtil {
         for (BotExecutorInfo startup : startups) {
             try {
                 server.getCommands().getDispatcher().execute(
-                    startup.command(bot.name()),
+                    startup.command(bot.name()).substring(1),
                     instance
                         // 离谱
                         //#if MC < 12102
                         .createCommandSourceStack()
-                    //#else
-                    //$$ .createCommandSourceStack()
-                    //#endif
+                        //#else
+                        //$$ .createCommandSourceStack()
+                        //#endif
                 );
             } catch (CommandSyntaxException e) {
-                GcaExtension.LOGGER.warn("Failed to execute startup action for bot {}: {}", bot.name(), e.getMessage());
+                GcaExtension.LOGGER.warn("Failed to execute startup action {} for bot {}: {}", startup.desc(), bot.name(), e.getMessage());
             }
         }
     }
