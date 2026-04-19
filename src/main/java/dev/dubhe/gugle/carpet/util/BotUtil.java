@@ -114,29 +114,23 @@ public class BotUtil {
     }
 
     private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
-        if (bot.startup().isPresent()) {
-            long id = bot.startup().get();
-            BotExecutorInfo executor = bot.executors().stream()
-                .filter(it -> it.id() == id)
-                .findFirst()
-                .orElse(null);
-            if (executor != null) {
-                try {
-                    server.getCommands().getDispatcher().execute(
-                        executor.command(bot.name()),
-                        instance
-                            // 离谱
-                            //#if MC < 12102
-                            .createCommandSourceStack()
-                            //#else
-                            //$$ .createCommandSourceStack()
-                            //#endif
-                    );
-                } catch (CommandSyntaxException e) {
-                    GcaExtension.LOGGER.warn("Failed to execute startup action for bot {}: {}", bot.name(), e.getMessage());
-                }
-                return;
+        BotExecutorInfo startup = bot.getStartup();
+        if (startup != null) {
+            try {
+                server.getCommands().getDispatcher().execute(
+                    startup.command(bot.name()),
+                    instance
+                        // 离谱
+                        //#if MC < 12102
+                        .createCommandSourceStack()
+                    //#else
+                    //$$ .createCommandSourceStack()
+                    //#endif
+                );
+            } catch (CommandSyntaxException e) {
+                GcaExtension.LOGGER.warn("Failed to execute startup action for bot {}: {}", bot.name(), e.getMessage());
             }
+            return;
         }
         bot.actions().applyAction(instance);
     }

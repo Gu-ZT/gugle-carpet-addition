@@ -502,7 +502,8 @@ public class BotCommand {
             context,
             ComponentHelper.fmtHlt("Bot %s's Action List", bot.name()),
             "/bot action " + bot.name() + " list",
-            bot.name()
+            bot.name(),
+            bot.startup().orElse(0L).toString()
         );
         return Command.SINGLE_SUCCESS;
     }
@@ -547,23 +548,14 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
         Consumer<Component> send = msg -> source.sendSuccess(() -> msg, false);
 
-        if (bot.startup().isEmpty()) {
+        BotExecutorInfo startup = bot.getStartup();
+
+        if (startup == null) {
             send.accept(ComponentHelper.fmtHlt("%s does not have startup action.", bot.name()));
             return Command.SINGLE_SUCCESS;
         }
 
-        long id = bot.startup().get();
-        BotExecutorInfo executor = bot.executors().stream()
-            .filter(it -> it.id() == id)
-            .findFirst()
-            .orElse(null);
-
-        if (executor == null) {
-            send.accept(ComponentHelper.fmtHlt("%s does not have startup action.", bot.name()));
-            return Command.SINGLE_SUCCESS;
-        }
-
-        Component component = executor.component(source.getServer(), bot.name());
+        Component component = startup.component(source.getServer(), bot.name());
         send.accept(ComponentHelper.fmtHlt("%s's startup action: ", bot.name()));
         send.accept(component);
         return Command.SINGLE_SUCCESS;

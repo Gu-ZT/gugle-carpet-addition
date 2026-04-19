@@ -32,6 +32,7 @@ public record BotExecutorInfo(
             return Component.literal("Error: No player name provided").withStyle(ChatFormatting.RED);
         }
         String name = args[0];
+        boolean isStartup = args.length > 1 && Long.parseLong(args[1]) == this.id;
         String command = this.command(name);
         Component tooltip = Component.literal("")
             .append(Component.literal(String.valueOf(this.id)).withStyle(ChatFormatting.AQUA))
@@ -56,8 +57,12 @@ public record BotExecutorInfo(
                     "/bot action %s remove %s".formatted(name, this.id)
                 ))
         );
+        Component mark = Component.literal("▶").withStyle(
+            isStartup ? Style.EMPTY.applyFormat(ChatFormatting.GOLD) : Style.EMPTY
+        );
 
-        return Component.literal("▶ ")
+        return Component.literal("")
+            .append(mark).append(" ")
             .append(desc).append(" ")
             .append(execute).append(" ")
             .append(delete);

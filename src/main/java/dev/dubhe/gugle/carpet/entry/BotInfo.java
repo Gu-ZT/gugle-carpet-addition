@@ -58,6 +58,16 @@ public record BotInfo(
         Codec.LONG.optionalFieldOf("startup").forGetter(BotInfo::startup)
     ).apply(instance, BotInfo::new));
 
+    @Nullable
+    public BotExecutorInfo getStartup() {
+        if (this.startup.isEmpty()) return null;
+        long id = this.startup.get();
+        return this.executors.stream()
+            .filter(it -> it.id() == id)
+            .findFirst()
+            .orElse(null);
+    }
+
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
         String name = player.getGameProfile().getName();
         EntityPlayerActionPack actionPack = saveAction ?
@@ -115,10 +125,15 @@ public record BotInfo(
     @Override
     public Component component(MinecraftServer server, String... args) {
         boolean showAction = args.length > 0 && "true".equals(args[0]);
+        MutableComponent tooltip = Component.literal("Name: " + this.name);
+        BotExecutorInfo startup = this.getStartup();
+        if (startup != null) {
+            tooltip.append("\n").append("Startup: " + startup.desc());
+        }
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))
         );
         boolean notOnline = server.getPlayerList().getPlayerByName(this.name) == null;
         Component spawn = Component.literal("[↑]").withStyle(
