@@ -92,7 +92,8 @@ public class ConfigUpdater {
                 info.mode,
                 info.flying,
                 actions,
-                List.of()
+                List.of(),
+                Optional.empty()
             );
         });
 
@@ -296,7 +297,7 @@ public class ConfigUpdater {
         ResourceKey<Level> dimension = Level.RESOURCE_KEY_CODEC.parse(NbtOps.INSTANCE, playerData.get("Dimension"))
             .resultOrPartial(LOGGER::error)
             .orElse(Level.OVERWORLD);
-        return new BotInfo(name, "Resident bot imported from old config", pos, facing, dimension, mode, flying, actions, List.of());
+        return new BotInfo(name, "Resident bot imported from old config", pos, facing, dimension, mode, flying, actions, List.of(), Optional.empty());
     }
 
     private record NameMapper(Path oldPath, Path newName) {

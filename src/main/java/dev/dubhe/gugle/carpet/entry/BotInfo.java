@@ -20,8 +20,10 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 //#if MC < 12105
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
@@ -36,7 +38,8 @@ public record BotInfo(
     GameType mode,
     boolean flying,
     BotActionInfo actions,
-    List<BotExecutorInfo> executors
+    List<BotExecutorInfo> executors,
+    Optional<Long> startup
 ) implements IConfigNode {
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
@@ -51,7 +54,8 @@ public record BotInfo(
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions),
-        BotExecutorInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors)
+        BotExecutorInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors),
+        Codec.LONG.optionalFieldOf("startup").forGetter(BotInfo::startup)
     ).apply(instance, BotInfo::new));
 
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
@@ -72,11 +76,28 @@ public record BotInfo(
             player.gameMode.getGameModeForPlayer(),
             player.getAbilities().flying,
             BotActionInfo.fromActionPack(actionPack),
-            List.of()
+            List.of(),
+            Optional.empty()
         );
     }
 
     public BotInfo withExecutors(List<BotExecutorInfo> executors) {
+        return this.copyExecutors(executors, this.startup);
+    }
+
+    public BotInfo withStartup(@Nullable BotExecutorInfo executor) {
+        return this.copyExecutors(
+            this.executors,
+            executor == null ? Optional.empty() : Optional.of(executor.id())
+        );
+    }
+
+    public BotInfo mergeExecutors(@Nullable BotInfo bot) {
+        if (bot == null) return this;
+        return this.copyExecutors(bot.executors, bot.startup);
+    }
+
+    public BotInfo copyExecutors(List<BotExecutorInfo> executors, Optional<Long> startup) {
         return new BotInfo(
             this.name,
             this.desc,
@@ -86,7 +107,8 @@ public record BotInfo(
             this.mode,
             this.flying,
             this.actions,
-            executors
+            executors,
+            startup
         );
     }
 

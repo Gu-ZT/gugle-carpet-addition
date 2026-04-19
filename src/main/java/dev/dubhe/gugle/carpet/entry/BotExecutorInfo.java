@@ -22,17 +22,24 @@ public record BotExecutorInfo(
         Codec.STRING.fieldOf("action").forGetter(BotExecutorInfo::action)
     ).apply(instance, BotExecutorInfo::new));
 
+    public String command(String name) {
+        return "/player %s %s".formatted(name, this.action);
+    }
+
     @Override
     public Component component(MinecraftServer server, String... args) {
         if (args.length == 0) {
             return Component.literal("Error: No player name provided").withStyle(ChatFormatting.RED);
         }
         String name = args[0];
-        String command = "/player %s %s".formatted(name, this.action);
+        String command = this.command(name);
+        Component tooltip = Component.literal("")
+            .append(Component.literal(String.valueOf(this.id)).withStyle(ChatFormatting.AQUA))
+            .append(Component.literal("\n" + command));
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(command)))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))
         );
         Component execute = Component.literal("[▶]").withStyle(
             Style.EMPTY

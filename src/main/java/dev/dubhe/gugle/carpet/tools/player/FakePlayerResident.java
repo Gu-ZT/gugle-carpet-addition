@@ -3,6 +3,7 @@ package dev.dubhe.gugle.carpet.tools.player;
 import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
@@ -53,6 +54,8 @@ public class FakePlayerResident {
                 GcaExtension.LOGGER.warn("player {} is already exist.", bot.name());
                 continue;
             }
+
+            bot = bot.mergeExecutors(BotCommand.getBotInfo(this.server, bot.name()));
             if (!BotUtil.spawnBot(this.server, bot, GcaSetting.fakePlayerReloadAction)) {
                 GcaExtension.LOGGER.warn("{} is not loaded.", bot.name());
             }
