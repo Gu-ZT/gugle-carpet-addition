@@ -23,7 +23,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.Optional;
 
 //#if MC < 12105
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
@@ -38,8 +37,7 @@ public record BotInfo(
     GameType mode,
     boolean flying,
     BotActionInfo actions,
-    List<BotExecutorInfo> executors,
-    Optional<Long> startup
+    List<BotExecutorInfo> executors
 ) implements IConfigNode {
     public static final Codec<BotInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotInfo::name),
@@ -54,18 +52,11 @@ public record BotInfo(
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
         BotActionInfo.CODEC.fieldOf("actions").forGetter(BotInfo::actions),
-        BotExecutorInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors),
-        Codec.LONG.optionalFieldOf("startup").forGetter(BotInfo::startup)
+        BotExecutorInfo.CODEC.listOf().optionalFieldOf("executors", List.of()).forGetter(BotInfo::executors)
     ).apply(instance, BotInfo::new));
 
-    @Nullable
-    public BotExecutorInfo getStartup() {
-        if (this.startup.isEmpty()) return null;
-        long id = this.startup.get();
-        return this.executors.stream()
-            .filter(it -> it.id() == id)
-            .findFirst()
-            .orElse(null);
+    public List<BotExecutorInfo> getStartups() {
+        return this.executors.stream().filter(BotExecutorInfo::startup).toList();
     }
 
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
@@ -86,28 +77,16 @@ public record BotInfo(
             player.gameMode.getGameModeForPlayer(),
             player.getAbilities().flying,
             BotActionInfo.fromActionPack(actionPack),
-            List.of(),
-            Optional.empty()
+            List.of()
         );
+    }
+
+    public BotInfo withExecutors(@Nullable BotInfo bot) {
+        if (bot == null) return this;
+        return this.withExecutors(bot.executors);
     }
 
     public BotInfo withExecutors(List<BotExecutorInfo> executors) {
-        return this.copyExecutors(executors, this.startup);
-    }
-
-    public BotInfo withStartup(@Nullable BotExecutorInfo executor) {
-        return this.copyExecutors(
-            this.executors,
-            executor == null ? Optional.empty() : Optional.of(executor.id())
-        );
-    }
-
-    public BotInfo mergeExecutors(@Nullable BotInfo bot) {
-        if (bot == null) return this;
-        return this.copyExecutors(bot.executors, bot.startup);
-    }
-
-    public BotInfo copyExecutors(List<BotExecutorInfo> executors, Optional<Long> startup) {
         return new BotInfo(
             this.name,
             this.desc,
@@ -117,23 +96,17 @@ public record BotInfo(
             this.mode,
             this.flying,
             this.actions,
-            executors,
-            startup
+            executors
         );
     }
 
     @Override
     public Component component(MinecraftServer server, String... args) {
         boolean showAction = args.length > 0 && "true".equals(args[0]);
-        MutableComponent tooltip = Component.literal("Name: " + this.name);
-        BotExecutorInfo startup = this.getStartup();
-        if (startup != null) {
-            tooltip.append("\n").append("Startup: " + startup.desc());
-        }
         Component desc = Component.literal(this.desc).withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
         );
         boolean notOnline = server.getPlayerList().getPlayerByName(this.name) == null;
         Component spawn = Component.literal("[↑]").withStyle(

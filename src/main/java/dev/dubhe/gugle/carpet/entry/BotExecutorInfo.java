@@ -14,16 +14,22 @@ import net.minecraft.server.MinecraftServer;
 public record BotExecutorInfo(
     long id,
     String desc,
-    String action
+    String action,
+    boolean startup
 ) implements IComponentNode {
     public static final Codec<BotExecutorInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.LONG.fieldOf("id").forGetter(BotExecutorInfo::id),
         Codec.STRING.fieldOf("desc").forGetter(BotExecutorInfo::desc),
-        Codec.STRING.fieldOf("action").forGetter(BotExecutorInfo::action)
+        Codec.STRING.fieldOf("action").forGetter(BotExecutorInfo::action),
+        Codec.BOOL.fieldOf("startup").forGetter(BotExecutorInfo::startup)
     ).apply(instance, BotExecutorInfo::new));
 
     public String command(String name) {
         return "/player %s %s".formatted(name, this.action);
+    }
+
+    public BotExecutorInfo withStartup(boolean startup) {
+        return new BotExecutorInfo(this.id, this.desc, this.action, startup);
     }
 
     @Override
@@ -32,7 +38,6 @@ public record BotExecutorInfo(
             return Component.literal("Error: No player name provided").withStyle(ChatFormatting.RED);
         }
         String name = args[0];
-        boolean isStartup = args.length > 1 && Long.parseLong(args[1]) == this.id;
         String command = this.command(name);
         Component tooltip = Component.literal("")
             .append(Component.literal(String.valueOf(this.id)).withStyle(ChatFormatting.AQUA))
@@ -58,7 +63,7 @@ public record BotExecutorInfo(
                 ))
         );
         Component mark = Component.literal("▶").withStyle(
-            isStartup ? Style.EMPTY.applyFormat(ChatFormatting.GOLD) : Style.EMPTY
+            this.startup ? Style.EMPTY.applyFormat(ChatFormatting.GOLD) : Style.EMPTY
         );
 
         return Component.literal("")

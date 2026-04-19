@@ -14,6 +14,8 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
+import java.util.List;
+
 public class BotUtil {
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
         return spawnBot(server, bot, true);
@@ -41,19 +43,28 @@ public class BotUtil {
     }
 
     private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
-        BotExecutorInfo startup = bot.getStartup();
-        if (startup != null) {
+        List<BotExecutorInfo> startups = bot.getStartups();
+        if (startups.isEmpty()) {
+            bot.actions().applyAction(instance);
+            return;
+        }
+
+        for (BotExecutorInfo startup : startups) {
             try {
                 server.getCommands().getDispatcher().execute(
                     startup.command(bot.name()),
-                    instance.createCommandSourceStack()
+                    instance
+                        // 离谱
+                        //#if MC < 12102
+                        .createCommandSourceStack()
+                    //#else
+                    //$$ .createCommandSourceStack()
+                    //#endif
                 );
             } catch (CommandSyntaxException e) {
                 GcaExtension.LOGGER.warn("Failed to execute startup action for bot {}: {}", bot.name(), e.getMessage());
             }
-            return;
         }
-        bot.actions().applyAction(instance);
     }
 
 

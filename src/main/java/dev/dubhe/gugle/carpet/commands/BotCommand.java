@@ -25,6 +25,7 @@ import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -169,11 +169,13 @@ public class BotCommand {
                         )
                     )
                     .then(literal("startup")
-                        .executes(BotCommand::actionStartupShow)
-                        .then(literal("set")
+                        .then(literal("toggle")
                             .then(argument("id", LongArgumentType.longArg())
                                 .suggests(BotCommand::suggestActions)
-                                .executes(BotCommand::actionStartupSet)
+                                .executes(BotCommand::actionStartupToggle)
+                                .then(argument("value", BoolArgumentType.bool())
+                                    .executes(BotCommand::actionStartupToggle)
+                                )
                             )
                         )
                         .then(literal("clear")
@@ -502,8 +504,7 @@ public class BotCommand {
             context,
             ComponentHelper.fmtHlt("Bot %s's Action List", bot.name()),
             "/bot action " + bot.name() + " list",
-            bot.name(),
-            bot.startup().orElse(0L).toString()
+            bot.name()
         );
         return Command.SINGLE_SUCCESS;
     }
@@ -520,7 +521,7 @@ public class BotCommand {
         long id = IdUtil.nextId();
         String desc = StringArgumentType.getString(context, "desc");
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
-        executors.add(new BotExecutorInfo(id, desc, action));
+        executors.add(new BotExecutorInfo(id, desc, action, false));
         BOT_CONFIG.update(bot.withExecutors(executors));
         context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is added.", desc), false);
         return Command.SINGLE_SUCCESS;
@@ -531,10 +532,6 @@ public class BotCommand {
         if (pair == null) return 0;
         BotInfo bot = pair.getLeft();
         BotExecutorInfo action = pair.getRight();
-        if (bot.startup().isPresent() && bot.startup().get() == action.id()) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("%s is set as startup action for %s, please clear it before remove.", action.desc(), bot.name()));
-            return 0;
-        }
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.removeIf(it -> it.id() == action.id());
         BOT_CONFIG.update(bot.withExecutors(executors));
@@ -542,43 +539,39 @@ public class BotCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int actionStartupShow(CommandContext<CommandSourceStack> context) {
-        BotInfo bot = getBot(context);
-        if (bot == null) return 0;
-        CommandSourceStack source = context.getSource();
-        Consumer<Component> send = msg -> source.sendSuccess(() -> msg, false);
-
-        BotExecutorInfo startup = bot.getStartup();
-
-        if (startup == null) {
-            send.accept(ComponentHelper.fmtHlt("%s does not have startup action.", bot.name()));
-            return Command.SINGLE_SUCCESS;
-        }
-
-        Component component = startup.component(source.getServer(), bot.name());
-        send.accept(ComponentHelper.fmtHlt("%s's startup action: ", bot.name()));
-        send.accept(component);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int actionStartupSet(CommandContext<CommandSourceStack> context) {
+    private static int actionStartupToggle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         Pair<BotInfo, BotExecutorInfo> pair = getBotAction(context);
         if (pair == null) return 0;
         BotInfo bot = pair.getLeft();
         BotExecutorInfo action = pair.getRight();
-        BOT_CONFIG.update(bot.withStartup(action));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s's startup action has benn set to %s", bot.name(), action.desc()), false);
+        boolean set = CommandUtil.getArgOrDefault(
+            () -> BoolArgumentType.getBool(context, "value"),
+            () -> !action.startup()
+        );
+        if (action.startup() == set) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("%s is already %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()));
+            return 0;
+        }
+        BotExecutorInfo newAction = action.withStartup(set);
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        for (int i = 0; i < executors.size(); i++) {
+            if (executors.get(i).id() == newAction.id()) {
+                executors.set(i, newAction);
+                break;
+            }
+        }
+        BOT_CONFIG.update(bot.withExecutors(executors));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is now %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
     private static int actionStartupClear(CommandContext<CommandSourceStack> context) {
         BotInfo bot = getBot(context);
         if (bot == null) return 0;
-        if (bot.startup().isEmpty()) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s does not have startup action.", bot.name()));
-            return 0;
-        }
-        BOT_CONFIG.update(bot.withStartup(null));
+        List<BotExecutorInfo> executors = bot.executors().stream()
+            .map(it -> it.withStartup(false))
+            .toList();
+        BOT_CONFIG.update(bot.withExecutors(executors));
         context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s's startup action has been cleared.", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }

@@ -55,7 +55,7 @@ public class FakePlayerResident {
                 continue;
             }
 
-            bot = bot.mergeExecutors(BotCommand.getBotInfo(this.server, bot.name()));
+            bot = bot.withExecutors(BotCommand.getBotInfo(this.server, bot.name()));
             if (!BotUtil.spawnBot(this.server, bot, GcaSetting.fakePlayerReloadAction)) {
                 GcaExtension.LOGGER.warn("{} is not loaded.", bot.name());
             }

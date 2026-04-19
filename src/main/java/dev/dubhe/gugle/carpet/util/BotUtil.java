@@ -17,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.CommonListenerCookie;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 //#if MC < 12102
@@ -114,8 +115,13 @@ public class BotUtil {
     }
 
     private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
-        BotExecutorInfo startup = bot.getStartup();
-        if (startup != null) {
+        List<BotExecutorInfo> startups = bot.getStartups();
+        if (startups.isEmpty()) {
+            bot.actions().applyAction(instance);
+            return;
+        }
+
+        for (BotExecutorInfo startup : startups) {
             try {
                 server.getCommands().getDispatcher().execute(
                     startup.command(bot.name()),
@@ -130,8 +136,6 @@ public class BotUtil {
             } catch (CommandSyntaxException e) {
                 GcaExtension.LOGGER.warn("Failed to execute startup action for bot {}: {}", bot.name(), e.getMessage());
             }
-            return;
         }
-        bot.actions().applyAction(instance);
     }
 }
