@@ -1,5 +1,7 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import dev.dubhe.gugle.carpet.api.inject.IFakeResident;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerResident;
@@ -20,6 +22,8 @@ public class MinecraftServerMixin implements IFakeResident {
     private FakePlayerResident gca$Resident = null;
     @Unique
     private final MinecraftServer gca$server = (MinecraftServer) (Object) this;
+    @Unique
+    private boolean gca$initiating = false;
 
     @Inject(method = "loadLevel", at = @At("HEAD"))
     public void initResident(CallbackInfo ci) {
@@ -41,9 +45,17 @@ public class MinecraftServerMixin implements IFakeResident {
         this.gca$Resident.save();
     }
 
+    @WrapOperation(method = "runServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;initServer()Z"))
+    private boolean init(MinecraftServer instance, Operation<Boolean> original) {
+        this.gca$initiating = true;
+        boolean result = original.call(instance);
+        this.gca$initiating = false;
+        return result;
+    }
+
     @Inject(method = "saveEverything", at = @At("HEAD"))
     public void saveResidentPoint2(boolean bl, boolean bl2, boolean bl3, CallbackInfoReturnable<Boolean> cir) {
-        if (this.gca$Resident != null) this.gca$Resident.save();
+        if (this.gca$Resident != null && !this.gca$initiating) this.gca$Resident.save();
     }
 
     @SuppressWarnings("AddedMixinMembersNamePattern")

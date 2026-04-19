@@ -12,7 +12,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class IntegratedServerMixin {
     @Inject(method = "halt", at = @At("HEAD"))
     public void saveResident(boolean bl, CallbackInfo ci) {
-        FakePlayerResident resident = ((IFakeResident) this).getGCAResident();
-        if (resident != null) resident.save();
+        if (((IntegratedServer) (Object) this).isRunning()) {
+            FakePlayerResident resident = ((IFakeResident) this).getGCAResident();
+            if (resident != null) resident.save();
+        }
     }
 }
