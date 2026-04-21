@@ -1,3 +1,4 @@
 - Add fake player action management.
   - `/bot action <bot> <list|add|remove>`
 - Added the `fakePlayerToolDamagedNotification` option, which broadcasts a server-wide notification when a tool breaks or restocking fails.
+- Fix an issue where FakePlayerResident data would be wiped when saved during server shutdown on mc version 26.1+.
