@@ -3,6 +3,9 @@ package dev.dubhe.gugle.carpet.util;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import com.mojang.authlib.GameProfile;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import dev.dubhe.gugle.carpet.GcaExtension;
+import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
@@ -14,6 +17,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.CommonListenerCookie;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 //#if MC < 12102
@@ -105,8 +109,33 @@ public class BotUtil {
                 bot.dimension());
             instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
             instance.getAbilities().flying = bot.flying();
-            if (applyAction) bot.actions().applyAction(instance);
+            if (applyAction) applyAction(server, instance, bot);
         }, server);
         return true;
+    }
+
+    private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
+        List<BotExecutorInfo> startups = bot.getStartups();
+        if (startups.isEmpty()) {
+            bot.actions().applyAction(instance);
+            return;
+        }
+
+        for (BotExecutorInfo startup : startups) {
+            try {
+                server.getCommands().getDispatcher().execute(
+                    startup.command(bot.name()).substring(1),
+                    instance
+                        // 离谱
+                        //#if MC < 12102
+                        .createCommandSourceStack()
+                        //#else
+                        //$$ .createCommandSourceStack()
+                        //#endif
+                );
+            } catch (CommandSyntaxException e) {
+                GcaExtension.LOGGER.warn("Failed to execute startup action {} for bot {}: {}", startup.desc(), bot.name(), e.getMessage());
+            }
+        }
     }
 }

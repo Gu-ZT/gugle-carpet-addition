@@ -7,7 +7,7 @@ import dev.dubhe.gugle.carpet.api.menu.control.AutoResetButton;
 import dev.dubhe.gugle.carpet.api.menu.control.Button;
 import dev.dubhe.gugle.carpet.api.menu.control.RadioList;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.util.InventoryUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -92,7 +92,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
     private static RadioList createHotbarButton(BiConsumer<Integer, Button> adder, PlayerInventoryContainer container) {
         List<Button> hotBarList = new ArrayList<>();
         for (int i = 0; i < 9; i++) {
-            Component hotBarComponent = ComponentTranslate.trans(
+            Component hotBarComponent = ComponentHelper.tr(
                 "gca.hotbar",
                 Color.WHITE,
                 Style.EMPTY.withBold(true).withItalic(false),

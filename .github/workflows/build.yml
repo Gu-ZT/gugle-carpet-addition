@@ -25,7 +25,7 @@ jobs:
       CI_BUILD: true
       PR_BUILD: false
     steps:
-      - name: checkout
+      - name: Checkout
         uses: actions/checkout@v5
         with:
           submodules: recursive
@@ -52,9 +52,51 @@ jobs:
           name: 'Artifacts'
           path: ./ModWrapper/build/libs/*.jar
 
+      - name: Resolve Publisher Token
+        if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
+        id: resolve_token
+        env:
+          SECRETS_JSON: ${{ toJson(secrets) }}
+          COMMITTER_EMAIL: ${{ github.event.head_commit.author.email }}
+        run: |
+          echo "Committer email: $COMMITTER_EMAIL"
+          PUBLISHER_NAME=""
+          while IFS=' ' read -r email name; do
+            email=$(echo "$email" | tr -d '\r')
+            name=$(echo "$name" | tr -d '\r')
+            echo "Checking publisher entry: '$email' -> '$name' | match: $([ "$email" = "$COMMITTER_EMAIL" ] && echo yes || echo no)"
+            if [ "$email" = "$COMMITTER_EMAIL" ]; then
+              PUBLISHER_NAME="$name"
+              break
+            fi
+          done < .github/.publisher
+          echo "Resolved publisher name: ${PUBLISHER_NAME:-none}"
+          
+          MODRINTH_TOKEN_NAME="MODRINTH_TOKEN_${PUBLISHER_NAME}"
+          CF_TOKEN_NAME="CURSEFORGE_TOKEN_${PUBLISHER_NAME}"
+          
+          if [ -n "$PUBLISHER_NAME" ]; then
+            if echo "$SECRETS_JSON" | jq -e --arg key "$MODRINTH_TOKEN_NAME" 'has($key)' > /dev/null 2>&1; then
+              echo "modrinth_token_name=$MODRINTH_TOKEN_NAME" >> $GITHUB_OUTPUT
+            else
+              echo "::warning::Modrinth token '$MODRINTH_TOKEN_NAME' not found in secrets, falling back to default."
+              echo "modrinth_token_name=MODRINTH_TOKEN" >> $GITHUB_OUTPUT
+            fi
+          
+            if echo "$SECRETS_JSON" | jq -e --arg key "$CF_TOKEN_NAME" 'has($key)' > /dev/null 2>&1; then
+              echo "curseforge_token_name=$CF_TOKEN_NAME" >> $GITHUB_OUTPUT
+            else
+              echo "::warning::CurseForge token '$CF_TOKEN_NAME' not found in secrets, falling back to default."
+              echo "curseforge_token_name=CURSEFORGE_TOKEN" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "modrinth_token_name=MODRINTH_TOKEN" >> $GITHUB_OUTPUT
+            echo "curseforge_token_name=CURSEFORGE_TOKEN" >> $GITHUB_OUTPUT
+          fi
+
       - name: Publish
         if: ${{ startsWith(github.ref, 'refs/heads/releases/') }}
         run: ./gradlew :ModWrapper:publishMods
         env:
-          CURSEFORGE_TOKEN: ${{ secrets.CURSEFORGE_TOKEN }}
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_TOKEN: ${{ secrets[steps.resolve_token.outputs.curseforge_token_name] }}
+          MODRINTH_TOKEN: ${{ secrets[steps.resolve_token.outputs.modrinth_token_name] }}

@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.util;
 
 import com.google.common.collect.ImmutableList;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -90,7 +90,7 @@ public class PosUtil {
         ResourceKey<Level> dimension = player.level().dimension();
         ImmutableList.Builder<MutableComponent> builder = ImmutableList.builder();
         List<MutableComponent> pos = PosUtil.pos("Shared Location", position, dimension);
-        PlayerGameProfileInfo info = PlayerGameProfileInfo.of(player);
+        PlayerGameProfileCache info = PlayerGameProfileCache.of(player);
         MutableComponent component = Component.literal("%s at".formatted(info.name())).append(" ").append(pos.getFirst());
         if (pos.size() > 2) component.append("->").append(pos.get(2));
         builder.add(component, pos.get(1));

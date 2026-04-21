@@ -7,6 +7,7 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplenishment;
 
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerNotification;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -53,10 +54,10 @@ import net.minecraft.world.InteractionResultHolder;
 abstract class ItemStackMixin {
     //#if MC>=12005
     @Shadow
-    public abstract Item getItem();
-
-    @Shadow
     @Final
+        //#if MC >= 260000
+        //$$ private
+        //#endif
     PatchedDataComponentMap components;
     //#endif
 
@@ -105,21 +106,22 @@ abstract class ItemStackMixin {
                                   //#endif
                                   runnable, Operation<Void> original, @Local(argsOnly = true) EquipmentSlot equipmentSlot) {
         // 在物品损坏前获取物品类型，损坏后将只能获取为空气
-        Item item = itemStack.getItem();
+        ItemStack beforeItem = itemStack.copy();
         original.call(itemStack, i, source, serverPlayer, runnable);
-        if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && serverPlayer instanceof EntityPlayerMPFake fakePlayer) {
-            FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, item, equipmentSlot);
+        if (!(serverPlayer instanceof EntityPlayerMPFake fakePlayer)) return;
+        if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool)) {
+            FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, beforeItem.getItem(), equipmentSlot);
+        } else if (GcaSetting.fakePlayerToolDamagedNotification && itemStack.isEmpty()) { // 如果开了工具替换, 替换后再确认是否通知
+            FakePlayerNotification.sendToolDamaged(fakePlayer, beforeItem);
         }
     }
     //#else
     //$$ @WrapOperation(method = "hurtAndBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;hurt(ILnet/minecraft/util/RandomSource;Lnet/minecraft/server/level/ServerPlayer;)Z"))
     //$$ private boolean onHurt(ItemStack itemStack, int i, RandomSource randomSource, ServerPlayer player, Operation<Boolean> original) {
-    //$$     Boolean call = original.call(itemStack, i, randomSource, player);
-    //$$     if (call) {
-    //$$         // 物品耐久耗尽，交给下方的Mixin方法处理
-    //$$         return true;
-    //$$     }
-    //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && player instanceof EntityPlayerMPFake fakePlayer) {
+    //$$     boolean broken = original.call(itemStack, i, randomSource, player);
+    //$$     // 物品耐久耗尽，交给下方的Mixin方法处理
+    //$$         if (broken || !(player instanceof EntityPlayerMPFake fakePlayer)) return broken;
+    //$$         if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool)) {
     //$$         FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, itemStack.getItem(), itemStack);
     //$$     }
     //$$     return false;
@@ -127,10 +129,14 @@ abstract class ItemStackMixin {
     //$$
     //$$ @WrapOperation(method = "hurtAndBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     //$$ private <T extends LivingEntity> void onShrink(ItemStack itemStack, int i, Operation<Void> original, @Local(argsOnly = true) T livingEntity) {
-    //$$     Item item = itemStack.getItem();
-    //$$     original.call(itemStack, i);
-    //$$     if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool) && livingEntity instanceof EntityPlayerMPFake fakePlayer) {
-    //$$         FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, item, itemStack);
+    //$$     ItemStack beforeItem = itemStack.copy();
+    //$$         original.call(itemStack, i);
+    //$$         if (livingEntity instanceof EntityPlayerMPFake fakePlayer) {
+    //$$         if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool)) {
+    //$$             FakePlayerAutoReplaceTool.checkFakePlayerShouldReplaceTool(fakePlayer, beforeItem.getItem(), itemStack);
+    //$$         } else if (GcaSetting.fakePlayerToolDamagedNotification && itemStack.isEmpty()) { // 如果开了工具替换, 替换后再确认是否通知
+    //$$             FakePlayerNotification.sendToolDamaged(fakePlayer, beforeItem);
+    //$$         }
     //$$     }
     //$$ }
     //#endif

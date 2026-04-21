@@ -2,7 +2,7 @@ package dev.dubhe.gugle.carpet.util;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.GameProfileArgument;
 
@@ -11,13 +11,13 @@ import java.util.function.Supplier;
 
 public class CommandUtil {
 
-    public static List<PlayerGameProfileInfo> parseGameProfiles(
+    public static List<PlayerGameProfileCache> parseGameProfiles(
         CommandContext<CommandSourceStack> context,
         String name
     ) throws CommandSyntaxException {
         return GameProfileArgument.getGameProfiles(context, name)
             .stream()
-            .map(PlayerGameProfileInfo::of)
+            .map(PlayerGameProfileCache::of)
             .toList();
     }
 

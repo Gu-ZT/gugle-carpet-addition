@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.api.menu.control;
 
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
@@ -51,17 +51,17 @@ public class Button {
     public Button(boolean defaultState, String key) {
         this(
             defaultState, Items.BARRIER, Items.STRUCTURE_VOID, 1,
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 key,
                 Color.GREEN,
                 Style.EMPTY.withBold(true).withItalic(false),
-                ComponentTranslate.trans("gca.button.on")
+                ComponentHelper.tr("gca.button.on")
             ),
-            ComponentTranslate.trans(
+            ComponentHelper.tr(
                 key,
                 Color.RED,
                 Style.EMPTY.withBold(true).withItalic(false),
-                ComponentTranslate.trans("gca.button.off")
+                ComponentHelper.tr("gca.button.off")
             )
         );
     }
@@ -73,8 +73,8 @@ public class Button {
     public Button(boolean defaultState, Item onItem, Item offItem, int itemCount) {
         this(
             defaultState, onItem, offItem, itemCount,
-            ComponentTranslate.trans("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
-            ComponentTranslate.trans("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
+            ComponentHelper.tr("gca.button.on", Color.GREEN, Style.EMPTY.withBold(true).withItalic(false)),
+            ComponentHelper.tr("gca.button.off", Color.RED, Style.EMPTY.withBold(true).withItalic(false))
         );
     }
 

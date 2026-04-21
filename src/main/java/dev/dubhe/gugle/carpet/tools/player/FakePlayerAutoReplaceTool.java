@@ -54,7 +54,9 @@ public class FakePlayerAutoReplaceTool {
         ReplaceInfo info = FAKE_PLAYER_TOOL_MAP.remove(uuid);
         if (info == null) return;
         Predicate<ItemStack> predicate = itemReplacePredicate(info.item);
-        replaceTool(info.slot, predicate, player);
+        if (!replaceTool(info.slot, predicate, player) && GcaSetting.fakePlayerToolDamagedNotification) {
+            FakePlayerNotification.sendRestockFailed(player, info.item);
+        }
     }
 
     public static boolean replaceTool(EquipmentSlot slot, Predicate<ItemStack> predicate, Player fakePlayer) {

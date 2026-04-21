@@ -7,7 +7,6 @@ import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.WelcomeInfo;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
@@ -27,6 +26,9 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+//#if MC>=12100
+import net.minecraft.network.chat.ClickEvent;
+//#endif
 //#if MC >= 260000
 //$$ import net.minecraft.core.Holder;
 //$$ import net.minecraft.world.clock.WorldClock;
@@ -74,7 +76,7 @@ public class WelcomeMessage {
     }
 
     private static WelcomeInfo getOrCreateWelcomeInfo() {
-        WelcomeInfo info = WELCOME_CONFIG.getContents().get(WelcomeInfo.KEY);
+        WelcomeInfo info = WELCOME_CONFIG.get(WelcomeInfo.KEY);
         if (info == null) {
             info = WelcomeInfo.defaultInfo();
             WELCOME_CONFIG.update(info);

@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.tools;
 
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -36,7 +36,7 @@ public class FastPingFriend {
 
     public static Component getMessage(ServerPlayer player) {
         MutableComponent playerName = Component.empty().append(player.getDisplayName()).withStyle(ChatFormatting.GOLD);
-        return ComponentTranslate.trans("carpet.rule.fastPingFriend.msg", Color.AQUA, playerName);
+        return ComponentHelper.tr("carpet.rule.fastPingFriend.msg", Color.AQUA, playerName);
     }
 
     public static void playSound(SoundEvent event, ServerPlayer player) {

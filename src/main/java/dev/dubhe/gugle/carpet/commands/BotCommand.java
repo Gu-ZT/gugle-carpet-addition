@@ -8,43 +8,48 @@ import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
+import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
-import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
-import net.minecraft.ChatFormatting;
+import dev.dubhe.gugle.carpet.util.CommandUtil;
+import dev.dubhe.gugle.carpet.util.IdUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
 public class BotCommand {
+    private static final Pattern ACTION_PATTERN = Pattern.compile("bot action (\\S+) add (\"[^\"]+\"|\\S+)(?:\\s+(.*))?");
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
 
@@ -67,13 +72,13 @@ public class BotCommand {
             )
             .then(literal("load")
                 .then(argument("player", StringArgumentType.string())
-                    .suggests(BotCommand::suggestPlayer)
+                    .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::load)
                 )
             )
             .then(literal("remove")
                 .then(argument("player", StringArgumentType.string())
-                    .suggests(BotCommand::suggestPlayer)
+                    .suggests(BOT_CONFIG::suggestKeys)
                     .executes(BotCommand::remove)
                 )
             )
@@ -108,42 +113,98 @@ public class BotCommand {
                 )
                 .then(literal("add")
                     .then(argument("bot", StringArgumentType.string())
-                        .suggests(BotCommand::suggestPlayer)
+                        .suggests(BOT_CONFIG::suggestKeys)
                         .then(argument("group", StringArgumentType.greedyString())
-                            .suggests(BotCommand::suggestGroup)
+                            .suggests(BOT_GROUP_CONFIG::suggestKeys)
                             .executes(BotCommand::groupAddBot)
                         )
                     )
                 )
                 .then(literal("remove")
                     .then(argument("bot", StringArgumentType.string())
-                        .suggests(BotCommand::suggestPlayer)
+                        .suggests(BOT_CONFIG::suggestKeys)
                         .then(argument("group", StringArgumentType.greedyString())
-                            .suggests(BotCommand::suggestGroup)
+                            .suggests(BOT_GROUP_CONFIG::suggestKeys)
                             .executes(BotCommand::groupRemoveBot)
                         )
                     )
                 )
                 .then(literal("load")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupLoadBot)
                     )
                 )
                 .then(literal("unload")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupUnloadBot)
                     )
                 )
                 .then(literal("info")
                     .then(argument("group", StringArgumentType.greedyString())
-                        .suggests(BotCommand::suggestGroup)
+                        .suggests(BOT_GROUP_CONFIG::suggestKeys)
                         .executes(BotCommand::groupInfo)
                     )
                 )
             )
+            .then(literal("action")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotAction))
+                .then(argument("player", StringArgumentType.string())
+                    .suggests(BOT_CONFIG::suggestKeys)
+                    .executes(BotCommand::actionList)
+                    .then(literal("list")
+                        .executes(BotCommand::actionList)
+                        .then(argument("page", IntegerArgumentType.integer(1))
+                            .executes(BotCommand::actionList)
+                        )
+                    )
+                    .then(literal("add")
+                        .then(actionAddCommand(dispatcher))
+                    )
+                    .then(literal("remove")
+                        .then(argument("id", LongArgumentType.longArg())
+                            .suggests(BotCommand::suggestActions)
+                            .executes(BotCommand::actionRemove)
+                        )
+                    )
+                    .then(literal("startup")
+                        .then(literal("toggle")
+                            .then(argument("id", LongArgumentType.longArg())
+                                .suggests(BotCommand::suggestActions)
+                                .executes(BotCommand::actionStartupToggle)
+                                .then(argument("value", BoolArgumentType.bool())
+                                    .executes(BotCommand::actionStartupToggle)
+                                )
+                            )
+                        )
+                        .then(literal("clear")
+                            .executes(BotCommand::actionStartupClear)
+                        )
+                    )
+                )
+            )
         );
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> actionAddCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+        ArgumentBuilder<CommandSourceStack, ?> node = argument("desc", StringArgumentType.string());
+        CommandNode<CommandSourceStack> playerOperateNode = dispatcher.getRoot()
+            .getChild("player")
+            .getChild("player");
+        loopCommand(node, playerOperateNode, BotCommand::actionAdd);
+        return node;
+    }
+
+    private static void loopCommand(ArgumentBuilder<CommandSourceStack, ?> node, CommandNode<CommandSourceStack> parent, Command<CommandSourceStack> execute) {
+        for (CommandNode<CommandSourceStack> child : parent.getChildren()) {
+            ArgumentBuilder<CommandSourceStack, ?> builder = child.createBuilder();
+            if (builder.getCommand() != null) {
+                builder.executes(execute);
+            }
+            loopCommand(builder, child, execute);
+            node.then(builder);
+        }
     }
 
     private static void tryInit(CommandContext<CommandSourceStack> context) {
@@ -151,17 +212,143 @@ public class BotCommand {
         BOT_GROUP_CONFIG.tryInit(context);
     }
 
+    private static CompletableFuture<Suggestions> suggestActions(
+        final CommandContext<CommandSourceStack> context,
+        final SuggestionsBuilder builder
+    ) {
+        tryInit(context);
+        String name = StringArgumentType.getString(context, "player");
+        BotInfo bot = BOT_CONFIG.get(name);
+        List<String> actionIds = bot == null ?
+            List.of() :
+            bot.executors().stream()
+            .map(it -> String.valueOf(it.id()))
+            .toList();
+        return SharedSuggestionProvider.suggest(actionIds, builder);
+    }
+
+    @Nullable
+    public static BotInfo getBotInfo(MinecraftServer server, String name) {
+        BOT_CONFIG.tryInit(server);
+        return BOT_CONFIG.get(name);
+    }
+
+    // Bot
+
+    @Nullable
+    private static BotInfo getBot(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        String name = StringArgumentType.getString(context, "player");
+        BotInfo bot = BOT_CONFIG.get(name);
+        if (bot == null) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not exist.", name));
+        }
+        return bot;
+    }
+
+    @Nullable
+    private static Pair<BotInfo, BotExecutorInfo> getBotAction(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return null;
+        long id = LongArgumentType.getLong(context, "id");
+        BotExecutorInfo executor = bot.executors().stream()
+            .filter(it -> it.id() == id)
+            .findFirst()
+            .orElse(null);
+        if (executor == null) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Action id %s is not found for bot %s", id, bot.name()));
+            return null;
+        }
+
+        return Pair.of(bot, executor);
+    }
+
+    private static int load(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
+    }
+
+    private static boolean spawnBot(CommandSourceStack source, BotInfo bot) {
+        //#if MC>=12002
+        if (
+            //#if MC < 12104
+            BotUtil.isGcaSpawningBot(bot.name())
+            //#else
+            //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
+            //#endif
+        ) {
+            source.sendFailure(ComponentHelper.fmtHlt("Player %s is currently logging on", bot.name()));
+            return false;
+        }
+        //#endif
+        if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
+            source.sendFailure(ComponentHelper.fmtHlt("player %s is already exist.", bot.name()));
+            return false;
+        }
+        boolean success = BotUtil.spawnBot(source.getServer(), bot);
+        if (!success) {
+            source.sendFailure(ComponentHelper.fmtHlt("%s is not loaded.", bot.name()));
+        }
+        return success;
+
+    }
+
+    private static int list(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
+        if (page == null) return 0;
+        String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
+        page.sendMessage(context, "Bot List", "/bot list", actionPermission);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        tryInit(context);
+        CommandSourceStack source = context.getSource();
+        ServerPlayer p;
+        if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
+            source.sendFailure(ComponentHelper.fmtHlt("%s is not a fake player.", p.getGameProfile().getName()));
+            return 0;
+        }
+        String name = player.getGameProfile().getName();
+        if (BOT_CONFIG.contains(name)) {
+            source.sendFailure(ComponentHelper.fmtHlt("%s is already save.", name));
+            return 0;
+        }
+        BOT_CONFIG.update(BotInfo.create(
+            name,
+            StringArgumentType.getString(context, "desc"),
+            player,
+            ((ServerPlayerInterface) player).getActionPack()
+        ));
+        source.sendSuccess(() -> ComponentHelper.fmtHlt("%s is added.", name), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int remove(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        String name = StringArgumentType.getString(context, "player");
+        if (BOT_CONFIG.remove(name) == null) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not exist.", name));
+            return 0;
+        }
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", name), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    // Group
+
     @Nullable
     private static GroupNode getGroupNode(CommandContext<CommandSourceStack> context, String groupName) {
         tryInit(context);
-        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
-        BotGroupInfo groupInfo = BOT_GROUP_CONFIG.getContents().get(groupName);
+        BotGroupInfo groupInfo = BOT_GROUP_CONFIG.get(groupName);
         if (groupInfo == null) {
-            context.getSource().sendFailure(Component.literal("Group %s is not found.".formatted(groupName)));
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Group %s is not found.", groupName));
             return null;
         }
         List<BotInfo> bots = groupInfo.bots().stream()
-            .map(botContents::get)
+            .map(BOT_CONFIG::get)
             .filter(Objects::nonNull)
             .toList();
         if (bots.size() != groupInfo.bots().size()) {
@@ -170,15 +357,90 @@ public class BotCommand {
         return new GroupNode(groupInfo, bots);
     }
 
+    private static int groupList(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.values());
+        if (page == null) return 0;
+        page.sendMessage(context, "Bot Group List", "/bot group list");
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int groupCreate(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        String groupName = StringArgumentType.getString(context, "name");
+        if (BOT_GROUP_CONFIG.contains(groupName)) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Group %s already exists.", groupName));
+            return 0;
+        }
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Group %s created successfully.", groupName), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int groupRemove(CommandContext<CommandSourceStack> context) {
+        tryInit(context);
+        String groupName = StringArgumentType.getString(context, "name");
+        if (BOT_GROUP_CONFIG.remove(groupName) == null) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot Group %s is not exist.", groupName));
+            return 0;
+        }
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", groupName), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
     private static int groupInfo(CommandContext<CommandSourceStack> context) {
         String groupName = StringArgumentType.getString(context, "group");
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
-        page.pageComponents("Bot Group " + groupName, "/bot group info " + groupName, BotCommand::botToComponent)
-            .forEach(context.getSource()::sendSystemMessage);
+        String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
+        page.sendMessage(
+            context,
+            ComponentHelper.fmtHlt("Bot Group %s", groupName),
+            "/bot group info " + groupName,
+            actionPermission
+        );
         return Command.SINGLE_SUCCESS;
+    }
+
+    private static int groupAddBot(CommandContext<CommandSourceStack> context) {
+        String groupName = StringArgumentType.getString(context, "group");
+        String botName = StringArgumentType.getString(context, "bot");
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        List<String> bots = new ArrayList<>(group.group.bots());
+        if (bots.contains(botName)) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is already added.", botName));
+            return 0;
+        }
+        bots.add(botName);
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Bot %s is added to %s successfully.", botName, groupName), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int groupRemoveBot(CommandContext<CommandSourceStack> context) {
+        String groupName = StringArgumentType.getString(context, "group");
+        String botName = StringArgumentType.getString(context, "bot");
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        List<String> bots = new ArrayList<>(group.group.bots());
+        if (!bots.remove(botName)) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not found in the %s.", botName, groupName));
+            return 0;
+        }
+        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Bot %s is removed from %s successfully.", botName, groupName), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int groupLoadBot(CommandContext<CommandSourceStack> context) {
+        String groupName = StringArgumentType.getString(context, "group");
+        GroupNode group = getGroupNode(context, groupName);
+        if (group == null) return 0;
+        CommandSourceStack source = context.getSource();
+        return (int) group.bots.stream().filter(it -> spawnBot(source, it)).count();
     }
 
     private static int groupUnloadBot(CommandContext<CommandSourceStack> context) {
@@ -194,55 +456,14 @@ public class BotCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int groupLoadBot(CommandContext<CommandSourceStack> context) {
-        String groupName = StringArgumentType.getString(context, "group");
-        GroupNode group = getGroupNode(context, groupName);
-        if (group == null) return 0;
-        CommandSourceStack source = context.getSource();
-        return (int) group.bots.stream().filter(it -> spawnBot(source, it)).count();
-    }
-
-    private static int groupRemoveBot(CommandContext<CommandSourceStack> context) {
-        String groupName = StringArgumentType.getString(context, "group");
-        String botName = StringArgumentType.getString(context, "bot");
-        GroupNode group = getGroupNode(context, groupName);
-        if (group == null) return 0;
-        CommandSourceStack source = context.getSource();
-        List<String> bots = new ArrayList<>(group.group.bots());
-        if (!bots.remove(botName)) {
-            source.sendFailure(Component.literal("Bot %s is not found in the %s.".formatted(botName, groupName)));
-            return 0;
-        }
-        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        source.sendSuccess(() -> Component.literal("Bot %s is removed from %s successfully.".formatted(botName, groupName)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int groupAddBot(CommandContext<CommandSourceStack> context) {
-        String groupName = StringArgumentType.getString(context, "group");
-        String botName = StringArgumentType.getString(context, "bot");
-        GroupNode group = getGroupNode(context, groupName);
-        if (group == null) return 0;
-        CommandSourceStack source = context.getSource();
-        List<String> bots = new ArrayList<>(group.group.bots());
-        if (bots.contains(botName)) {
-            source.sendFailure(Component.literal("Bot %s is already added.".formatted(botName)));
-            return 0;
-        }
-        bots.add(botName);
-        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        source.sendSuccess(() -> Component.literal("Bot %s is added to %s successfully.".formatted(botName, groupName)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
     private static int groupGenerated(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         int groupCount = IntegerArgumentType.getInteger(context, "count");
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
         CommandSourceStack source = context.getSource();
-        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
-            source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
+        if (BOT_GROUP_CONFIG.contains(groupName)) {
+            source.sendFailure(ComponentHelper.fmtHlt("Group %s already exists.", groupName));
             return 0;
         }
         ServerPlayer player = source.getPlayer();
@@ -251,12 +472,11 @@ public class BotCommand {
             return 0;
         }
 
-        Map<String, BotInfo> botContents = BOT_CONFIG.getContents();
         List<BotInfo> bots = new ArrayList<>();
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
-            if (botContents.containsKey(botName)) {
-                source.sendFailure(Component.literal("Bot %s already exists.".formatted(botName)));
+            if (BOT_CONFIG.contains(botName)) {
+                source.sendFailure(ComponentHelper.fmtHlt("Bot %s already exists.", botName));
                 continue;
             }
             BotInfo bot = BotInfo.create(botName, botName, player, new EntityPlayerActionPack(player));
@@ -269,221 +489,91 @@ public class BotCommand {
                 spawnBot(source, bot);
             }
         }
-        source.sendSuccess(() -> Component.literal("Group %s generated successfully.".formatted(groupName)), false);
+        source.sendSuccess(() -> ComponentHelper.fmtHlt("Group %s generated successfully.", groupName), false);
         return bots.size();
     }
 
-    private static int groupCreate(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String groupName = StringArgumentType.getString(context, "name");
-        CommandSourceStack source = context.getSource();
-        if (BOT_GROUP_CONFIG.getContents().containsKey(groupName)) {
-            source.sendFailure(Component.literal("Group %s already exists.".formatted(groupName)));
-            return 0;
-        }
-        BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
-        source.sendSuccess(() -> Component.literal("Group %s created successfully.".formatted(groupName)), false);
-        return Command.SINGLE_SUCCESS;
-    }
+    // Action
 
-    private static int groupRemove(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String groupName = StringArgumentType.getString(context, "name");
-        if (BOT_GROUP_CONFIG.remove(groupName) == null) {
-            context.getSource().sendFailure(Component.literal("Bot Group %s is not exist.".formatted(groupName)));
-            return 0;
-        }
-        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(groupName)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int groupList(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.getContents().values());
+    private static int actionList(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        PageInfo<BotExecutorInfo> page = PageInfo.of(context, bot.executors());
         if (page == null) return 0;
-        page.pageComponents("Bot Group List", "/bot group list", BotCommand::botGroupToComponent)
-            .forEach(context.getSource()::sendSystemMessage);
+        page.sendMessage(
+            context,
+            ComponentHelper.fmtHlt("Bot %s's Action List", bot.name()),
+            "/bot action " + bot.name() + " list",
+            bot.name()
+        );
         return Command.SINGLE_SUCCESS;
     }
 
-    private static MutableComponent botGroupToComponent(BotGroupInfo botGroupInfo) {
-        MutableComponent name = Component.literal(botGroupInfo.name()).withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botGroupInfo.name())))
-        );
-        MutableComponent load = Component.literal("[↑]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load Group")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
-                    "/bot group load %s".formatted(botGroupInfo.name())
-                ))
-        );
-        MutableComponent remove = Component.literal("[↓]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload Group")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
-                    "/bot group unload %s".formatted(botGroupInfo.name())
-                ))
-        );
-        MutableComponent info = Component.literal("[i]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
-                    "/bot group info %s".formatted(botGroupInfo.name())
-                ))
-        );
-        MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Bot Group")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.SUGGEST_COMMAND,
-                    "/bot group remove %s".formatted(botGroupInfo.name())
-                ))
-        );
-        MutableComponent component = Component.literal("▶ ").append(name);
-        component.append(" ").append(load);
-        component.append(" ").append(remove);
-        component.append(" ").append(info);
-        return component.append(" ").append(delete);
-    }
-
-    private static int load(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String name = StringArgumentType.getString(context, "player");
-        BotInfo bot = BOT_CONFIG.getContents().get(name);
-        return spawnBot(context.getSource(), bot) ? Command.SINGLE_SUCCESS : 0;
-    }
-
-    private static boolean spawnBot(CommandSourceStack source, @Nullable BotInfo bot) {
-        if (bot == null) {
-            source.sendFailure(Component.literal("%s is not exist."));
-            return false;
-        }
-        //#if MC>=12002
-        if (
-            //#if MC < 12104
-            BotUtil.isGcaSpawningBot(bot.name())
-            //#else
-            //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
-            //#endif
-        ) {
-            source.sendFailure(Component.literal("Player %s is currently logging on".formatted(bot.name())));
-            return false;
-        }
-        //#endif
-        if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
-            source.sendFailure(Component.literal("player %s is already exist.".formatted(bot.name())));
-            return false;
-        }
-        boolean success = BotUtil.spawnBot(source.getServer(), bot);
-        if (!success) {
-            source.sendFailure(Component.literal("%s is not loaded.".formatted(bot.name())));
-        }
-        return success;
-
-    }
-
-    private static int add(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        tryInit(context);
-        CommandSourceStack source = context.getSource();
-        ServerPlayer p;
-        if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
-            source.sendFailure(Component.literal("%s is not a fake player.".formatted(
-                p.getGameProfile().getName()
-            )));
+    private static int actionAdd(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        Matcher matcher = ACTION_PATTERN.matcher(context.getInput());
+        if (!matcher.matches()) {
+            context.getSource().sendFailure(Component.literal("Invalid command syntax."));
             return 0;
         }
-        String name = player.getGameProfile().getName();
-        if (BOT_CONFIG.getContents().containsKey(name)) {
-            source.sendFailure(Component.literal("%s is already save.".formatted(name)));
+        String action = matcher.group(3).trim();
+        long id = IdUtil.nextId();
+        String desc = StringArgumentType.getString(context, "desc");
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        executors.add(new BotExecutorInfo(id, desc, action, false));
+        BOT_CONFIG.update(bot.withExecutors(executors));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is added.", desc), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int actionRemove(CommandContext<CommandSourceStack> context) {
+        Pair<BotInfo, BotExecutorInfo> pair = getBotAction(context);
+        if (pair == null) return 0;
+        BotInfo bot = pair.getLeft();
+        BotExecutorInfo action = pair.getRight();
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        executors.removeIf(it -> it.id() == action.id());
+        BOT_CONFIG.update(bot.withExecutors(executors));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", action.desc()), false);
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int actionStartupToggle(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        Pair<BotInfo, BotExecutorInfo> pair = getBotAction(context);
+        if (pair == null) return 0;
+        BotInfo bot = pair.getLeft();
+        BotExecutorInfo action = pair.getRight();
+        boolean set = CommandUtil.getArgOrDefault(
+            () -> BoolArgumentType.getBool(context, "value"),
+            () -> !action.startup()
+        );
+        if (action.startup() == set) {
+            context.getSource().sendFailure(ComponentHelper.fmtHlt("%s is already %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()));
             return 0;
         }
-        BOT_CONFIG.update(BotInfo.create(
-            name,
-            StringArgumentType.getString(context, "desc"),
-            player,
-            ((ServerPlayerInterface) player).getActionPack()
-        ));
-        source.sendSuccess(() -> Component.literal("%s is added.".formatted(name)), false);
-        return Command.SINGLE_SUCCESS;
-    }
-
-    private static int remove(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        String name = StringArgumentType.getString(context, "player");
-        if (BOT_CONFIG.remove(name) == null) {
-            context.getSource().sendFailure(Component.literal("Bot %s is not exist.".formatted(name)));
-            return 0;
+        BotExecutorInfo newAction = action.withStartup(set);
+        List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
+        for (int i = 0; i < executors.size(); i++) {
+            if (executors.get(i).id() == newAction.id()) {
+                executors.set(i, newAction);
+                break;
+            }
         }
-        context.getSource().sendSuccess(() -> Component.literal("%s is removed.".formatted(name)), false);
+        BOT_CONFIG.update(bot.withExecutors(executors));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is now %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int list(CommandContext<CommandSourceStack> context) {
-        tryInit(context);
-        PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.getContents().values());
-        if (page == null) return 0;
-        page.pageComponents("Bot List", "/bot list", BotCommand::botToComponent)
-            .forEach(context.getSource()::sendSystemMessage);
+    private static int actionStartupClear(CommandContext<CommandSourceStack> context) {
+        BotInfo bot = getBot(context);
+        if (bot == null) return 0;
+        List<BotExecutorInfo> executors = bot.executors().stream()
+            .map(it -> it.withStartup(false))
+            .toList();
+        BOT_CONFIG.update(bot.withExecutors(executors));
+        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s's startup action has been cleared.", bot.name()), false);
         return Command.SINGLE_SUCCESS;
-    }
-
-    private static MutableComponent botToComponent(BotInfo botInfo) {
-        MutableComponent desc = Component.literal(botInfo.desc()).withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(botInfo.name())))
-        );
-        boolean notOnline = BOT_CONFIG.getServer().getPlayerList().getPlayerByName(botInfo.name()) == null;
-        MutableComponent load = Component.literal("[↑]").withStyle(
-            Style.EMPTY
-                .applyFormat(notOnline ? ChatFormatting.GREEN : ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load bot")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot load %s".formatted(botInfo.name())))
-        );
-        MutableComponent remove = Component.literal("[↓]").withStyle(
-            Style.EMPTY
-                .applyFormat(notOnline ? ChatFormatting.GRAY : ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload bot")))
-                .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/player %s kill".formatted(botInfo.name())))
-        );
-        MutableComponent delete = Component.literal("[\uD83D\uDDD1]").withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.SUGGEST_COMMAND,
-                    "/bot remove %s".formatted(botInfo.name())
-                ))
-        );
-        MutableComponent component = Component.literal("▶ ")
-            .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
-            .append(desc);
-        component.append(" ").append(load);
-        component.append(" ").append(remove);
-        return component.append(" ").append(delete);
-    }
-
-    private static CompletableFuture<Suggestions> suggestPlayer(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        return SharedSuggestionProvider.suggest(BOT_CONFIG.getContents().keySet(), builder);
-    }
-
-    private static CompletableFuture<Suggestions> suggestGroup(
-        final CommandContext<CommandSourceStack> context,
-        final SuggestionsBuilder builder
-    ) {
-        return SharedSuggestionProvider.suggest(BOT_GROUP_CONFIG.getContents().keySet(), builder);
     }
 
     record GroupNode(BotGroupInfo group, List<BotInfo> bots) {

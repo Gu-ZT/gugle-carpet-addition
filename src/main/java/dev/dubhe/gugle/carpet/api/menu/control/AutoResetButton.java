@@ -1,7 +1,7 @@
 package dev.dubhe.gugle.carpet.api.menu.control;
 
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -9,8 +9,8 @@ import net.minecraft.world.item.Items;
 public class AutoResetButton extends Button {
     public AutoResetButton(String key) {
         super(false,
-            ComponentTranslate.trans(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false)),
-            ComponentTranslate.trans(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false))
+            ComponentHelper.tr(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false)),
+            ComponentHelper.tr(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false))
         );
         this.addTurnOnFunction(this::turnOffWithoutFunction);
     }
@@ -20,8 +20,8 @@ public class AutoResetButton extends Button {
             item,
             item,
             1,
-            ComponentTranslate.trans(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false)),
-            ComponentTranslate.trans(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false))
+            ComponentHelper.tr(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false)),
+            ComponentHelper.tr(key, Color.WHITE, Style.EMPTY.withBold(true).withItalic(false))
         );
         this.addTurnOnFunction(this::turnOffWithoutFunction);
     }

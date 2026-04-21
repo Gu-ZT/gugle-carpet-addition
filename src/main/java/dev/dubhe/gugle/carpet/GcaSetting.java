@@ -69,6 +69,12 @@ public class GcaSetting {
     )
     public static String fakePlayerAutoReplaceTool = "false";
 
+    // 假人工具损坏通知
+    @Rule(
+        categories = {GCA, BOT}
+    )
+    public static boolean fakePlayerToolDamagedNotification = false;
+
     public static final String fakePlayerNoneName = "#none";
 
     // 假人名称前缀

@@ -3,7 +3,7 @@ package dev.dubhe.gugle.carpet;
 import carpet.CarpetExtension;
 import carpet.CarpetServer;
 import com.mojang.brigadier.CommandDispatcher;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentTranslate;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.commands.BlistCommand;
 import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.commands.HereCommand;
@@ -13,7 +13,7 @@ import dev.dubhe.gugle.carpet.commands.TodoCommand;
 import dev.dubhe.gugle.carpet.commands.WhereisCommand;
 import dev.dubhe.gugle.carpet.commands.WlistCommand;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
-import dev.dubhe.gugle.carpet.entry.PlayerGameProfileInfo;
+import dev.dubhe.gugle.carpet.entry.PlayerGameProfileCache;
 import dev.dubhe.gugle.carpet.tools.WelcomeMessage;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.commands.CommandBuildContext;
@@ -32,8 +32,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public class GcaExtension implements CarpetExtension, ModInitializer {
-    public static String MOD_ID = "gca";
-    public static String MOD_NAME = "GugleCarpetAddition";
+    public static final String MOD_ID = "gca";
+    public static final String MOD_NAME = "GugleCarpetAddition";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
     public static final HashMap<String, Consumer<ServerPlayer>> ON_PLAYER_LOGGED_IN = new HashMap<>();
     public static final List<Map.Entry<Long, Runnable>> PLAN_FUNCTION = new ArrayList<>();
@@ -56,7 +56,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public void onPlayerLoggedIn(ServerPlayer player) {
-        PlayerGameProfileInfo info = PlayerGameProfileInfo.of(player);
+        PlayerGameProfileCache info = PlayerGameProfileCache.of(player);
         Consumer<ServerPlayer> consumer = ON_PLAYER_LOGGED_IN.remove(info.name());
         if (consumer != null) consumer.accept(player);
         if (GcaSetting.welcomePlayer) WelcomeMessage.onPlayerLoggedIn(player);
@@ -86,7 +86,7 @@ public class GcaExtension implements CarpetExtension, ModInitializer {
 
     @Override
     public @Nullable Map<String, String> canHasTranslations(String lang) {
-        return ComponentTranslate.getTranslations(lang);
+        return ComponentHelper.fetchLanguage(lang);
     }
 
     @Override
