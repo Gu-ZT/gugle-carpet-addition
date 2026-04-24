@@ -61,13 +61,11 @@ public record BotInfo(
 
     public static BotInfo create(ServerPlayer player, String desc, boolean saveAction) {
         String name = player.getGameProfile().getName();
-        EntityPlayerActionPack actionPack = saveAction ?
-            ((ServerPlayerInterface) player).getActionPack() :
-            new EntityPlayerActionPack(player);
+        EntityPlayerActionPack actionPack = saveAction ? ((ServerPlayerInterface) player).getActionPack() : null;
         return BotInfo.create(name, desc, player, actionPack);
     }
 
-    public static BotInfo create(String name, String desc, ServerPlayer player, EntityPlayerActionPack actionPack) {
+    public static BotInfo create(String name, String desc, ServerPlayer player, @Nullable EntityPlayerActionPack actionPack) {
         return new BotInfo(
             name,
             desc,

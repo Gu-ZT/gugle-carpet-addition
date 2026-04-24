@@ -479,7 +479,7 @@ public class BotCommand {
                 source.sendFailure(ComponentHelper.fmtHlt("Bot %s already exists.", botName));
                 continue;
             }
-            BotInfo bot = BotInfo.create(botName, botName, player, new EntityPlayerActionPack(player));
+            BotInfo bot = BotInfo.create(botName, botName, player, null);
             BOT_CONFIG.update(bot, false);
             bots.add(bot);
         }
