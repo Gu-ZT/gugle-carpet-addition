@@ -1,1 +1,1 @@
-- Fixed an issue where saving FakePlayerResident data would clear the fake player's ongoing actions when fakePlayerResident is enabled and fakePlayerReloadAction is disabled.
+- Fixed an issue where saving FakePlayerResident data would clear the fake player's ongoing actions when `fakePlayerResident` is enabled and `fakePlayerReloadAction` is disabled.
