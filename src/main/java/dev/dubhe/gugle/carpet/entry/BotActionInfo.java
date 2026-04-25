@@ -7,6 +7,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.ActionAccessor;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.Nullable;
 
 public record BotActionInfo(
     boolean sneaking,
@@ -29,7 +30,8 @@ public record BotActionInfo(
 
     public static final BotActionInfo EMPTY = new BotActionInfo(false, false, 0F, 0F, 0, 0, 0);
 
-    public static BotActionInfo fromActionPack(EntityPlayerActionPack pack) {
+    public static BotActionInfo fromActionPack(@Nullable EntityPlayerActionPack pack) {
+        if (pack == null) return EMPTY;
         APAccessor accessor = (APAccessor) pack;
         return new BotActionInfo(
             accessor.getSneaking(),

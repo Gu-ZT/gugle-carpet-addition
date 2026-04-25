@@ -42,7 +42,7 @@ public class GcaSetting {
     @Rule(
         categories = {GCA, BOT}
     )
-    public static boolean fakePlayerReloadAction = false;
+    public static boolean fakePlayerReloadAction = true;
 
     // 让假人自动补货
     @Rule(
