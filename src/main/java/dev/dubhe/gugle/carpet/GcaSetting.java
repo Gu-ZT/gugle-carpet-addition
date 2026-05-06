@@ -91,6 +91,12 @@ public class GcaSetting {
     )
     public static String fakePlayerSuffixName = fakePlayerNoneName;
 
+//    // 假人强制使用离线uuid
+//    @Rule(
+//        categories = {GCA, BOT}
+//    )
+//    public static boolean fakePlayerForceOfflineUUID = false;
+
     // 方便快捷的假人管理菜单
     @Rule(
         categories = {GCA, BOT, COMMAND},

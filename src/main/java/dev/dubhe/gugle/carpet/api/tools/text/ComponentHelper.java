@@ -17,6 +17,7 @@ public class ComponentHelper {
 
     private static String lang = "";
     private static final Map<String, String> language = new HashMap<>();
+    private static final Map<String, String> en_us = new HashMap<>();
 
     public static Component tr(String key, Object... args) {
         return tr(key, null, args);
@@ -28,9 +29,13 @@ public class ComponentHelper {
 
     public static Component tr(String key, @Nullable TextColor color, Style style, Object... args) {
         if (color != null) style = style.withColor(color);
+        String text = language.get(key);
+        if (text == null) {
+            text = en_us.get(key);
+        }
         // 不太懂这里为什么要try catch
         try {
-            return Component.translatableWithFallback(key, language.get(key), args).setStyle(style);
+            return Component.translatableWithFallback(key, text, args).setStyle(style);
         } catch (ClassCastException | NullPointerException e) {
             GcaExtension.LOGGER.error(e.getMessage(), e);
             return Component.translatable(key, args);
@@ -58,9 +63,14 @@ public class ComponentHelper {
     }
 
     public static void updateLanguage(String lang) {
-        ComponentHelper.lang = lang;
+        if (en_us.isEmpty()) {
+            String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, "en_us");
+            Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
+            en_us.putAll(translations);
+        }
         String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
-        Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
+        Map<String, String> translations = "en_us".equals(lang) ? en_us : Translations.getTranslationFromResourcePath(path);
+        ComponentHelper.lang = lang;
         language.clear();
         language.putAll(translations);
     }
