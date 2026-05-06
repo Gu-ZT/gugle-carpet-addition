@@ -30,9 +30,6 @@ public class ComponentHelper {
     public static Component tr(String key, @Nullable TextColor color, Style style, Object... args) {
         if (color != null) style = style.withColor(color);
         String text = language.get(key);
-        if (text == null) {
-            text = en_us.get(key);
-        }
         return Component.translatableWithFallback(key, text, args).setStyle(style);
     }
 
