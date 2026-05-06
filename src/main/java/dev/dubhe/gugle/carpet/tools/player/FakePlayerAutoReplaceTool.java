@@ -87,7 +87,7 @@ public class FakePlayerAutoReplaceTool {
 
     private static Predicate<ItemStack> itemReplacePredicate(Item item) {
         boolean keepTool = "keep".equals(GcaSetting.fakePlayerAutoReplaceTool);
-        return itemStack -> itemStack.getItem().getClass() == item.getClass() &&
+        return itemStack -> itemStack.is(item) &&
             ((!keepTool && !InventoryUtil.hasMendingEnchant(itemStack)) ||
                 itemStack.getMaxDamage() - itemStack.getDamageValue() > 10);
     }

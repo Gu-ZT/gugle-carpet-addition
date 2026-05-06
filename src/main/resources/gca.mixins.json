@@ -30,6 +30,7 @@
     "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
     "ServerPlaceRecipeMixin",
+    "ServerPlayerGameModeMixin",
     "ServerPlayerMixin",
     "SignBlockMixin",
     "SlotMixin",

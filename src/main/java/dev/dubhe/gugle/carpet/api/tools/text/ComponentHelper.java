@@ -33,13 +33,7 @@ public class ComponentHelper {
         if (text == null) {
             text = en_us.get(key);
         }
-        // 不太懂这里为什么要try catch
-        try {
-            return Component.translatableWithFallback(key, text, args).setStyle(style);
-        } catch (ClassCastException | NullPointerException e) {
-            GcaExtension.LOGGER.error(e.getMessage(), e);
-            return Component.translatable(key, args);
-        }
+        return Component.translatableWithFallback(key, text, args).setStyle(style);
     }
 
     @SuppressWarnings("NoTranslation")
