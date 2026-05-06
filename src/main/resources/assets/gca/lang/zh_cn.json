@@ -14,6 +14,9 @@
   "carpet.rule.openFakePlayerEnderChest.name": "假人末影箱",
   "carpet.rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
 
+  "carpet.rule.fakePlayerForceOfflineUUID.name": "假人使用离线UUID",
+  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID. (allowSpawningOfflinePlayers必须为true)",
+
   "carpet.rule.fakePlayerResident.name": "假人驻留",
   "carpet.rule.fakePlayerResident.desc": "退出存档时保留假人",
 
