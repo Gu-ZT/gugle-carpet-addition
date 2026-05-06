@@ -38,13 +38,6 @@ import java.util.function.Consumer;
 //$$ import net.minecraft.util.RandomSource;
 //#endif
 
-//#if MC>=12102
-//$$ import net.minecraft.world.InteractionResult;
-//#else
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-//#endif
-
 @Mixin(ItemStack.class)
 abstract class ItemStackMixin {
     //#if MC>=12005
@@ -55,29 +48,6 @@ abstract class ItemStackMixin {
         //#endif
     PatchedDataComponentMap components;
     //#endif
-
-
-//    @Inject(method = "use", at = @At("HEAD"))
-//    private void use(Level level, Player player, InteractionHand usedHand, CallbackInfoReturnable<
-//        //#if MC>=12102
-//        //$$ InteractionResult
-//        //#else
-//        InteractionResultHolder<ItemStack>
-//        //#endif
-//        > cir) {
-//        if (GcaSetting.fakePlayerAutoReplenishment && player instanceof EntityPlayerMPFake fakePlayer) {
-//            FakePlayerAutoReplenishment.autoReplenishment(fakePlayer, usedHand);
-//        }
-//    }
-//
-//    @WrapOperation(method = "useOn", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/Item;useOn(Lnet/minecraft/world/item/context/UseOnContext;)Lnet/minecraft/world/InteractionResult;"))
-//    private InteractionResult useOn(Item item, UseOnContext context, Operation<InteractionResult> original) {
-//        InteractionResult call = original.call(item, context);
-//        if (GcaSetting.fakePlayerAutoReplenishment && context.getPlayer() instanceof EntityPlayerMPFake fakePlayer) {
-//            FakePlayerAutoReplenishment.autoReplenishment(fakePlayer, context.getHand());
-//        }
-//        return call;
-//    }
 
     //#if MC>=12005
     @WrapOperation(method = "hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/entity/EquipmentSlot;)V", at = @At(value = "INVOKE", target =
