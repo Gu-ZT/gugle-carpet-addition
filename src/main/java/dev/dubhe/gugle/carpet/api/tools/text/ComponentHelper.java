@@ -68,11 +68,15 @@ public class ComponentHelper {
             Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
             en_us.putAll(translations);
         }
-        String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
-        Map<String, String> translations = "en_us".equals(lang) ? en_us : Translations.getTranslationFromResourcePath(path);
-        ComponentHelper.lang = lang;
         language.clear();
-        language.putAll(translations);
+        language.putAll(en_us);
+        ComponentHelper.lang = lang;
+        if (!"en_us".equals(lang)) {
+            String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
+            Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
+            language.clear();
+            language.putAll(translations);
+        }
     }
 
     public static Map<String, String> fetchLanguage(String lang) {
