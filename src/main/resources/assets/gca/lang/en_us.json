@@ -33,7 +33,7 @@
   "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace damaged tool",
 
   "carpet.rule.fakePlayerToolDamagedNotification.name": "Fake Player Tool Damaged Notification",
-  "carpet.rule.fakePlayerToolDamagedNotification.desc": "Broadcast a server-wide message when a fake player’s tool breaks or when restocking fails",
+  "carpet.rule.fakePlayerToolDamagedNotification.desc": "Broadcast a server-wide message when a fake player’s tool breaks or when restocking fails. (May cause message spam)",
 
   "carpet.rule.betterFenceGatePlacement.name": "Better Fence Gate Placement",
   "carpet.rule.betterFenceGatePlacement.desc": "Make the placed fence gate have the same block status as the fence gate you clicked",
