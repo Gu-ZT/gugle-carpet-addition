@@ -2,3 +2,5 @@
 - Update tool restocking conditions to support newer versions;
   - now restocks same items instead of similar ones.
 - Adjust restocking timing to trigger earlier, accommodating more use cases.
+- Added `fakePlayerForceOfflineUUID` option
+  - `allowSpawningOfflinePlayers` must be `true`, otherwise the fake player cannot be spawned.
