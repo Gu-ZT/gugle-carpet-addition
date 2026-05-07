@@ -14,6 +14,9 @@
   "carpet.rule.openFakePlayerEnderChest.name": "假人末影箱",
   "carpet.rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
 
+  "carpet.rule.fakePlayerForceOfflineUUID.name": "假人使用离线UUID",
+  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID. (allowSpawningOfflinePlayers必须为true)",
+
   "carpet.rule.fakePlayerResident.name": "假人驻留",
   "carpet.rule.fakePlayerResident.desc": "退出存档时保留假人",
 
@@ -33,7 +36,7 @@
   "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换损坏的工具",
 
   "carpet.rule.fakePlayerToolDamagedNotification.name": "假人工具损坏通知",
-  "carpet.rule.fakePlayerToolDamagedNotification.desc": "假人工具损坏或补货失败后发送一条全服广播",
+  "carpet.rule.fakePlayerToolDamagedNotification.desc": "假人工具损坏或补货失败后发送一条全服广播(可能刷屏)",
 
   "carpet.rule.betterFenceGatePlacement.name": "更好的栅栏门放置",
   "carpet.rule.betterFenceGatePlacement.desc": "让放置的栅栏门与你点击的栅栏门拥有相同的方块状态",

@@ -1,2 +1,6 @@
-- Fixed an issue where saving FakePlayerResident data would clear the fake player's ongoing actions when `fakePlayerResident` is enabled and `fakePlayerReloadAction` is disabled.
-- `fakePlayerReloadAction` default true
+- Use `en_us` as the default i18n text.
+- Update tool restocking conditions to support newer versions;
+  - now restocks same items instead of similar ones.
+- Adjust restocking timing to trigger earlier, accommodating more use cases.
+- Added `fakePlayerForceOfflineUUID` option
+  - `allowSpawningOfflinePlayers` must be `true`, otherwise the fake player cannot be spawned.

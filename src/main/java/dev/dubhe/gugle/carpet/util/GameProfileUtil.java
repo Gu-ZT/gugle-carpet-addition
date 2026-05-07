@@ -2,6 +2,7 @@ package dev.dubhe.gugle.carpet.util;
 
 import carpet.CarpetSettings;
 import com.mojang.authlib.GameProfile;
+import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
@@ -19,15 +20,17 @@ public class GameProfileUtil {
 
     @Nullable
     public static GameProfile getGameProfile(MinecraftServer server, final String name) {
-        GameProfileCache.setUsesAuthentication(false);
         GameProfile gameprofile = null;
-        try {
-            GameProfileCache cache = server.getProfileCache();
-            if (cache != null) {
-                gameprofile = cache.get(name).orElse(null);
+        if (!GcaSetting.fakePlayerForceOfflineUUID) {
+            GameProfileCache.setUsesAuthentication(false);
+            try {
+                GameProfileCache cache = server.getProfileCache();
+                if (cache != null) {
+                    gameprofile = cache.get(name).orElse(null);
+                }
+            } finally {
+                GameProfileCache.setUsesAuthentication(server.isDedicatedServer() && server.usesAuthentication());
             }
-        } finally {
-            GameProfileCache.setUsesAuthentication(server.isDedicatedServer() && server.usesAuthentication());
         }
         if (gameprofile == null && CarpetSettings.allowSpawningOfflinePlayers) {
             gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
