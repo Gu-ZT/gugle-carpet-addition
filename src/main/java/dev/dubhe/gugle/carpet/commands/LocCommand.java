@@ -110,7 +110,7 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Loc List", "/loc list");
+        page.sendPageInfo(context, "msg.gca.location.list", "/loc list");
         return Command.SINGLE_SUCCESS;
     }
 

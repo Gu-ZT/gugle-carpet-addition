@@ -121,7 +121,7 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Todo List", "/todo list");
+        page.sendPageInfo(context, "msg.gca.todo.list", "/todo list");
         return Command.SINGLE_SUCCESS;
     }
 }

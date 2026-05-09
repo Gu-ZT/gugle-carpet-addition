@@ -299,7 +299,7 @@ public class BotCommand {
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
         if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
-        page.sendMessage(context, "Bot List", "/bot list", actionPermission);
+        page.sendPageInfo(context, "msg.gca.bot.list", "/bot list", actionPermission);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -361,7 +361,7 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Bot Group List", "/bot group list");
+        page.sendPageInfo(context, "msg.gca.bot.group.list", "/bot group list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -395,9 +395,9 @@ public class BotCommand {
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
-        page.sendMessage(
+        page.sendPageInfo(
             context,
-            ComponentHelper.fmtHlt("Bot Group %s", groupName),
+            Pair.of("msg.gca.bot.group.list.bot", new Object[]{groupName}),
             "/bot group info " + groupName,
             actionPermission
         );
@@ -500,9 +500,9 @@ public class BotCommand {
         if (bot == null) return 0;
         PageInfo<BotExecutorInfo> page = PageInfo.of(context, bot.executors());
         if (page == null) return 0;
-        page.sendMessage(
+        page.sendPageInfo(
             context,
-            ComponentHelper.fmtHlt("Bot %s's Action List", bot.name()),
+            Pair.of("Bot %s's Action List", new Object[]{bot.name()}),
             "/bot action " + bot.name() + " list",
             bot.name()
         );

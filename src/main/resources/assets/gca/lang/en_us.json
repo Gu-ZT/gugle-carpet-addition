@@ -144,5 +144,19 @@
   "gca.player.inventory": "%s's Inventory",
 
   "gca.tool.damaged": "%s's Tool %s is broken!",
-  "gca.tool.restock.failed": "%s failed to restock %s!"
+  "gca.tool.restock.failed": "%s failed to restock %s!",
+
+  "msg.gca.page.total": "Total %s",
+  "msg.gca.page.footer": "Page %s/%s",
+  "msg.gca.page.previous": "Previous Page",
+  "msg.gca.page.next": "Next Page",
+
+  "msg.gca.bot.list": "Bot List",
+  "msg.gca.bot.group.list": "Bot Group List",
+  "msg.gca.bot.group.list.bot": "Bot Group %s",
+  "msg.gca.bot.action.list": "Bot Action List",
+
+  "msg.gca.location.list": "Location List",
+  "msg.gca.todo.list": "Todo List"
+
 }
