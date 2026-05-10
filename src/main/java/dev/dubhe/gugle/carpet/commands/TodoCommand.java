@@ -105,7 +105,7 @@ public class TodoCommand {
                 false
             );
         } else {
-            context.getSource().sendSuccess(() -> fmtTr("msg.gca.todo.incomplete", todo.desc()), false);
+            context.getSource().sendSuccess(() -> fmtTr("msg.gca.todo.incompleted", todo.desc()), false);
         }
         return Command.SINGLE_SUCCESS;
     }

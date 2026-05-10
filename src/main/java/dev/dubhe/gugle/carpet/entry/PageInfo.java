@@ -88,7 +88,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         if (this.pageNum <= 1) previous.withStyle(ChatFormatting.DARK_GRAY);
         else previous.withStyle(Style.EMPTY
             .applyFormat(ChatFormatting.GREEN)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.page.previous")))
+            .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.page.previous")))
             .withClickEvent(ComponentUtil.createClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
                 command + " " + (this.pageNum - 1)
@@ -98,7 +98,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         if (this.pageNum >= this.maxPage) next.withStyle(ChatFormatting.DARK_GRAY);
         else next.withStyle(Style.EMPTY
             .applyFormat(ChatFormatting.YELLOW)
-            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.page.next")))
+            .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.page.next")))
             .withClickEvent(ComponentUtil.createClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
                 command + " " + (this.pageNum + 1)
@@ -113,49 +113,5 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
         ).withStyle(ChatFormatting.WHITE)));
 
         components.forEach(it -> source.sendSystemMessage(prefix(it)));
-    }
-
-    public void sendMessage(CommandContext<CommandSourceStack> context, Object title, String command, String... args) {
-        CommandSourceStack source = context.getSource();
-        MinecraftServer server = source.getServer();
-        List<Component> components = new ArrayList<>(this.page.size() + 2);
-        components.add(ComponentHelper.fmt("======= %s (Page %s/%s) =======", title, this.pageNum, this.maxPage)
-            .withStyle(ChatFormatting.YELLOW));
-        for (T node : this.page) {
-            components.add(node.component(server, args));
-        }
-        Component prevPage = this.pageNum <= 1 ?
-            Component.literal("<<<").withStyle(ChatFormatting.GRAY) :
-            Component.literal("<<<").withStyle(
-                Style.EMPTY
-                .applyFormat(ChatFormatting.GREEN)
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
-                    command + " " + (this.pageNum - 1)
-                ))
-            );
-        Component nextPage = this.pageNum >= this.maxPage ?
-            Component.literal(">>>").withStyle(ChatFormatting.GRAY) :
-            Component.literal(">>>").withStyle(
-                Style.EMPTY
-                .applyFormat(ChatFormatting.GREEN)
-                .withClickEvent(ComponentUtil.createClickEvent(
-                    ClickEvent.Action.RUN_COMMAND,
-                    command + " " + (this.pageNum + 1)
-                ))
-            );
-        components.add(Component.literal("=======")
-            .withStyle(ChatFormatting.YELLOW)
-            .append(" ")
-            .append(prevPage)
-            .append(" ")
-            .append(Component.literal("(Page %s/%s)".formatted(this.pageNum, this.maxPage))
-                .withStyle(ChatFormatting.YELLOW))
-            .append(" ")
-            .append(nextPage)
-            .append(" ")
-            .append(Component.literal("=======").withStyle(ChatFormatting.YELLOW)));
-
-        components.forEach(source::sendSystemMessage);
     }
 }

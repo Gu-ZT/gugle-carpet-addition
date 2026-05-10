@@ -9,8 +9,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
+
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 
 public record BotExecutorInfo(
     long id,
@@ -48,24 +51,28 @@ public record BotExecutorInfo(
                 .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))
         );
-        Component execute = Component.literal("[▶]").withStyle(
+        Component execute = Component.literal("[>]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Execute action")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.action.execute")))
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, command))
         );
         Component delete = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove action")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.action.remove")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.SUGGEST_COMMAND,
                     "/bot action %s remove %s".formatted(name, this.id)
                 ))
         );
-        Component mark = Component.literal("▶").withStyle(
-            this.startup ? Style.EMPTY.applyFormat(ChatFormatting.GOLD) : Style.EMPTY
-        );
+        MutableComponent mark = Component.literal("▶");
+        if (this.startup) {
+            mark.withStyle(Style.EMPTY
+                .withColor(ChatFormatting.GOLD)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.action.startup")))
+            );
+        }
 
         return Component.literal("")
             .append(mark).append(" ")

@@ -163,6 +163,10 @@
   "msg.gca.bot.add.success": "Bot %s is added.",
   "msg.gca.bot.remove.not_exist": "Bot %s is not exist.",
   "msg.gca.bot.remove.success": "Bot %s is removed.",
+  "msg.gca.bot.load": "Load Bot",
+  "msg.gca.bot.unload": "Unload Bot",
+  "msg.gca.bot.remove": "Remove Bot",
+  "msg.gca.bot.actions": "%s Actions",
 
   "msg.gca.bot.group.list": "Bot Group List",
   "msg.gca.bot.group.list.bot": "Bot Group %s",
@@ -171,7 +175,10 @@
   "msg.gca.bot.group.add.success": "Bot Group %s created successfully.",
   "msg.gca.bot.group.remove.success": "Bot Group %s is removed.",
   "msg.gca.bot.group.generate.success": "Bot Group %s generated successfully.",
-
+  "msg.gca.bot.group.load": "Load Bot Group",
+  "msg.gca.bot.group.unload": "Unload Bot Group",
+  "msg.gca.bot.group.info": "Bot Group Info",
+  "msg.gca.bot.group.remove": "Remove Bot Group",
   "msg.gca.bot.group.bot.add.already": "Bot %s is already in Bot Group %s.",
   "msg.gca.bot.group.bot.add.success": "Bot %s is added to Bot Group %s successfully.",
   "msg.gca.bot.group.bot.remove.not_exist": "Bot %s is not exist in the Bot Group %s.",
@@ -185,15 +192,25 @@
   "msg.gca.bot.action.startup.success": "Action %s is now %s as startup action for Bot %s.",
   "msg.gca.bot.action.clear": "Bot %s's startup action has been cleared.",
 
+  "msg.gca.bot.action.execute": "Execute Action",
+  "msg.gca.bot.action.remove": "Remove Action",
+  "msg.gca.bot.action.startup": "Startup Execution",
+
   "msg.gca.location.list": "Location List",
   "msg.gca.location.not_exist": "Location %s is not exist.",
   "msg.gca.location.add.success": "Location %s is added.",
+  "msg.gca.location.remove": "Remove Location",
   "msg.gca.location.remove.success": "Location %s is removed.",
+  "msg.gca.location.info.view": "View location information",
 
   "msg.gca.todo.list": "Todo List",
   "msg.gca.todo.not_exist": "Todo %s is not exist.",
   "msg.gca.todo.add.success": "Todo %s is added.",
   "msg.gca.todo.remove.success": "Todo %s is removed.",
   "msg.gca.todo.completed": "%s has completed Todo %s.",
-  "msg.gca.todo.incomplete": "Set Todo %s as incomplete."
+  "msg.gca.todo.incompleted": "Set Todo %s as incomplete.",
+  "msg.gca.todo.status.completed": "Completed",
+  "msg.gca.todo.status.incompleted": "Incompleted",
+  "msg.gca.todo.status.done": "Mark as Completed",
+  "msg.gca.todo.status.undone": "Mark as Incompleted"
 }
