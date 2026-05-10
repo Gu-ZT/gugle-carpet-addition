@@ -186,5 +186,10 @@
   "msg.gca.bot.action.clear": "Bot %s's startup action has been cleared.",
 
   "msg.gca.location.list": "Location List",
+  "msg.gca.location.add.success": "Location %s is added.",
+  "msg.gca.location.not_exist": "Location %s is not exist.",
+  "msg.gca.location.remove.success": "Location %s is removed.",
+
+
   "msg.gca.todo.list": "Todo List"
 }
