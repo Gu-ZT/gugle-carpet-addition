@@ -87,7 +87,7 @@ public class LocCommand {
             () -> DimensionArgument.getDimension(context, "dimension").dimension(),
             source.getLevel()::dimension
         );
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(LOCATION_CONFIG);
         String desc = StringArgumentType.getString(context, "desc");
         LOCATION_CONFIG.update(new LocationInfo(id, desc, pos, dimension));
         source.sendSuccess(() -> Component.literal("Loc %s is added.".formatted(desc)), false);

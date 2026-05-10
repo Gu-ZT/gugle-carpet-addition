@@ -3,6 +3,7 @@ package dev.dubhe.gugle.carpet.entry;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.config.IComponentNode;
+import dev.dubhe.gugle.carpet.config.IIdNode;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
@@ -16,7 +17,7 @@ public record BotExecutorInfo(
     String desc,
     String action,
     boolean startup
-) implements IComponentNode {
+) implements IComponentNode, IIdNode {
     public static final Codec<BotExecutorInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.LONG.fieldOf("id").forGetter(BotExecutorInfo::id),
         Codec.STRING.fieldOf("desc").forGetter(BotExecutorInfo::desc),

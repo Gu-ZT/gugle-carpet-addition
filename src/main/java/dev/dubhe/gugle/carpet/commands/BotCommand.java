@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.fakes.ServerPlayerInterface;
-import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import com.mojang.brigadier.Command;
@@ -45,6 +44,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.highlight;
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -241,7 +242,7 @@ public class BotCommand {
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.get(name);
         if (bot == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not exist.", name));
+            context.getSource().sendFailure(tr("msg.gca.bot.not_exist", highlight(name)));
         }
         return bot;
     }
@@ -256,7 +257,7 @@ public class BotCommand {
             .findFirst()
             .orElse(null);
         if (executor == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Action id %s is not found for bot %s", id, bot.name()));
+            context.getSource().sendFailure(tr("msg.gca.bot.action.not_found", highlight(id), highlight(bot.name())));
             return null;
         }
 
@@ -518,7 +519,7 @@ public class BotCommand {
             return 0;
         }
         String action = matcher.group(3).trim();
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(bot.executors());
         String desc = StringArgumentType.getString(context, "desc");
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.add(new BotExecutorInfo(id, desc, action, false));

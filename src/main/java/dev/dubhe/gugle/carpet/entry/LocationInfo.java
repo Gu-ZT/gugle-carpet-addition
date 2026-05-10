@@ -3,6 +3,7 @@ package dev.dubhe.gugle.carpet.entry;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.config.IConfigNode;
+import dev.dubhe.gugle.carpet.config.IIdNode;
 import dev.dubhe.gugle.carpet.util.ComponentUtil;
 import dev.dubhe.gugle.carpet.util.PosUtil;
 import net.minecraft.ChatFormatting;
@@ -24,7 +25,7 @@ public record LocationInfo(
     String desc,
     Vec3 pos,
     ResourceKey<Level> dimension
-) implements IConfigNode {
+) implements IConfigNode, IIdNode {
     public static final Codec<LocationInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.LONG.fieldOf("id").forGetter(LocationInfo::id),
         Codec.STRING.fieldOf("desc").forGetter(LocationInfo::desc),

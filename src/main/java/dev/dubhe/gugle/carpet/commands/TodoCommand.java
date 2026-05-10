@@ -68,7 +68,7 @@ public class TodoCommand {
     public static int add(CommandContext<CommandSourceStack> context) {
         TODO_CONFIG.tryInit(context);
         CommandSourceStack source = context.getSource();
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(TODO_CONFIG);
         String desc = StringArgumentType.getString(context, "desc");
         TODO_CONFIG.update(new TodoInfo(id, desc, false));
         source.sendSuccess(() -> Component.literal("Todo %s is added.".formatted(desc)), false);

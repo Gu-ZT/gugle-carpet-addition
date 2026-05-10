@@ -157,6 +157,11 @@
   "msg.gca.bot.action.list": "Bot Action List",
 
   "msg.gca.location.list": "Location List",
-  "msg.gca.todo.list": "Todo List"
+  "msg.gca.todo.list": "Todo List",
+
+  "msg.gca.bot.not_exist": "Bot %s is not exist.",
+
+  "msg.gca.bot.action.not_found": "Action id %s is not found for bot %s"
+
 
 }
