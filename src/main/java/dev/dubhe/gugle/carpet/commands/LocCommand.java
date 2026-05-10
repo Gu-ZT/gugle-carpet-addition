@@ -30,8 +30,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
 import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.prefix;
-import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -91,7 +91,7 @@ public class LocCommand {
         long id = IdUtil.nextId(LOCATION_CONFIG);
         String desc = StringArgumentType.getString(context, "desc");
         LOCATION_CONFIG.update(new LocationInfo(id, desc, pos, dimension));
-        source.sendSuccess(() -> tr("msg.gca.location.add.success", desc), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.location.add.success", desc), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -100,10 +100,10 @@ public class LocCommand {
         long id = LongArgumentType.getLong(context, "id");
         LocationInfo removed = LOCATION_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(tr("msg.gca.location.not_exist", id));
+            context.getSource().sendFailure(fmtTr("msg.gca.location.not_exist", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> tr("msg.gca.location.remove.success", removed.desc()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.location.remove.success", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -121,7 +121,7 @@ public class LocCommand {
         LocationInfo location = LOCATION_CONFIG.get(String.valueOf(id));
         CommandSourceStack source = context.getSource();
         if (location == null) {
-            source.sendFailure(tr("msg.gca.location.not_exist", id));
+            source.sendFailure(fmtTr("msg.gca.location.not_exist", id));
             return 0;
         }
         for (Component component : LocCommand.info(location)) {

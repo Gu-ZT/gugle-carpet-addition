@@ -20,7 +20,7 @@ public class ComponentHelper {
     private static final Map<String, String> en_us = new HashMap<>();
 
     public static MutableComponent tr(String key, Object... args) {
-        return tr(key, null, args);
+        return tr(key, null, Style.EMPTY, args);
     }
 
     public static MutableComponent tr(String key, @Nullable TextColor color, Object... args) {
@@ -51,17 +51,6 @@ public class ComponentHelper {
             })
             .toArray();
         return tr(key, highlights);
-    }
-
-    public static MutableComponent fmtHlt(String text, Object... args) {
-        Object[] highlights = Arrays.stream(args)
-            .map(it -> {
-                if (it instanceof String str) return highlight(str);
-                if (it instanceof Component component) return component;
-                return highlight(it.toString());
-            })
-            .toArray();
-        return fmt(text, highlights);
     }
 
     public static Component prefix(Component content) {
