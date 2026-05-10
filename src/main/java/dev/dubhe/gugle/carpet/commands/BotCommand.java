@@ -43,8 +43,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
-import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.highlight;
-import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -241,7 +240,7 @@ public class BotCommand {
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.get(name);
         if (bot == null) {
-            context.getSource().sendFailure(tr("msg.gca.bot.not_exist", highlight(name)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.not_exist", name));
         }
         return bot;
     }
@@ -256,7 +255,7 @@ public class BotCommand {
             .findFirst()
             .orElse(null);
         if (executor == null) {
-            context.getSource().sendFailure(tr("msg.gca.bot.action.not_found", highlight(id), highlight(bot.name())));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.not_found", id, bot.name()));
             return null;
         }
 
@@ -278,17 +277,17 @@ public class BotCommand {
             //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
             //#endif
         ) {
-            source.sendFailure(tr("msg.gca.bot.load.logging", highlight(bot.name())));
+            source.sendFailure(fmtTr("msg.gca.bot.load.logging", bot.name()));
             return false;
         }
         //#endif
         if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
-            source.sendFailure(tr("msg.gca.bot.load.already", highlight(bot.name())));
+            source.sendFailure(fmtTr("msg.gca.bot.load.already", bot.name()));
             return false;
         }
         boolean success = BotUtil.spawnBot(source.getServer(), bot);
         if (!success) {
-            source.sendFailure(tr("msg.gca.bot.load.failed", highlight(bot.name())));
+            source.sendFailure(fmtTr("msg.gca.bot.load.failed", bot.name()));
         }
         return success;
 
@@ -308,12 +307,12 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
-            source.sendFailure(tr("msg.gca.bot.add.not_fake", highlight(p.getGameProfile().getName())));
+            source.sendFailure(fmtTr("msg.gca.bot.add.not_fake", p.getGameProfile().getName()));
             return 0;
         }
         String name = player.getGameProfile().getName();
         if (BOT_CONFIG.contains(name)) {
-            source.sendFailure(tr("msg.gca.bot.add.already", highlight(name)));
+            source.sendFailure(fmtTr("msg.gca.bot.add.already", name));
             return 0;
         }
         BOT_CONFIG.update(BotInfo.create(
@@ -322,7 +321,7 @@ public class BotCommand {
             player,
             ((ServerPlayerInterface) player).getActionPack()
         ));
-        source.sendSuccess(() -> tr("msg.gca.bot.add.success", highlight(name)), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.bot.add.success", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -330,10 +329,10 @@ public class BotCommand {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         if (BOT_CONFIG.remove(name) == null) {
-            context.getSource().sendFailure(tr("msg.gca.bot.remove.not_exist", highlight(name)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.remove.not_exist", name));
             return 0;
         }
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.remove.success", highlight(name)), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.remove.success", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -344,7 +343,7 @@ public class BotCommand {
         tryInit(context);
         BotGroupInfo groupInfo = BOT_GROUP_CONFIG.get(groupName);
         if (groupInfo == null) {
-            context.getSource().sendFailure(tr("msg.gca.bot.group.not_exist", highlight(groupName)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.not_exist", groupName));
             return null;
         }
         List<BotInfo> bots = groupInfo.bots().stream()
@@ -369,11 +368,11 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            context.getSource().sendFailure(tr("msg.gca.bot.group.already", highlight(groupName)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.already", groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.group.add.success", highlight(groupName)), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.add.success", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -381,10 +380,10 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         if (BOT_GROUP_CONFIG.remove(groupName) == null) {
-            context.getSource().sendFailure(tr("msg.gca.bot.group.not_exist", highlight(groupName)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.not_exist", groupName));
             return 0;
         }
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.group.remove.success", highlight(groupName)), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.remove.success", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -411,12 +410,12 @@ public class BotCommand {
         if (group == null) return 0;
         List<String> bots = new ArrayList<>(group.group.bots());
         if (bots.contains(botName)) {
-            context.getSource().sendFailure(tr("msg.gca.bot.group.bot.add.already", highlight(botName), highlight(groupName)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.bot.add.already", botName, groupName));
             return 0;
         }
         bots.add(botName);
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.group.bot.add.success", highlight(botName), highlight(groupName)), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.bot.add.success", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -427,11 +426,11 @@ public class BotCommand {
         if (group == null) return 0;
         List<String> bots = new ArrayList<>(group.group.bots());
         if (!bots.remove(botName)) {
-            context.getSource().sendFailure(tr("msg.gca.bot.group.bot.remove.not_exist", highlight(botName), highlight(groupName)));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.bot.remove.not_exist", botName, groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.group.bot.remove.success", highlight(botName), highlight(groupName)), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.bot.remove.success", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -451,7 +450,7 @@ public class BotCommand {
         for (BotInfo bot : group.bots) {
             ServerPlayer player = players.getPlayerByName(bot.name());
             if (!(player instanceof EntityPlayerMPFake fake)) continue;
-            fake.kill(Component.literal("Killed"));
+            fake.kill(Component.literal("Manual logout"));
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -464,7 +463,7 @@ public class BotCommand {
         int groupCount = IntegerArgumentType.getInteger(context, "count");
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            source.sendFailure(tr("msg.gca.bot.group.already", highlight(groupName)));
+            source.sendFailure(fmtTr("msg.gca.bot.group.already", groupName));
             return 0;
         }
 
@@ -472,7 +471,7 @@ public class BotCommand {
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
             if (BOT_CONFIG.contains(botName)) {
-                source.sendFailure(tr("msg.gca.bot.load.already", highlight(botName)));
+                source.sendFailure(fmtTr("msg.gca.bot.load.already", botName));
                 continue;
             }
             BotInfo bot = BotInfo.create(botName, botName, player, null);
@@ -485,7 +484,7 @@ public class BotCommand {
                 spawnBot(source, bot);
             }
         }
-        source.sendSuccess(() -> tr("msg.gca.bot.group.generate.success", highlight(groupName)), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.bot.group.generate.success", groupName), false);
         return bots.size();
     }
 
@@ -510,7 +509,7 @@ public class BotCommand {
         if (bot == null) return 0;
         Matcher matcher = ACTION_PATTERN.matcher(context.getInput());
         if (!matcher.matches()) {
-            context.getSource().sendFailure(tr("msg.gca.bot.action.invalid"));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.invalid"));
             return 0;
         }
         String action = matcher.group(3).trim();
@@ -519,7 +518,7 @@ public class BotCommand {
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.add(new BotExecutorInfo(id, desc, action, false));
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.action.success", highlight(desc), highlight(bot.name())), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.success", desc, bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -531,7 +530,7 @@ public class BotCommand {
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.removeIf(it -> it.id() == action.id());
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.action.remove.success", highlight(action.desc()), highlight(bot.name())), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.remove.success", action.desc(), bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -545,7 +544,7 @@ public class BotCommand {
             () -> !action.startup()
         );
         if (action.startup() == set) {
-            context.getSource().sendFailure(tr("msg.gca.bot.action.startup.already", highlight(action.desc()), set ? "set" : "not set", highlight(bot.name())));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.startup.already", action.desc(), set ? "set" : "not set", bot.name()));
             return 0;
         }
         BotExecutorInfo newAction = action.withStartup(set);
@@ -557,7 +556,7 @@ public class BotCommand {
             }
         }
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.action.startup.success", highlight(action.desc()), set ? "set" : "not set", highlight(bot.name())), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.startup.success", action.desc(), set ? "set" : "not set", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -568,7 +567,7 @@ public class BotCommand {
             .map(it -> it.withStartup(false))
             .toList();
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> tr("msg.gca.bot.action.clear", highlight(bot.name())), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.clear", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 

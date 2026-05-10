@@ -42,6 +42,17 @@ public class ComponentHelper {
         return Component.literal(String.valueOf(value)).withStyle(ChatFormatting.GOLD);
     }
 
+    public static Component fmtTr(String key, Object... args) {
+        Object[] highlights = Arrays.stream(args)
+            .map(it -> {
+                if (it instanceof Component component) return component;
+                if (it instanceof String str) return highlight(str);
+                return highlight(it.toString());
+            })
+            .toArray();
+        return tr(key, highlights);
+    }
+
     public static MutableComponent fmtHlt(String text, Object... args) {
         Object[] highlights = Arrays.stream(args)
             .map(it -> {
