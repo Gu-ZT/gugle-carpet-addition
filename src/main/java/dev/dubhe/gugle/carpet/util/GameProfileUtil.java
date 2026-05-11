@@ -36,7 +36,7 @@ public class GameProfileUtil {
             gameprofile = new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name);
         }
         //#if MC <= 12001
-        //$$ if (gameprofile != null && gameprofile.getProperties().containsKey("textures")) {
+        //$$ if (gameprofile != null && !GcaSetting.fakePlayerForceOfflineUUID && gameprofile.getProperties().containsKey("textures")) {
         //$$     AtomicReference<GameProfile> result = new AtomicReference<>();
         //$$     SkullBlockEntity.updateGameprofile(gameprofile, result::set);
         //$$     gameprofile = result.get();
@@ -47,6 +47,9 @@ public class GameProfileUtil {
 
     //#if MC > 12001
     public static CompletableFuture<Optional<GameProfile>> fetchGameProfile(MinecraftServer server, GameProfile profile) {
+        if (GcaSetting.fakePlayerForceOfflineUUID) {
+            return CompletableFuture.completedFuture(Optional.of(profile));
+        }
         return SkullBlockEntity.fetchGameProfile(profile.getName());
     }
     //#endif

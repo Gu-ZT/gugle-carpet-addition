@@ -18,7 +18,7 @@
   "carpet.rule.fakePlayerResident.desc": "Keep the fake player when exiting the level",
 
   "carpet.rule.fakePlayerForceOfflineUUID.name": "Fake Player Force Offline UUID",
-  "carpet.rule.fakePlayerForceOfflineUUID.desc": "Force fake players to use offline UUIDs. (allowSpawningOfflinePlayers must be set to true)",
+  "carpet.rule.fakePlayerForceOfflineUUID.desc": "Force fake players to use offline UUIDs.\n'allowSpawningOfflinePlayers' must be set to true.\n§eTo disable this feature after enabling it, you need to clear the usercache.json file and restart the server/client.",
 
   "carpet.rule.fakePlayerReloadAction.name": "Fake Player Reload Action",
   "carpet.rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",

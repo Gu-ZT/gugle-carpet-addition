@@ -21,10 +21,13 @@ import java.util.Optional;
 //#endif
 //#if MC >= 12104
 //$$ import dev.dubhe.gugle.carpet.util.BotUtil;
-//$$ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 //#endif
 //#if MC > 12001
 import net.minecraft.server.level.ClientInformation;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import java.util.concurrent.CompletableFuture;
+//#else
+//$$ import com.mojang.authlib.properties.PropertyMap;
 //#endif
 
 @Mixin(EntityPlayerMPFake.class)
@@ -68,6 +71,36 @@ public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
     //$$ private static UUID useOfflineUUID(MinecraftServer minecraftServer, String string, Operation<UUID> original) {
     //$$     if (GcaSetting.fakePlayerForceOfflineUUID) return null;
     //$$     return original.call(minecraftServer, string);
+    //$$ }
+    //#endif
+
+
+    //#if MC > 12001
+    @Inject(method = "fetchGameProfile", at = @At("HEAD"), cancellable = true, remap = false)
+    private static void cancelFetchUUID(
+        //#if MC >= 12109
+        //$$ MinecraftServer server, UUID name, CallbackInfoReturnable<CompletableFuture<GameProfile>> cir
+        //#else
+        String name, CallbackInfoReturnable<CompletableFuture<Optional<GameProfile>>> cir
+        //#endif
+    ) {
+        if (GcaSetting.fakePlayerForceOfflineUUID) {
+            cir.setReturnValue(CompletableFuture.completedFuture(
+                //#if MC >= 12109
+                //$$ new GameProfile(name, "")
+                //#else
+                Optional.empty()
+                //#endif
+            ));
+        }
+    }
+    //#else
+    //$$ @WrapOperation(method = "createFake", at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/properties/PropertyMap;containsKey(Ljava/lang/Object;)Z"), remap = false)
+    //$$ private static boolean cancelFetchUUID(PropertyMap instance, Object o, Operation<Boolean> original) {
+    //$$     if (GcaSetting.fakePlayerForceOfflineUUID) {
+    //$$         return false;
+    //$$     }
+    //$$     return original.call(instance, o);
     //$$ }
     //#endif
 }

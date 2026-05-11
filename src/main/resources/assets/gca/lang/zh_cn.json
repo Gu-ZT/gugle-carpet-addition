@@ -18,7 +18,7 @@
   "carpet.rule.fakePlayerResident.desc": "退出存档时保留假人",
 
   "carpet.rule.fakePlayerForceOfflineUUID.name": "假人使用离线UUID",
-  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID. (allowSpawningOfflinePlayers必须为true)",
+  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID\n§e必须启用'allowSpawningOfflinePlayers',否则无法召唤假人§r\n§e如果在启用后需要关闭此功能,需要清理'usercache.json'文件并重启服务器/客户端§r",
 
   "carpet.rule.fakePlayerReloadAction.name": "假人动作保存",
   "carpet.rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
