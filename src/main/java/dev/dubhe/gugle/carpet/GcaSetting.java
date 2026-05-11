@@ -271,7 +271,9 @@ public class GcaSetting {
     // 列表中一页显示的条目数
     @Rule(
         categories = {GCA},
-        validators = GcaValidators.PositiveNumber.class
+        validators = GcaValidators.PositiveNumber.class,
+        options = {"8"},
+        strict = false
     )
     public static int gcaPageSize = 8;
 
