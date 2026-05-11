@@ -39,12 +39,11 @@ public class ComponentHelper {
     }
 
     public static Component highlight(Object value) {
-        MutableComponent component = switch (value) {
-            case MutableComponent cpt -> cpt;
-            case Component cpt -> Component.literal("").append(cpt);
-            case String str -> str.startsWith("msg.gca.") ? tr(str) : Component.literal(str);
-            default -> Component.literal(String.valueOf(value));
-        };
+        MutableComponent component;
+        if (value instanceof MutableComponent cpt) component = cpt;
+        else if (value instanceof Component cpt) component = Component.literal("").append(cpt);
+        else if (value instanceof String str && str.startsWith("msg.gca.")) component = tr(str);
+        else component = Component.literal(String.valueOf(value));
 
         return component.withStyle(ChatFormatting.GOLD);
     }
