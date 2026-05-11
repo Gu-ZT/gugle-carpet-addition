@@ -25,6 +25,7 @@ import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -44,6 +45,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
 import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -543,8 +545,9 @@ public class BotCommand {
             () -> BoolArgumentType.getBool(context, "value"),
             () -> !action.startup()
         );
+        Component setComponent = tr(set ? "msg.gca.bot.action.startup.set" : "msg.gca.bot.action.startup.not_set");
         if (action.startup() == set) {
-            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.startup.already", action.desc(), set ? "set" : "not set", bot.name()));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.startup.already", action.desc(), setComponent, bot.name()));
             return 0;
         }
         BotExecutorInfo newAction = action.withStartup(set);
@@ -556,7 +559,7 @@ public class BotCommand {
             }
         }
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.startup.success", action.desc(), set ? "set" : "not set", bot.name()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.startup.success", action.desc(), setComponent, bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 

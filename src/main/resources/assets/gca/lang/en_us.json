@@ -151,8 +151,6 @@
   "msg.gca.page.previous": "Previous Page",
   "msg.gca.page.next": "Next Page",
 
-  "msg.gca.bot.action.list": "Bot Action List",
-
   "msg.gca.bot.list": "Bot List",
   "msg.gca.bot.not_exist": "Bot %s is not exist.",
   "msg.gca.bot.load.logging": "Bot %s is currently logging on",
@@ -184,14 +182,16 @@
   "msg.gca.bot.group.bot.remove.not_exist": "Bot %s is not exist in the Bot Group %s.",
   "msg.gca.bot.group.bot.remove.success": "Bot %s is removed from Bot Group %s successfully.",
 
+  "msg.gca.bot.action.list": "Bot Action List",
   "msg.gca.bot.action.not_found": "Action id %s is not found for bot %s",
   "msg.gca.bot.action.invalid": "Invalid action",
   "msg.gca.bot.action.success": "Action %s is added to Bot %s.",
   "msg.gca.bot.action.remove.success": "Action %s is removed from Bot %s.",
+  "msg.gca.bot.action.startup.set": "set",
+  "msg.gca.bot.action.startup.not_set": "not set",
   "msg.gca.bot.action.startup.already": "Action %s is already %s as startup action for Bot %s.",
   "msg.gca.bot.action.startup.success": "Action %s is now %s as startup action for Bot %s.",
   "msg.gca.bot.action.clear": "Bot %s's startup action has been cleared.",
-
   "msg.gca.bot.action.execute": "Execute Action",
   "msg.gca.bot.action.remove": "Remove Action",
   "msg.gca.bot.action.startup": "Startup Execution",

@@ -39,17 +39,18 @@ public class ComponentHelper {
     }
 
     public static Component highlight(Object value) {
-        return Component.literal(String.valueOf(value)).withStyle(ChatFormatting.GOLD);
+        MutableComponent component = switch (value) {
+            case MutableComponent cpt -> cpt;
+            case Component cpt -> Component.literal("").append(cpt);
+            case String str -> str.startsWith("msg.gca.") ? tr(str) : Component.literal(str);
+            default -> Component.literal(String.valueOf(value));
+        };
+
+        return component.withStyle(ChatFormatting.GOLD);
     }
 
     public static Component fmtTr(String key, Object... args) {
-        Object[] highlights = Arrays.stream(args)
-            .map(it -> {
-                if (it instanceof Component component) return component;
-                if (it instanceof String str) return highlight(str);
-                return highlight(it.toString());
-            })
-            .toArray();
+        Object[] highlights = Arrays.stream(args).map(ComponentHelper::highlight).toArray();
         return tr(key, highlights);
     }
 
