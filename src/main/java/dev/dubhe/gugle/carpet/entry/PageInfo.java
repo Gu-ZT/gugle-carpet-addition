@@ -43,7 +43,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
     public static <T extends IComponentNode> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection, int pageSize) {
         int pageNum = getPage(context);
         int total = collection.size();
-        int maxPage = total / pageSize + 1;
+        int maxPage = (total + pageSize - 1) / pageSize;
         if (pageNum > maxPage) {
             context.getSource().sendFailure(Component.literal("No such page %s".formatted(pageNum)));
             return null;

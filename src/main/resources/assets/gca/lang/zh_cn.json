@@ -182,7 +182,7 @@
   "msg.gca.bot.group.bot.remove.not_exist": "%2$s中没有假人%1$s",
   "msg.gca.bot.group.bot.remove.success": "假人%s已从%s中移除",
 
-  "msg.gca.bot.action.list": "Bot Action List",
+  "msg.gca.bot.action.list": "Bot %s's Action List",
   "msg.gca.bot.action.not_found": "假人%2$s没有此动作",
   "msg.gca.bot.action.invalid": "无效动作",
   "msg.gca.bot.action.success": "动作%s已添加至假人%s",

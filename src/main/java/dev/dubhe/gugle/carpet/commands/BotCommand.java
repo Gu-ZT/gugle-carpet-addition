@@ -25,7 +25,6 @@ import dev.dubhe.gugle.carpet.util.BotUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -499,7 +498,7 @@ public class BotCommand {
         if (page == null) return 0;
         page.sendPageInfo(
             context,
-            Pair.of("Bot %s's Action List", new Object[]{bot.name()}),
+            Pair.of("msg.gca.bot.action.list", new Object[]{bot.name()}),
             "/bot action " + bot.name() + " list",
             bot.name()
         );
