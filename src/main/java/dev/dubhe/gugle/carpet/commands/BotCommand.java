@@ -1,7 +1,6 @@
 package dev.dubhe.gugle.carpet.commands;
 
 import carpet.fakes.ServerPlayerInterface;
-import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.CommandHelper;
 import com.mojang.brigadier.Command;
@@ -17,7 +16,6 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
@@ -45,6 +43,8 @@ import java.util.regex.Pattern;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.Nullable;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -241,7 +241,7 @@ public class BotCommand {
         String name = StringArgumentType.getString(context, "player");
         BotInfo bot = BOT_CONFIG.get(name);
         if (bot == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not exist.", name));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.not_exist", name));
         }
         return bot;
     }
@@ -256,7 +256,7 @@ public class BotCommand {
             .findFirst()
             .orElse(null);
         if (executor == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Action id %s is not found for bot %s", id, bot.name()));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.not_found", id, bot.name()));
             return null;
         }
 
@@ -278,17 +278,17 @@ public class BotCommand {
             //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
             //#endif
         ) {
-            source.sendFailure(ComponentHelper.fmtHlt("Player %s is currently logging on", bot.name()));
+            source.sendFailure(fmtTr("msg.gca.bot.load.logging", bot.name()));
             return false;
         }
         //#endif
         if (source.getServer().getPlayerList().getPlayerByName(bot.name()) != null) {
-            source.sendFailure(ComponentHelper.fmtHlt("player %s is already exist.", bot.name()));
+            source.sendFailure(fmtTr("msg.gca.bot.load.already", bot.name()));
             return false;
         }
         boolean success = BotUtil.spawnBot(source.getServer(), bot);
         if (!success) {
-            source.sendFailure(ComponentHelper.fmtHlt("%s is not loaded.", bot.name()));
+            source.sendFailure(fmtTr("msg.gca.bot.load.failed", bot.name()));
         }
         return success;
 
@@ -299,7 +299,7 @@ public class BotCommand {
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
         if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
-        page.sendMessage(context, "Bot List", "/bot list", actionPermission);
+        page.sendPageInfo(context, "msg.gca.bot.list", "/bot list", actionPermission);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -308,12 +308,12 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
         ServerPlayer p;
         if (!((p = EntityArgument.getPlayer(context, "player")) instanceof EntityPlayerMPFake player)) {
-            source.sendFailure(ComponentHelper.fmtHlt("%s is not a fake player.", p.getGameProfile().getName()));
+            source.sendFailure(fmtTr("msg.gca.bot.add.not_fake", p.getGameProfile().getName()));
             return 0;
         }
         String name = player.getGameProfile().getName();
         if (BOT_CONFIG.contains(name)) {
-            source.sendFailure(ComponentHelper.fmtHlt("%s is already save.", name));
+            source.sendFailure(fmtTr("msg.gca.bot.add.already", name));
             return 0;
         }
         BOT_CONFIG.update(BotInfo.create(
@@ -322,7 +322,7 @@ public class BotCommand {
             player,
             ((ServerPlayerInterface) player).getActionPack()
         ));
-        source.sendSuccess(() -> ComponentHelper.fmtHlt("%s is added.", name), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.bot.add.success", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -330,10 +330,10 @@ public class BotCommand {
         tryInit(context);
         String name = StringArgumentType.getString(context, "player");
         if (BOT_CONFIG.remove(name) == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not exist.", name));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.remove.not_exist", name));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", name), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.remove.success", name), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -344,7 +344,7 @@ public class BotCommand {
         tryInit(context);
         BotGroupInfo groupInfo = BOT_GROUP_CONFIG.get(groupName);
         if (groupInfo == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Group %s is not found.", groupName));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.not_exist", groupName));
             return null;
         }
         List<BotInfo> bots = groupInfo.bots().stream()
@@ -361,7 +361,7 @@ public class BotCommand {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Bot Group List", "/bot group list");
+        page.sendPageInfo(context, "msg.gca.bot.group.list", "/bot group list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -369,11 +369,11 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Group %s already exists.", groupName));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.already", groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, List.of()));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Group %s created successfully.", groupName), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.add.success", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -381,10 +381,10 @@ public class BotCommand {
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         if (BOT_GROUP_CONFIG.remove(groupName) == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot Group %s is not exist.", groupName));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.not_exist", groupName));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", groupName), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.remove.success", groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -395,9 +395,9 @@ public class BotCommand {
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
         if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
-        page.sendMessage(
+        page.sendPageInfo(
             context,
-            ComponentHelper.fmtHlt("Bot Group %s", groupName),
+            Pair.of("msg.gca.bot.group.list.bot", new Object[]{groupName}),
             "/bot group info " + groupName,
             actionPermission
         );
@@ -411,12 +411,12 @@ public class BotCommand {
         if (group == null) return 0;
         List<String> bots = new ArrayList<>(group.group.bots());
         if (bots.contains(botName)) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is already added.", botName));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.bot.add.already", botName, groupName));
             return 0;
         }
         bots.add(botName);
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Bot %s is added to %s successfully.", botName, groupName), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.bot.add.success", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -427,11 +427,11 @@ public class BotCommand {
         if (group == null) return 0;
         List<String> bots = new ArrayList<>(group.group.bots());
         if (!bots.remove(botName)) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("Bot %s is not found in the %s.", botName, groupName));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.group.bot.remove.not_exist", botName, groupName));
             return 0;
         }
         BOT_GROUP_CONFIG.update(new BotGroupInfo(groupName, bots));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Bot %s is removed from %s successfully.", botName, groupName), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.group.bot.remove.success", botName, groupName), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -451,24 +451,20 @@ public class BotCommand {
         for (BotInfo bot : group.bots) {
             ServerPlayer player = players.getPlayerByName(bot.name());
             if (!(player instanceof EntityPlayerMPFake fake)) continue;
-            fake.kill(Component.literal("Killed"));
+            fake.kill(Component.literal("Manual logout"));
         }
         return Command.SINGLE_SUCCESS;
     }
 
-    private static int groupGenerated(CommandContext<CommandSourceStack> context) {
+    private static int groupGenerated(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack source = context.getSource();
+        ServerPlayer player = source.getPlayerOrException();
         tryInit(context);
         String groupName = StringArgumentType.getString(context, "name");
         int groupCount = IntegerArgumentType.getInteger(context, "count");
         boolean groupLoad = BoolArgumentType.getBool(context, "load");
-        CommandSourceStack source = context.getSource();
         if (BOT_GROUP_CONFIG.contains(groupName)) {
-            source.sendFailure(ComponentHelper.fmtHlt("Group %s already exists.", groupName));
-            return 0;
-        }
-        ServerPlayer player = source.getPlayer();
-        if (player == null) {
-            source.sendFailure(Component.literal("Command source must be player."));
+            source.sendFailure(fmtTr("msg.gca.bot.group.already", groupName));
             return 0;
         }
 
@@ -476,7 +472,7 @@ public class BotCommand {
         for (int i = 0; i < groupCount; i++) {
             String botName = "bot_%s_%s".formatted(groupName, i);
             if (BOT_CONFIG.contains(botName)) {
-                source.sendFailure(ComponentHelper.fmtHlt("Bot %s already exists.", botName));
+                source.sendFailure(fmtTr("msg.gca.bot.load.already", botName));
                 continue;
             }
             BotInfo bot = BotInfo.create(botName, botName, player, null);
@@ -489,7 +485,7 @@ public class BotCommand {
                 spawnBot(source, bot);
             }
         }
-        source.sendSuccess(() -> ComponentHelper.fmtHlt("Group %s generated successfully.", groupName), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.bot.group.generate.success", groupName), false);
         return bots.size();
     }
 
@@ -500,9 +496,9 @@ public class BotCommand {
         if (bot == null) return 0;
         PageInfo<BotExecutorInfo> page = PageInfo.of(context, bot.executors());
         if (page == null) return 0;
-        page.sendMessage(
+        page.sendPageInfo(
             context,
-            ComponentHelper.fmtHlt("Bot %s's Action List", bot.name()),
+            Pair.of("msg.gca.bot.action.list", new Object[]{bot.name()}),
             "/bot action " + bot.name() + " list",
             bot.name()
         );
@@ -514,16 +510,16 @@ public class BotCommand {
         if (bot == null) return 0;
         Matcher matcher = ACTION_PATTERN.matcher(context.getInput());
         if (!matcher.matches()) {
-            context.getSource().sendFailure(Component.literal("Invalid command syntax."));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.invalid"));
             return 0;
         }
         String action = matcher.group(3).trim();
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(bot.executors());
         String desc = StringArgumentType.getString(context, "desc");
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.add(new BotExecutorInfo(id, desc, action, false));
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is added.", desc), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.success", desc, bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -535,7 +531,7 @@ public class BotCommand {
         List<BotExecutorInfo> executors = new ArrayList<>(bot.executors());
         executors.removeIf(it -> it.id() == action.id());
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is removed.", action.desc()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.remove.success", action.desc(), bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -548,8 +544,9 @@ public class BotCommand {
             () -> BoolArgumentType.getBool(context, "value"),
             () -> !action.startup()
         );
+        Component setComponent = tr(set ? "msg.gca.bot.action.startup.set" : "msg.gca.bot.action.startup.not_set");
         if (action.startup() == set) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("%s is already %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()));
+            context.getSource().sendFailure(fmtTr("msg.gca.bot.action.startup.already", action.desc(), setComponent, bot.name()));
             return 0;
         }
         BotExecutorInfo newAction = action.withStartup(set);
@@ -561,7 +558,7 @@ public class BotCommand {
             }
         }
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s is now %s as startup action for %s.", action.desc(), set ? "set" : "not set", bot.name()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.startup.success", action.desc(), setComponent, bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -572,7 +569,7 @@ public class BotCommand {
             .map(it -> it.withStartup(false))
             .toList();
         BOT_CONFIG.update(bot.withExecutors(executors));
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("%s's startup action has been cleared.", bot.name()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.clear", bot.name()), false);
         return Command.SINGLE_SUCCESS;
     }
 

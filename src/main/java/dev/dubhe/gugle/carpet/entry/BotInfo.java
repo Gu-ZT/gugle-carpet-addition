@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
+
 //#if MC < 12105
 import dev.dubhe.gugle.carpet.tools.CustomCodec;
 //#endif
@@ -102,50 +104,56 @@ public record BotInfo(
     public Component component(MinecraftServer server, String... args) {
         boolean showAction = args.length > 0 && "true".equals(args[0]);
         Component desc = Component.literal(this.desc).withStyle(
-            Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
+            Style.EMPTY.withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
         );
-        boolean notOnline = server.getPlayerList().getPlayerByName(this.name) == null;
+
+        boolean online = server.getPlayerList().getPlayerByName(this.name) != null;
+
         Component spawn = Component.literal("[↑]").withStyle(
             Style.EMPTY
-                .applyFormat(notOnline ? ChatFormatting.GREEN : ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load bot")))
+                .applyFormat(ChatFormatting.GREEN)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.load")))
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot load %s".formatted(this.name)))
         );
         Component kill = Component.literal("[↓]").withStyle(
             Style.EMPTY
-                .applyFormat(notOnline ? ChatFormatting.GRAY : ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload bot")))
+                .applyFormat(ChatFormatting.RED)
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.unload")))
                 .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/player %s kill".formatted(this.name)))
         );
         Component remove = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove bot")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.remove")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.SUGGEST_COMMAND,
                     "/bot remove %s".formatted(this.name)
                 ))
         );
 
-        MutableComponent result = Component.literal("▶ ")
-            .withStyle(notOnline ? ChatFormatting.RED : ChatFormatting.GREEN)
-            .append(desc).append(" ")
-            .append(spawn).append(" ")
-            .append(kill).append(" ");
+        MutableComponent result = Component.literal("")
+            .append(Component.literal("▶").withStyle(
+                Style.EMPTY
+                    .withColor(online ? ChatFormatting.GREEN : ChatFormatting.RED)
+                    .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr(
+                        online ? "multiplayer.status.online" : "gui.socialInteractions.status_offline"
+                    )))
+            ))
+            .append(" ").append(desc)
+            .append(" ").append(spawn)
+            .append(" ").append(kill);
 
         if (showAction) {
             Component action = Component.literal("[⚙]").withStyle(
                 Style.EMPTY
                     .applyFormat(ChatFormatting.GRAY)
-                    .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("%d actions".formatted(this.executors.size()))))
+                    .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.actions", this.executors.size())))
                     .withClickEvent(ComponentUtil.createClickEvent(ClickEvent.Action.RUN_COMMAND, "/bot action %s".formatted(this.name)))
             );
-            result.append(action).append(" ");
+            result.append(" ").append(action);
         }
 
-        result.append(remove);
+        result.append(" ").append(remove);
 
         return result;
     }

@@ -29,6 +29,9 @@ public class GameProfileUtil {
     }
 
     public static CompletableFuture<GameProfile> fetchGameProfile(MinecraftServer server, GameProfile profile) {
+        if (GcaSetting.fakePlayerForceOfflineUUID) {
+            return CompletableFuture.completedFuture(profile);
+        }
         final ResolvableProfile resolvableProfile = ResolvableProfile.createUnresolved(profile.id());
         return resolvableProfile.resolveProfile(server.services().profileResolver());
     }

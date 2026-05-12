@@ -14,6 +14,8 @@ import net.minecraft.server.MinecraftServer;
 
 import java.util.List;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
+
 public record BotGroupInfo(String name, List<String> bots) implements IConfigNode {
     public static final Codec<BotGroupInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.fieldOf("name").forGetter(BotGroupInfo::name),
@@ -24,13 +26,12 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
     public Component component(MinecraftServer server, String... args) {
         Component name = Component.literal(this.name).withStyle(
             Style.EMPTY
-                .applyFormat(ChatFormatting.GRAY)
                 .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(this.name)))
         );
         Component load = Component.literal("[↑]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GREEN)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Load Group")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.group.load")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group load %s".formatted(this.name)
@@ -39,7 +40,7 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
         Component remove = Component.literal("[↓]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Unload Group")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.group.unload")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group unload %s".formatted(this.name)
@@ -48,7 +49,7 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
         Component info = Component.literal("[i]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.GRAY)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Group Info")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.group.info")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.RUN_COMMAND,
                     "/bot group info %s".formatted(this.name)
@@ -57,7 +58,7 @@ public record BotGroupInfo(String name, List<String> bots) implements IConfigNod
         Component delete = Component.literal("[\uD83D\uDDD1]").withStyle(
             Style.EMPTY
                 .applyFormat(ChatFormatting.RED)
-                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Remove Bot Group")))
+                .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.bot.group.remove")))
                 .withClickEvent(ComponentUtil.createClickEvent(
                     ClickEvent.Action.SUGGEST_COMMAND,
                     "/bot group remove %s".formatted(this.name)

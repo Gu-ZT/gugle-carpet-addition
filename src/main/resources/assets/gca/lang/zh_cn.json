@@ -14,11 +14,11 @@
   "carpet.rule.openFakePlayerEnderChest.name": "假人末影箱",
   "carpet.rule.openFakePlayerEnderChest.desc": "允许玩家打开假人末影箱",
 
-  "carpet.rule.fakePlayerForceOfflineUUID.name": "假人使用离线UUID",
-  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID. (allowSpawningOfflinePlayers必须为true)",
-
   "carpet.rule.fakePlayerResident.name": "假人驻留",
   "carpet.rule.fakePlayerResident.desc": "退出存档时保留假人",
+
+  "carpet.rule.fakePlayerForceOfflineUUID.name": "假人使用离线UUID",
+  "carpet.rule.fakePlayerForceOfflineUUID.desc": "假人强制使用离线UUID\n§e必须启用'allowSpawningOfflinePlayers',否则无法召唤假人§r\n§e如果在启用后需要关闭此功能,需要清理'usercache.json'文件并重启服务器/客户端§r",
 
   "carpet.rule.fakePlayerReloadAction.name": "假人动作保存",
   "carpet.rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
@@ -47,14 +47,14 @@
   "carpet.rule.betterSignInteraction.name": "更好的告示牌交互",
   "carpet.rule.betterSignInteraction.desc": "右键告示牌时与之附着的方块产生交互",
 
-  "carpet.rule.betterItemFrameInteraction.name": "更好的展示框交互",
-  "carpet.rule.betterItemFrameInteraction.desc": "右键包含物品的展示框时与之附着的方块产生交互",
-
   "carpet.rule.betterSignEditing.name": "更好的告示牌编辑",
   "carpet.rule.betterSignEditing.desc": "允许使用名称中包含“笔”的羽毛编辑告示牌",
 
   "carpet.rule.betterQuickCrafting.name": "更好的快速合成",
   "carpet.rule.betterQuickCrafting.desc": "快速合成时在物品栏保留一份物品",
+
+  "carpet.rule.betterItemFrameInteraction.name": "更好的展示框交互",
+  "carpet.rule.betterItemFrameInteraction.desc": "右键包含物品的展示框时与之附着的方块产生交互",
 
   "carpet.rule.fakePlayerPrefixName.name": "假人名称前缀",
   "carpet.rule.fakePlayerPrefixName.desc": "假人名称前缀",
@@ -74,12 +74,6 @@
   "carpet.rule.commandTodo.name": "待办事项管理",
   "carpet.rule.commandTodo.desc": "待办事项管理菜单",
 
-  "carpet.rule.commandHere.name": "/here 命令",
-  "carpet.rule.commandHere.desc": "快速发送位置",
-
-  "carpet.rule.commandWhereis.name": "/whereis 命令",
-  "carpet.rule.commandWhereis.desc": "快速定位玩家",
-
   "carpet.rule.commandWlist.name": "白名单管理",
   "carpet.rule.commandWlist.desc": "白名单管理",
 
@@ -88,6 +82,12 @@
 
   "carpet.rule.commandSop.name": "简单获取op",
   "carpet.rule.commandSop.desc": "简单获取op",
+
+  "carpet.rule.commandHere.name": "/here 命令",
+  "carpet.rule.commandHere.desc": "快速发送位置",
+
+  "carpet.rule.commandWhereis.name": "/whereis 命令",
+  "carpet.rule.commandWhereis.desc": "快速定位玩家",
 
   "carpet.rule.simpleInGameCalculator.name": "简单的游戏内计算器",
   "carpet.rule.simpleInGameCalculator.desc": "简单的游戏内计算器",
@@ -105,9 +105,6 @@
   "carpet.rule.welcomePlayer.name": "欢迎玩家",
   "carpet.rule.welcomePlayer.desc": "欢迎玩家",
 
-  "carpet.rule.commandTransfer.name": "服务器玩家转移命令",
-  "carpet.rule.commandTransfer.desc": "/transfer 命令",
-
   "carpet.rule.wanderingTraderSpawnFailedWarning.name": "流浪商人生成失败提醒",
   "carpet.rule.wanderingTraderSpawnFailedWarning.desc": "在流浪商人生成失败进行提醒，并告诉玩家生成失败的原因",
   "carpet.rule.wanderingTraderSpawnFailedWarning.tip.01": "流浪商人生成失败，原因：",
@@ -118,6 +115,9 @@
   "carpet.rule.wanderingTraderSpawnRemind.name": "流浪商人生成提醒",
   "carpet.rule.wanderingTraderSpawnRemind.desc": "流浪商人生成提醒",
   "carpet.rule.wanderingTraderSpawnRemind.tip": "流浪商人生成成功，位置为 %s ，同时生成了 %s 只行商羊驼",
+
+  "carpet.rule.commandTransfer.name": "服务器玩家转移命令",
+  "carpet.rule.commandTransfer.desc": "/transfer 命令",
 
   "carpet.rule.fakePlayerLocatorBar.name": "假人定位条",
   "carpet.rule.fakePlayerLocatorBar.desc": "在定位条上显示假玩家位置",
@@ -143,6 +143,74 @@
   "gca.player.other_controller": "%s 的额外控制面板",
   "gca.player.inventory": "%s 的背包",
 
-  "gca.tool.damaged": "%s 的工具 %s 已损坏!",
-  "gca.tool.restock.failed": "%s 补货 %s 失败!"
+  "gca.tool.damaged": "%s的工具%s已损坏!",
+  "gca.tool.restock.failed": "%s补货%s失败!",
+
+  "msg.gca.page.total": "共%s项",
+  "msg.gca.page.footer": "第%s/%s页",
+  "msg.gca.page.previous": "上一页",
+  "msg.gca.page.next": "下一页",
+
+  "msg.gca.bot.list": "假人列表",
+  "msg.gca.bot.not_exist": "假人%s不存在",
+  "msg.gca.bot.load.logging": "假人%s正在登录中",
+  "msg.gca.bot.load.already": "假人%s已存在",
+  "msg.gca.bot.load.failed": "假人%s加载失败",
+  "msg.gca.bot.add.not_fake": "%s不是假人",
+  "msg.gca.bot.add.already": "假人%s已经保存过了",
+  "msg.gca.bot.add.success": "假人%s添加成功",
+  "msg.gca.bot.remove.not_exist": "假人%s不存在",
+  "msg.gca.bot.remove.success": "假人%s已移除",
+  "msg.gca.bot.load": "上线",
+  "msg.gca.bot.unload": "下线",
+  "msg.gca.bot.remove": "删除",
+  "msg.gca.bot.actions": "%s个动作",
+
+  "msg.gca.bot.group.list": "Bot Group List",
+  "msg.gca.bot.group.list.bot": "Bot Group %s",
+  "msg.gca.bot.group.not_exist": "%s不存在",
+  "msg.gca.bot.group.already": "%s已存在",
+  "msg.gca.bot.group.add.success": "%s创建成功",
+  "msg.gca.bot.group.remove.success": "%s已移除",
+  "msg.gca.bot.group.generate.success": "%s生成成功",
+  "msg.gca.bot.group.load": "上线此组",
+  "msg.gca.bot.group.unload": "下线此组",
+  "msg.gca.bot.group.info": "查看此组信息",
+  "msg.gca.bot.group.remove": "移除此组",
+  "msg.gca.bot.group.bot.add.already": "假人%s已在组%s中",
+  "msg.gca.bot.group.bot.add.success": "成功将假人%s添加到组%s",
+  "msg.gca.bot.group.bot.remove.not_exist": "%2$s中没有假人%1$s",
+  "msg.gca.bot.group.bot.remove.success": "假人%s已从%s中移除",
+
+  "msg.gca.bot.action.list": "Bot %s's Action List",
+  "msg.gca.bot.action.not_found": "假人%2$s没有此动作",
+  "msg.gca.bot.action.invalid": "无效动作",
+  "msg.gca.bot.action.success": "动作%s已添加至假人%s",
+  "msg.gca.bot.action.remove.success": "动作%s已从假人%s移除",
+  "msg.gca.bot.action.startup.set": "设置",
+  "msg.gca.bot.action.startup.not_set": "取消",
+  "msg.gca.bot.action.startup.already": "动作%s已%s为%s的登入动作, 无需重复设置",
+  "msg.gca.bot.action.startup.success": "成功将动作%s%s为%s的登入动作",
+  "msg.gca.bot.action.clear": "假人%s的登入动作已清除",
+  "msg.gca.bot.action.execute": "执行动作",
+  "msg.gca.bot.action.remove": "删除动作",
+  "msg.gca.bot.action.startup": "登入后执行",
+
+  "msg.gca.location.list": "标记点",
+  "msg.gca.location.not_exist": "标记点%s不存在",
+  "msg.gca.location.add.success": "标记点%s添加成功",
+  "msg.gca.location.remove": "删除标记点",
+  "msg.gca.location.remove.success": "标记点%s已被移除",
+  "msg.gca.location.info.view": "查看标记点信息",
+
+  "msg.gca.todo.list": "待办清单",
+  "msg.gca.todo.not_exist": "待办%s不存在",
+  "msg.gca.todo.add.success": "待办%s已添加",
+  "msg.gca.todo.remove.success": "待办%s已移除",
+  "msg.gca.todo.completed": "%s已完成待办%s",
+  "msg.gca.todo.incompleted": "将待办%s设为未完成",
+  "msg.gca.todo.status.completed": "已完成",
+  "msg.gca.todo.status.incompleted": "未完成",
+  "msg.gca.todo.status.done": "标记为完成",
+  "msg.gca.todo.status.undone": "标记为未完成"
 }

@@ -19,15 +19,15 @@ public class ComponentHelper {
     private static final Map<String, String> language = new HashMap<>();
     private static final Map<String, String> en_us = new HashMap<>();
 
-    public static Component tr(String key, Object... args) {
-        return tr(key, null, args);
+    public static MutableComponent tr(String key, Object... args) {
+        return tr(key, null, Style.EMPTY, args);
     }
 
-    public static Component tr(String key, @Nullable TextColor color, Object... args) {
+    public static MutableComponent tr(String key, @Nullable TextColor color, Object... args) {
         return tr(key, color, Style.EMPTY, args);
     }
 
-    public static Component tr(String key, @Nullable TextColor color, Style style, Object... args) {
+    public static MutableComponent tr(String key, @Nullable TextColor color, Style style, Object... args) {
         if (color != null) style = style.withColor(color);
         String text = language.get(key);
         return Component.translatableWithFallback(key, text, args).setStyle(style);
@@ -38,19 +38,30 @@ public class ComponentHelper {
         return Component.translatableWithFallback("gca.format.empty", text, args);
     }
 
-    public static Component highlight(String name) {
-        return Component.literal(name).withStyle(ChatFormatting.AQUA);
+    public static Component highlight(Object value) {
+        MutableComponent component;
+        if (value instanceof MutableComponent cpt) component = cpt;
+        else if (value instanceof Component cpt) component = Component.literal("").append(cpt);
+        else if (value instanceof String str && str.startsWith("msg.gca.")) component = tr(str);
+        else component = Component.literal(String.valueOf(value));
+
+        return component.withStyle(ChatFormatting.GOLD);
     }
 
-    public static MutableComponent fmtHlt(String text, Object... args) {
-        Object[] highlights = Arrays.stream(args)
-            .map(it -> {
-                if (it instanceof String str) return highlight(str);
-                if (it instanceof Component component) return component;
-                return highlight(it.toString());
-            })
-            .toArray();
-        return fmt(text, highlights);
+    public static Component fmtTr(String key, Object... args) {
+        Object[] highlights = Arrays.stream(args).map(ComponentHelper::highlight).toArray();
+        return tr(key, highlights);
+    }
+
+    public static Component prefix(Component content) {
+        return Component.literal("")
+            .append(Component.literal("[GCA]").withStyle(ChatFormatting.DARK_AQUA))
+            .append(" ")
+            .append(content);
+    }
+
+    public static Component intro(Component content) {
+        return fmt("======== %s ========", content).withStyle(ChatFormatting.GRAY);
     }
 
     public static void updateLanguage(String lang) {
@@ -64,9 +75,7 @@ public class ComponentHelper {
         ComponentHelper.lang = lang;
         if (!"en_us".equals(lang)) {
             String path = String.format("assets/%s/lang/%s.json", GcaExtension.MOD_ID, lang);
-            Map<String, String> translations = Translations.getTranslationFromResourcePath(path);
-            language.clear();
-            language.putAll(translations);
+            language.putAll(Translations.getTranslationFromResourcePath(path));
         }
     }
 

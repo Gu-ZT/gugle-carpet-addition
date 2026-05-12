@@ -10,7 +10,6 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.LocationInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
@@ -31,6 +30,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.prefix;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 
@@ -87,10 +88,10 @@ public class LocCommand {
             () -> DimensionArgument.getDimension(context, "dimension").dimension(),
             source.getLevel()::dimension
         );
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(LOCATION_CONFIG);
         String desc = StringArgumentType.getString(context, "desc");
         LOCATION_CONFIG.update(new LocationInfo(id, desc, pos, dimension));
-        source.sendSuccess(() -> Component.literal("Loc %s is added.".formatted(desc)), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.location.add.success", desc), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -99,10 +100,10 @@ public class LocCommand {
         long id = LongArgumentType.getLong(context, "id");
         LocationInfo removed = LOCATION_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such loc id %s", id));
+            context.getSource().sendFailure(fmtTr("msg.gca.location.not_exist", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Loc %s is removed.", removed.desc()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.location.remove.success", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -110,7 +111,7 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         PageInfo<LocationInfo> page = PageInfo.of(context, LOCATION_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Loc List", "/loc list");
+        page.sendPageInfo(context, "msg.gca.location.list", "/loc list");
         return Command.SINGLE_SUCCESS;
     }
 
@@ -118,12 +119,13 @@ public class LocCommand {
         LOCATION_CONFIG.tryInit(context);
         long id = LongArgumentType.getLong(context, "id");
         LocationInfo location = LOCATION_CONFIG.get(String.valueOf(id));
+        CommandSourceStack source = context.getSource();
         if (location == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such loc id %s", id));
+            source.sendFailure(fmtTr("msg.gca.location.not_exist", id));
             return 0;
         }
         for (Component component : LocCommand.info(location)) {
-            context.getSource().sendSuccess(() -> component, false);
+            source.sendSystemMessage(prefix(component));
         }
         return Command.SINGLE_SUCCESS;
     }

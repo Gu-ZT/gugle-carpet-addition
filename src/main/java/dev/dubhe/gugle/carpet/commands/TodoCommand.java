@@ -9,7 +9,6 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import dev.dubhe.gugle.carpet.GcaSetting;
-import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
 import dev.dubhe.gugle.carpet.entry.TodoInfo;
@@ -18,6 +17,8 @@ import dev.dubhe.gugle.carpet.tools.ModCommands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+
+import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.fmtTr;
 
 public class TodoCommand {
     private static final GcaConfig<TodoInfo> TODO_CONFIG = GcaConfig.create("todo", TodoInfo.CODEC);
@@ -68,10 +69,10 @@ public class TodoCommand {
     public static int add(CommandContext<CommandSourceStack> context) {
         TODO_CONFIG.tryInit(context);
         CommandSourceStack source = context.getSource();
-        long id = IdUtil.nextId();
+        long id = IdUtil.nextId(TODO_CONFIG);
         String desc = StringArgumentType.getString(context, "desc");
         TODO_CONFIG.update(new TodoInfo(id, desc, false));
-        source.sendSuccess(() -> Component.literal("Todo %s is added.".formatted(desc)), false);
+        source.sendSuccess(() -> fmtTr("msg.gca.todo.add.success", desc), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -80,10 +81,10 @@ public class TodoCommand {
         long id = LongArgumentType.getLong(context, "id");
         TodoInfo removed = TODO_CONFIG.remove(String.valueOf(id));
         if (removed == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such todo id %s", id));
+            context.getSource().sendFailure(fmtTr("msg.gca.todo.not_exist", id));
             return 0;
         }
-        context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Todo %s is removed.", removed.desc()), false);
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.todo.remove.success", removed.desc()), false);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -93,18 +94,18 @@ public class TodoCommand {
         boolean success = getSuccess(context);
         TodoInfo todo = TODO_CONFIG.get(String.valueOf(id));
         if (todo == null) {
-            context.getSource().sendFailure(ComponentHelper.fmtHlt("No such todo id %s", id));
+            context.getSource().sendFailure(fmtTr("msg.gca.todo.not_exist", id));
             return 0;
         }
         TODO_CONFIG.update(todo.ofSuccess(success));
         if (success) {
             Component name = context.getSource().getDisplayName();
             context.getSource().getServer().getPlayerList().broadcastSystemMessage(
-                ComponentHelper.fmtHlt("%s has completed Todo %s.", name, todo.desc()),
+                fmtTr("msg.gca.todo.completed", name, todo.desc()),
                 false
             );
         } else {
-            context.getSource().sendSuccess(() -> ComponentHelper.fmtHlt("Set Todo %s as incomplete.", todo.desc()), false);
+            context.getSource().sendSuccess(() -> fmtTr("msg.gca.todo.incompleted", todo.desc()), false);
         }
         return Command.SINGLE_SUCCESS;
     }
@@ -121,7 +122,7 @@ public class TodoCommand {
         TODO_CONFIG.tryInit(context);
         PageInfo<TodoInfo> page = PageInfo.of(context, TODO_CONFIG.values());
         if (page == null) return 0;
-        page.sendMessage(context, "Todo List", "/todo list");
+        page.sendPageInfo(context, "msg.gca.todo.list", "/todo list");
         return Command.SINGLE_SUCCESS;
     }
 }
