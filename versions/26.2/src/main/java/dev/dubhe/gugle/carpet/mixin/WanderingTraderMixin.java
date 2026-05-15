@@ -1,0 +1,211 @@
+package dev.dubhe.gugle.carpet.mixin;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+import dev.dubhe.gugle.carpet.GcaSetting;
+import dev.dubhe.gugle.carpet.api.tools.text.Color;
+import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTraderSpawner;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+
+import java.util.Optional;
+
+//#if MC < 260000
+//$$ import org.spongepowered.asm.mixin.Shadow;
+//#else
+//#endif
+
+@Mixin(WanderingTraderSpawner.class)
+abstract class WanderingTraderMixin {
+    @Unique
+    private MinecraftServer gca$server = null;
+    @Unique
+    private ServerPlayer gca$player = null;
+    @Unique
+    private int gca$llama = 0;
+    //#if MC < 260000
+    //$$ @Shadow
+    //$$ private int spawnChance;
+    //#endif
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void spawn(
+        ServerLevel level, boolean spawnEnemies,
+        //#if MC < 12109
+        //$$ boolean bl2,
+        //#endif
+        //#if MC < 12105
+        //$$ CallbackInfoReturnable<Integer> cir
+        //#else
+        CallbackInfo ci
+        //#endif
+    ) {
+        this.gca$server = level.getServer();
+        this.gca$llama = 0;
+    }
+
+    @WrapOperation(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int spawn0(
+        RandomSource instance, int i, Operation<Integer> original
+        //#if MC >= 260000
+        , @Local(name = "chanceToSpawn") int chanceToSpawn
+        //#endif
+    ) {
+        int result = original.call(instance, i);
+        if (result > chanceToSpawn) {
+            this.gca$sendMsg(
+                ComponentHelper.tr(
+                    "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
+                    Color.YELLOW,
+                    Style.EMPTY,
+                    "i <= %s".formatted(chanceToSpawn),
+                    result
+                )
+            );
+        }
+        return result;
+    }
+
+    @WrapOperation(method = "spawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/RandomSource;nextInt(I)I"))
+    private int spawn1(RandomSource instance, int i, Operation<Integer> original) {
+        int result = original.call(instance, i);
+        if (result != 0) {
+            this.gca$sendMsg(
+                ComponentHelper.tr(
+                    "carpet.rule.wanderingTraderSpawnFailedWarning.tip.02",
+                    Color.YELLOW,
+                    Style.EMPTY,
+                    "i == 0",
+                    result
+                )
+            );
+        }
+        return result;
+    }
+
+    @WrapOperation(
+        method = "spawn",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/level/ServerLevel;getRandomPlayer()Lnet/minecraft/server/level/ServerPlayer;"
+        )
+    )
+    private @Nullable ServerPlayer getRandomPlayer(ServerLevel instance, Operation<ServerPlayer> original) {
+        this.gca$player = original.call(instance);
+        return this.gca$player;
+    }
+
+    @Inject(method = "spawn", at = @At(value = "RETURN", ordinal = 2))
+    private void spawn2(ServerLevel level, CallbackInfoReturnable<Boolean> cir) {
+        this.gca$sendMsg(
+            ComponentHelper.tr(
+                "carpet.rule.wanderingTraderSpawnFailedWarning.tip.03",
+                Color.YELLOW,
+                Style.EMPTY,
+                this.gca$player.getDisplayName()
+            )
+        );
+    }
+
+    @Inject(method = "spawn", at = @At(value = "RETURN", ordinal = 4))
+    private void spawnSuccess(ServerLevel level, CallbackInfoReturnable<Boolean> cir) {
+        this.gca$sendMsg(
+            ComponentHelper.tr(
+                "carpet.rule.wanderingTraderSpawnFailedWarning.tip.04",
+                Color.YELLOW,
+                Style.EMPTY,
+                this.gca$player.getDisplayName()
+            )
+        );
+    }
+
+    @Inject(
+        method = "tryToSpawnLlamaFor",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/entity/animal/equine/TraderLlama;setLeashedTo(Lnet/minecraft/world/entity/Entity;Z)V"
+        )
+    )
+    private void tryToSpawnLlamaFor(ServerLevel level, WanderingTrader trader, int radius, CallbackInfo ci) {
+        this.gca$llama++;
+    }
+
+    @SuppressWarnings("InjectLocalCaptureCanBeReplacedWithLocal")
+    @Inject(method = "spawn", at = @At(value = "RETURN", ordinal = 3), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void spawn3(
+        ServerLevel level,
+        CallbackInfoReturnable<Boolean> cir,
+        Player player,
+        BlockPos blockPos,
+        int i,
+        PoiManager poiManager,
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType") Optional<BlockPos> optional,
+        BlockPos blockPos2,
+        BlockPos blockPos3
+    ) {
+        if (!GcaSetting.wanderingTraderSpawnRemind) return;
+        Vec3 center = new Vec3(
+            blockPos2.getX() + 0.5,
+            blockPos2.getY(),
+            blockPos2.getZ() + 0.5
+        );
+        this.gca$server.getPlayerList().broadcastSystemMessage(
+            ComponentHelper.tr(
+                "carpet.rule.wanderingTraderSpawnRemind.tip",
+                Color.YELLOW,
+                Style.EMPTY,
+                Component.literal("[%.1f, %.1f, %.1f]".formatted(center.x, center.y, center.z))
+                    .withStyle(
+                        Style.EMPTY
+                            .withColor(ChatFormatting.GREEN)
+                            .withClickEvent(
+                                ComponentUtil.createClickEvent(
+                                    ClickEvent.Action.SUGGEST_COMMAND,
+                                    "/tp @s %.1f %.1f %.1f".formatted(center.x, center.y, center.z)
+                                )
+                            )
+                    ),
+                Component.literal(String.valueOf(this.gca$llama))
+                    .withStyle(ChatFormatting.GREEN)
+            ),
+            false
+        );
+    }
+
+    @Unique
+    private void gca$sendMsg(Component msg) {
+        if (!GcaSetting.wanderingTraderSpawnFailedWarning) return;
+        if (this.gca$server == null) return;
+        this.gca$server.getPlayerList().broadcastSystemMessage(
+            ComponentHelper.tr(
+                "carpet.rule.wanderingTraderSpawnFailedWarning.tip.01",
+                Color.YELLOW,
+                Style.EMPTY
+            ),
+            false
+        );
+        this.gca$server.getPlayerList().broadcastSystemMessage(msg, false);
+    }
+}
