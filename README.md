@@ -11,6 +11,19 @@
 
 #### If you need GCA for Minecraft 1.13, [please click here](https://github.com/Gu-ZT/TISCarpet113WithGCA/releases/latest)
 
+### gcaPageSize
+
+Set the number of entries per page on GCA list pages
+
+* Type: `int`
+* Default: `8`
+* Options: Any positive integer
+* Categories: `GCA`
+
+```
+/carpet [setDefault] gcaPageSize 10
+```
+
 ### openFakePlayerInventory
 
 Allow player to open the fake player's inventory
@@ -21,7 +34,7 @@ Allow player to open the fake player's inventory
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet openFakePlayerInventory true
+/carpet [setDefault] openFakePlayerInventory true
 ```
 
 **Usage**: Right-click on a fake player to open their inventory
@@ -38,8 +51,8 @@ Allow player to open the real player's inventory
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet openRealPlayerInventory true
-/carpet openRealPlayerInventory ops
+/carpet [setDefault] openRealPlayerInventory true
+/carpet [setDefault] openRealPlayerInventory ops
 ```
 
 **Usage**: Right-click on other real players to open their inventory, requires appropriate permission level
@@ -54,8 +67,8 @@ Allow player to open the fake player's ender chest
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet openFakePlayerEnderChest true
-/carpet openFakePlayerEnderChest ender_chest
+/carpet [setDefault] openFakePlayerEnderChest true
+/carpet [setDefault] openFakePlayerEnderChest ender_chest
 ```
 
 **Usage**: Sneak (hold Shift) + right-click on a fake player to open their ender chest
@@ -72,7 +85,7 @@ Keep the fake player when exiting the level
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerResident true
+/carpet [setDefault] fakePlayerResident true
 ```
 
 ### fakePlayerReloadAction
@@ -80,12 +93,12 @@ Keep the fake player when exiting the level
 Keep the fake player action when exiting the level
 
 * Type: `boolean`
-* Default: `false`
+* Default: `true`
 * Options: `true`, `false`
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerReloadAction true
+/carpet [setDefault] fakePlayerReloadAction false
 ```
 
 ### fakePlayerAutoReplenishment
@@ -98,7 +111,7 @@ Make fake player to auto replenishment
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoReplenishment true
+/carpet [setDefault] fakePlayerAutoReplenishment true
 ```
 
 ### fakePlayerAutoReplenishmentFormShulkerBox
@@ -111,7 +124,7 @@ Make fake player to auto replenishment from shulker box
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoReplenishmentFormShulkerBox true
+/carpet [setDefault] fakePlayerAutoReplenishmentFormShulkerBox true
 ```
 
 ### fakePlayerAutoFish
@@ -124,7 +137,7 @@ Make fake player to auto fish. When the fishing hook catches a fish, it will aut
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoFish true
+/carpet [setDefault] fakePlayerAutoFish true
 ```
 
 **Usage**: Let the fake player hold a fishing rod and use `/player <name> use` to start fishing. The fake player will automatically complete the reel-in and cast operations.
@@ -143,7 +156,20 @@ Make fake player to auto replace almost damaged tool
 > `keep`: All tools will keep 10 durability.
 
 ```
-/carpet fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool true
+```
+
+### fakePlayerToolDamagedNotification
+
+Broadcast a server-wide message when a fake player's tool breaks or when restocking fails (May cause message spam)
+
+* Type: `boolean`
+* Default: `false`
+* Options: `true`, `false`
+* Categories: `GCA`, `BOT`
+
+```
+/carpet [setDefault] fakePlayerToolDamagedNotification true
 ```
 
 ### fakePlayerPrefixName
@@ -156,8 +182,8 @@ Fake Player Prefix Name
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerPrefixName bot_
-/carpet fakePlayerPrefixName #none
+/carpet [setDefault] fakePlayerPrefixName bot_
+/carpet [setDefault] fakePlayerPrefixName #none
 ```
 
 ### fakePlayerSuffixName
@@ -170,9 +196,24 @@ Fake Player Suffix Name
 * Categories: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerSuffixName _fake
-/carpet fakePlayerSuffixName #none
+/carpet [setDefault] fakePlayerSuffixName _fake
+/carpet [setDefault] fakePlayerSuffixName #none
 ```
+
+### fakePlayerForceOfflineUUID
+
+Force fake players to use offline UUIDs (requires `allowSpawningOfflinePlayers` enabled)
+
+* Type: `boolean`
+* Default: `false`
+* Options: `true`, `false`
+* Categories: `GCA`, `BOT`
+
+```
+/carpet [setDefault] fakePlayerForceOfflineUUID true
+```
+
+> Disabling this feature requires clearing usercache.json and restarting the server/client to switch back to online UUIDs.
 
 ### commandBot
 
@@ -184,7 +225,7 @@ A Bot Management Menu for saving, loading, and grouping fake players
 * Categories: `GCA`, `BOT`, `command`
 
 ```
-/carpet commandBot ops
+/carpet [setDefault] commandBot ops
 ```
 
 **Command Usage**:
@@ -204,6 +245,28 @@ A Bot Management Menu for saving, loading, and grouping fake players
 /bot group generated <name> <count> [load]  # Batch generate bots and group them
 ```
 
+### commandBotAction
+
+A Bot Action Management Menu for adding/removing actions and setting startup actions for bots
+
+* Type: `String`
+* Default: `ops`
+* Options: `ops`, `0`, `1`, `2`, `3`, `4`, `true`, `false`
+* Categories: `GCA`, `BOT`, `command`
+
+```
+/carpet [setDefault] commandBotAction ops
+```
+
+**Command Usage**:
+```
+/bot action <bot>                       # View bot's action list
+/bot action <bot> add <action>          # Add action to bot
+/bot action <bot> remove <id>           # Remove action from bot
+/bot action <bot> startup set <action>  # Set bot's startup action
+/bot action <bot> startup clear         # Clear bot's startup actions
+```
+
 ### commandTodo
 
 A Todo Management Menu with support for adding, removing, and marking completion
@@ -214,7 +277,7 @@ A Todo Management Menu with support for adding, removing, and marking completion
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandTodo ops
+/carpet [setDefault] commandTodo ops
 ```
 
 **Command Usage**:
@@ -237,7 +300,7 @@ Quickly broadcast your current position to all players and add glowing effect to
 * Conditions: Only works when CarpetAmsAddition is NOT loaded
 
 ```
-/carpet commandHere ops
+/carpet [setDefault] commandHere ops
 ```
 
 **Command Usage**:
@@ -256,7 +319,7 @@ Quickly locate players and add glowing effect to target
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandWhereis ops
+/carpet [setDefault] commandWhereis ops
 ```
 
 **Command Usage**:
@@ -275,7 +338,7 @@ A Location Management Menu for saving, viewing, and deleting location points
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandLoc ops
+/carpet [setDefault] commandLoc ops
 ```
 
 **Command Usage**:
@@ -297,7 +360,7 @@ Whitelist Management, allows authorized regular players to manage the whitelist
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandWlist true
+/carpet [setDefault] commandWlist true
 ```
 
 **Command Usage**:
@@ -319,7 +382,7 @@ Banned List Management
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandBlist true
+/carpet [setDefault] commandBlist true
 /blist
 ```
 
@@ -333,8 +396,22 @@ Simple op get
 * Categories: `GCA`, `command`
 
 ```
-/carpet commandSop true
+/carpet [setDefault] commandSop true
 /sop
+```
+
+### commandSeed
+
+Sets the required permission level for the /seed command
+
+* Type: `String`
+* Default: `vanilla`
+* Options: `vanilla`, `true`, `false`, `ops`, `0`, `1`, `2`, `3`, `4`
+* Categories: `GCA`, `command`
+
+```
+/carpet [setDefault] commandSeed ops
+/carpet [setDefault] commandSeed 0
 ```
 
 ### betterFenceGatePlacement
@@ -347,7 +424,7 @@ Make the placed fence gate have the same block status as the fence gate you clic
 * Categories: `GCA`
 
 ```
-/carpet betterFenceGatePlacement true
+/carpet [setDefault] betterFenceGatePlacement true
 ```
 
 ### betterWoodStrip
@@ -360,7 +437,7 @@ Only the axe with "Strip" in its name is allowed to peel logs
 * Categories: `GCA`
 
 ```
-/carpet betterWoodStrip true
+/carpet [setDefault] betterWoodStrip true
 ```
 
 ### betterSignInteraction
@@ -373,7 +450,7 @@ Make the block attached to the sign interact when you right-click it
 * Categories: `GCA`
 
 ```
-/carpet betterSignInteraction true
+/carpet [setDefault] betterSignInteraction true
 ```
 
 ### betterItemFrameInteraction
@@ -386,7 +463,7 @@ Make the block attached to the ItemFrame interact when you right-click it
 * Categories: `GCA`
 
 ```
-/carpet betterItemFrameInteraction true
+/carpet [setDefault] betterItemFrameInteraction true
 ```
 
 ### betterQuickCrafting
@@ -399,7 +476,7 @@ Keep an item in the inventory during quick crafting
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet betterQuickCrafting true
+/carpet [setDefault] betterQuickCrafting true
 ```
 
 ### simpleInGameCalculator
@@ -412,7 +489,7 @@ Simple In-Game Calculator
 * Categories: `GCA`
 
 ```
-/carpet simpleInGameCalculator true
+/carpet [setDefault] simpleInGameCalculator true
 ```
 
 ### fastPingFriend
@@ -425,7 +502,7 @@ Fast ping friend
 * Categories: `GCA`
 
 ```
-/carpet fastPingFriend true
+/carpet [setDefault] fastPingFriend true
 ```
 
 ### qnmdLC
@@ -437,8 +514,8 @@ What is the height value for setting the LC value
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet qnmdLC 64
-/carpet qnmdLC -1
+/carpet [setDefault] qnmdLC 64
+/carpet [setDefault] qnmdLC -1
 ```
 
 ### fixedEndCrystalSync
@@ -451,7 +528,7 @@ Fixed End Crystal Sync
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet fixedEndCrystalSync true
+/carpet [setDefault] fixedEndCrystalSync true
 ```
 
 ### welcomePlayer
@@ -464,7 +541,7 @@ Welcome Player
 * Categories: `GCA`
 
 ```
-/carpet welcomePlayer true
+/carpet [setDefault] welcomePlayer true
 ```
 
 ### wanderingTraderSpawnFailedWarning
@@ -477,7 +554,7 @@ Wandering Trader Spawn Failed Warning
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet wanderingTraderSpawnFailedWarning true
+/carpet [setDefault] wanderingTraderSpawnFailedWarning true
 ```
 
 ### wanderingTraderSpawnRemind
@@ -490,7 +567,7 @@ Wandering Trader Spawn Remind
 * Categories: `GCA`, `experimental`
 
 ```
-/carpet wanderingTraderSpawnRemind true
+/carpet [setDefault] wanderingTraderSpawnRemind true
 ```
 
 ### commandTransfer
@@ -504,8 +581,22 @@ Wandering Trader Spawn Remind
 * Conditions: Requires Minecraft >= 1.21
 
 ```
-/carpet commandTransfer true
+/carpet [setDefault] commandTransfer true
 /transfer <server> [port]
+```
+
+### commandTick
+
+Fix Carpet's /tick command permission
+
+* Type: `String`
+* Default: `3`
+* Options: `true`, `false`, `ops`, `0`, `1`, `2`, `3`, `4`
+* Categories: `GCA`, `command`, `experimental`
+* Conditions: Requires Minecraft >= 1.20.3
+
+```
+/carpet [setDefault] commandTick 3
 ```
 
 ### fakePlayerLocatorBar
@@ -519,5 +610,5 @@ Display Fake Player Positions On The Locator Bar
 * Conditions: Requires Minecraft >= 1.21.6
 
 ```
-/carpet fakePlayerLocatorBar true
+/carpet [setDefault] fakePlayerLocatorBar true
 ```

@@ -12,6 +12,19 @@
 
 #### 如果你需要Minecraft 1.13版本的GCA, [请点击此处](https://github.com/Gu-ZT/TISCarpet113WithGCA/releases/latest)
 
+### GCA页面大小 (gcaPageSize)
+
+设置GCA列表每页显示的条目数
+
+* 类型: `int`
+* 默认值: `8`
+* 参考选项: 任意正整数
+* 分类: `GCA`
+
+```
+/carpet [setDefault] gcaPageSize 10
+```
+
 ### 假人背包 (openFakePlayerInventory)
 
 允许玩家打开假人背包
@@ -22,7 +35,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet openFakePlayerInventory true
+/carpet [setDefault] openFakePlayerInventory true
 ```
 
 **使用方法**: 右键点击假人即可打开其背包界面
@@ -39,8 +52,7 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet openRealPlayerInventory true
-/carpet openRealPlayerInventory ops
+/carpet [setDefault] openRealPlayerInventory true
 ```
 
 **使用方法**: 右键点击其他真实玩家即可打开其背包界面，需要相应权限等级
@@ -55,8 +67,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet openFakePlayerEnderChest true
-/carpet openFakePlayerEnderChest ender_chest
+/carpet [setDefault] openFakePlayerEnderChest true
 ```
 
 **使用方法**: 潜行(按住Shift)+右键点击假人即可打开其末影箱
@@ -73,7 +84,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerResident true
+/carpet [setDefault] fakePlayerResident true
 ```
 
 ### 假人动作保存 (fakePlayerReloadAction)
@@ -81,12 +92,12 @@
 退出存档时保留假人动作
 
 * 类型: `boolean`
-* 默认值: `false`
+* 默认值: `true`
 * 参考选项: `true`, `false`
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerReloadAction true
+/carpet [setDefault] fakePlayerReloadAction false
 ```
 
 ### 假人补货 (fakePlayerAutoReplenishment)
@@ -99,7 +110,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoReplenishment true
+/carpet [setDefault] fakePlayerAutoReplenishment true
 ```
 
 ### 假人潜影盒补货 (fakePlayerAutoReplenishmentFormShulkerBox)
@@ -112,7 +123,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoReplenishmentFormShulkerBox true
+/carpet [setDefault] fakePlayerAutoReplenishmentFormShulkerBox true
 ```
 
 ### 假人钓鱼 (fakePlayerAutoFish)
@@ -125,7 +136,7 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoFish true
+/carpet [setDefault] fakePlayerAutoFish true
 ```
 
 **使用方法**: 让假人手持鱼竿并使用 `/player <name> use` 开始钓鱼，假人会自动完成收竿和抛竿操作
@@ -140,12 +151,25 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool true
 ```
 
 > 当选项为 `true` 时有经验修补的工具会保留10点耐久, 其他在损坏后自动切换
 >
 > 当选项为 `keep` 时所有工具都会保留10点耐久
+
+### 假人工具损坏通知 (fakePlayerToolDamagedNotification)
+
+假人工具损坏或补货失败后向全服广播通知 **(可能造成刷屏)**
+
+* 类型: `boolean`
+* 默认值: `false`
+* 参考选项: `true`, `false`
+* 分类: `GCA`, `BOT`
+
+```
+/carpet [setDefault] fakePlayerToolDamagedNotification true
+```
 
 ### 假人名称前缀 (fakePlayerPrefixName)
 
@@ -157,8 +181,8 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerPrefixName bot_
-/carpet fakePlayerPrefixName #none
+/carpet [setDefault] fakePlayerPrefixName bot_
+/carpet [setDefault] fakePlayerPrefixName #none
 ```
 
 ### 假人名称后缀 (fakePlayerSuffixName)
@@ -171,9 +195,24 @@
 * 分类: `GCA`, `BOT`
 
 ```
-/carpet fakePlayerSuffixName _fake
-/carpet fakePlayerSuffixName #none
+/carpet [setDefault] fakePlayerSuffixName _fake
+/carpet [setDefault] fakePlayerSuffixName #none
 ```
+
+### 假人强制离线UUID (fakePlayerForceOfflineUUID)
+
+强制假人使用离线UUID登录（需要开启 `allowSpawningOfflinePlayers`）
+
+* 类型: `boolean`
+* 默认值: `false`
+* 参考选项: `true`, `false`
+* 分类: `GCA`, `BOT`
+
+```
+/carpet [setDefault] fakePlayerForceOfflineUUID true
+```
+
+> 禁用此功能后需清空 usercache.json 并重启服务器/客户端才能从离线UUID切回在线UUID
 
 ### 假人管理 (commandBot)
 
@@ -185,7 +224,7 @@
 * 分类: `GCA`, `BOT`, `command`
 
 ```
-/carpet commandBot ops
+/carpet [setDefault] commandBot ops
 ```
 
 **命令用法**:
@@ -205,6 +244,28 @@
 /bot group generated <name> <count> [load]  # 批量生成假人并分组
 ```
 
+### 假人动作管理 (commandBotAction)
+
+方便快捷的假人动作管理菜单，可以为假人添加、移除动作，设置登入后自动执行的动作
+
+* 类型: `String`
+* 默认值: `ops`
+* 参考选项: `ops`, `0`, `1`, `2`, `3`, `4`, `true`, `false`
+* 分类: `GCA`, `BOT`, `command`
+
+```
+/carpet [setDefault] commandBotAction ops
+```
+
+**命令用法**:
+```
+/bot action <bot>                       # 查看假人的动作列表
+/bot action <bot> add <action>          # 为假人添加动作
+/bot action <bot> remove <id>           # 移除假人的指定动作
+/bot action <bot> startup toggle <id>   # 切换动作假人登入后是否自动执行某动作
+/bot action <bot> startup clear         # 清除假人的启动动作
+```
+
 ### 待办事项管理 (commandTodo)
 
 待办事项管理菜单，支持添加、删除、标记完成
@@ -215,7 +276,7 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandTodo ops
+/carpet [setDefault] commandTodo ops
 ```
 
 **命令用法**:
@@ -238,7 +299,7 @@
 * 条件: 仅在未加载 CarpetAmsAddition 时生效
 
 ```
-/carpet commandHere ops
+/carpet [setDefault] commandHere ops
 ```
 
 **命令用法**:
@@ -257,7 +318,7 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandWhereis ops
+/carpet [setDefault] commandWhereis ops
 ```
 
 **命令用法**:
@@ -276,7 +337,7 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandLoc ops
+/carpet [setDefault] commandLoc ops
 ```
 
 **命令用法**:
@@ -298,7 +359,7 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandWlist true
+/carpet [setDefault] commandWlist true
 ```
 
 **命令用法**:
@@ -320,7 +381,7 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandBlist true
+/carpet [setDefault] commandBlist true
 /blist
 ```
 
@@ -334,8 +395,22 @@
 * 分类: `GCA`, `command`
 
 ```
-/carpet commandSop true
+/carpet [setDefault] commandSop true
 /sop
+```
+
+### /seed命令 (commandSeed)
+
+修改 `/seed` 命令的权限等级
+
+* 类型: `String`
+* 默认值: `vanilla`
+* 参考选项: `vanilla`, `true`, `false`, `ops`, `0`, `1`, `2`, `3`, `4`
+* 分类: `GCA`, `command`
+
+```
+/carpet [setDefault] commandSeed ops
+/carpet [setDefault] commandSeed 0
 ```
 
 ### 更好的栅栏门放置 (betterFenceGatePlacement)
@@ -348,7 +423,7 @@
 * 分类: `GCA`
 
 ```
-/carpet betterFenceGatePlacement true
+/carpet [setDefault] betterFenceGatePlacement true
 ```
 
 **使用方法**: 点击已有的栅栏门放置新的栅栏门时，新栅栏门会复制被点击栅栏门的朝向、开关状态、墙内状态等属性
@@ -363,7 +438,7 @@
 * 分类: `GCA`
 
 ```
-/carpet betterWoodStrip true
+/carpet [setDefault] betterWoodStrip true
 ```
 
 **使用方法**: 在铁砧上给斧头命名包含“去皮”或“Strip”关键词，该斧头才能对原木进行去皮操作
@@ -378,7 +453,7 @@
 * 分类: `GCA`
 
 ```
-/carpet betterSignInteraction true
+/carpet [setDefault] betterSignInteraction true
 ```
 
 **使用方法**: 右键点击墙上告示牌时，会对告示牌后面的方块触发交互(如开关门、按按钮等)
@@ -393,7 +468,7 @@
 * 分类: `GCA`
 
 ```
-/carpet betterItemFrameInteraction true
+/carpet [setDefault] betterItemFrameInteraction true
 ```
 
 **使用方法**:
@@ -411,7 +486,7 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet betterQuickCrafting true
+/carpet [setDefault] betterQuickCrafting true
 ```
 
 **使用方法**: 在合成台使用Shift+点击快速合成时，会自动在背包中保留一份每种材料
@@ -426,7 +501,7 @@
 * 分类: `GCA`
 
 ```
-/carpet simpleInGameCalculator true
+/carpet [setDefault] simpleInGameCalculator true
 ```
 
 **使用方法**: 在聊天框输入以 `==` 开头的表达式即可计算
@@ -447,7 +522,7 @@
 * 分类: `GCA`
 
 ```
-/carpet fastPingFriend true
+/carpet [setDefault] fastPingFriend true
 ```
 
 **使用方法**: 在聊天框输入
@@ -465,8 +540,8 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet qnmdLC 64
-/carpet qnmdLC -1
+/carpet [setDefault] qnmdLC 64
+/carpet [setDefault] qnmdLC -1
 ```
 
 ### 修复末地水晶同步 (fixedEndCrystalSync)
@@ -479,7 +554,7 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet fixedEndCrystalSync true
+/carpet [setDefault] fixedEndCrystalSync true
 ```
 
 ### 欢迎玩家 (welcomePlayer)
@@ -492,7 +567,7 @@
 * 分类: `GCA`
 
 ```
-/carpet welcomePlayer true
+/carpet [setDefault] welcomePlayer true
 ```
 
 **配置方法**: 编辑 `config/gca/welcome.json` 文件，支持的变量类型:
@@ -511,7 +586,7 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet wanderingTraderSpawnFailedWarning true
+/carpet [setDefault] wanderingTraderSpawnFailedWarning true
 ```
 
 ### 流浪商人生成提醒 (wanderingTraderSpawnRemind)
@@ -524,7 +599,7 @@
 * 分类: `GCA`, `experimental`
 
 ```
-/carpet wanderingTraderSpawnRemind true
+/carpet [setDefault] wanderingTraderSpawnRemind true
 ```
 
 ### 服务器玩家转移命令 (commandTransfer)
@@ -538,8 +613,22 @@
 * 条件: 需要 Minecraft >= 1.21
 
 ```
-/carpet commandTransfer true
+/carpet [setDefault] commandTransfer true
 /transfer <server> [port]
+```
+
+### /tick命令 (commandTick)
+
+修复 Carpet 的 `/tick` 命令权限
+
+* 类型: `String`
+* 默认值: `3`
+* 参考选项: `true`, `false`, `ops`, `0`, `1`, `2`, `3`, `4`
+* 分类: `GCA`, `command`, `experimental`
+* 条件: 需要 Minecraft >= 1.20.3
+
+```
+/carpet [setDefault] commandTick 3
 ```
 
 ### 假人定位条 (fakePlayerLocatorBar)
@@ -553,5 +642,5 @@
 * 条件: 需要 Minecraft >= 1.21.6
 
 ```
-/carpet fakePlayerLocatorBar true
+/carpet [setDefault] fakePlayerLocatorBar true
 ```
