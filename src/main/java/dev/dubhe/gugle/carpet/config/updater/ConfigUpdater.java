@@ -131,7 +131,7 @@ public class ConfigUpdater {
                     }
                     JsonObject object = json.getAsJsonObject();
                     ChatFormatting color = Optional.ofNullable(object.get("color"))
-                        .map(key -> ChatFormatting.getByName(key.getAsString()))
+                        .map(key -> ChatFormattingSerializer.byName(key.getAsString()))
                         .orElse(ChatFormatting.GOLD);
                     return new WelcomeInfo.MessageArg(
                         GcaExtension.parseLocation(object.get("type").getAsString()),

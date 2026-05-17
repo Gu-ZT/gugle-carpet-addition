@@ -1,5 +1,0 @@
-- Fixed `fakePlayerForceOfflineUUID` not working.
-  - To disable this feature after enabling it, you need to clear the usercache.json file and restart the server/client.
-- Apply i18n translations to all GCA-related messages.
-- Fixed an issue where todos could not be completed.
-- Changed ID generator from snowflake gen to sequential gen.

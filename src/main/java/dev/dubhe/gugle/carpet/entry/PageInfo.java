@@ -15,7 +15,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,25 +28,18 @@ import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.prefix;
 import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 
 public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int maxPage, int total, List<T> page) {
-    @Nullable
     public static <T extends IComponentNode> PageInfo<T> ofAll(CommandContext<CommandSourceStack> context, Collection<T> collection) {
         return of(context, collection, Math.max(collection.size(), GcaSetting.gcaPageSize));
     }
 
-    @Nullable
     public static <T extends IComponentNode> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection) {
         return of(context, collection, GcaSetting.gcaPageSize);
     }
 
-    @Nullable
     public static <T extends IComponentNode> PageInfo<T> of(CommandContext<CommandSourceStack> context, Collection<T> collection, int pageSize) {
         int pageNum = getPage(context);
         int total = collection.size();
         int maxPage = (total + pageSize - 1) / pageSize;
-        if (pageNum > maxPage) {
-            context.getSource().sendFailure(Component.literal("No such page %s".formatted(pageNum)));
-            return null;
-        }
         List<T> page = collection.stream().skip((long) (pageNum - 1) * pageSize).limit(pageSize).toList();
         return new PageInfo<>(pageSize, pageNum, maxPage, total, page);
     }

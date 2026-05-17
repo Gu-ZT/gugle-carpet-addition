@@ -26,5 +26,11 @@ public class AutoResetButton extends Button {
         this.addTurnOnFunction(this::turnOffWithoutFunction);
     }
 
-    public static final AutoResetButton NONE = new AutoResetButton("gca.button.none", Items.RED_STAINED_GLASS_PANE);
+    public static final AutoResetButton NONE = new AutoResetButton("gca.button.none",
+        //#if MC < 260200
+        Items.RED_STAINED_GLASS_PANE
+        //#else
+        //$$ Items.STAINED_GLASS_PANE.red()
+        //#endif
+    );
 }
