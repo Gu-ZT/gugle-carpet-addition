@@ -89,7 +89,7 @@ public record PageInfo<T extends IComponentNode>(int pageSize, int pageNum, int 
 
         if (this.pageNum >= this.maxPage) next.withStyle(ChatFormatting.DARK_GRAY);
         else next.withStyle(Style.EMPTY
-            .applyFormat(ChatFormatting.YELLOW)
+            .applyFormat(ChatFormatting.GREEN)
             .withHoverEvent(ComponentUtil.createHoverEvent(HoverEvent.Action.SHOW_TEXT, tr("msg.gca.page.next")))
             .withClickEvent(ComponentUtil.createClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
