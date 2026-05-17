@@ -1,0 +1,2 @@
+- Add support for the 26.2 snapshot
+- Fixed an error when querying paginated data if the page has no results
