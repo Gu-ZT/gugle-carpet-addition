@@ -1,4 +1,4 @@
-name: Mod Pull Request Build
+name: Mod Pull Request Build Check
 
 on: [pull_request]
 
