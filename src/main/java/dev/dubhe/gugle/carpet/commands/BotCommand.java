@@ -297,7 +297,6 @@ public class BotCommand {
     private static int list(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         PageInfo<BotInfo> page = PageInfo.of(context, BOT_CONFIG.values());
-        if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
         page.sendPageInfo(context, "msg.gca.bot.list", "/bot list", actionPermission);
         return Command.SINGLE_SUCCESS;
@@ -360,7 +359,6 @@ public class BotCommand {
     private static int groupList(CommandContext<CommandSourceStack> context) {
         tryInit(context);
         PageInfo<BotGroupInfo> page = PageInfo.of(context, BOT_GROUP_CONFIG.values());
-        if (page == null) return 0;
         page.sendPageInfo(context, "msg.gca.bot.group.list", "/bot group list");
         return Command.SINGLE_SUCCESS;
     }
@@ -393,7 +391,6 @@ public class BotCommand {
         GroupNode group = getGroupNode(context, groupName);
         if (group == null) return 0;
         PageInfo<BotInfo> page = PageInfo.ofAll(context, group.bots);
-        if (page == null) return 0;
         String actionPermission = Boolean.toString(CommandHelper.canUseCommand(context.getSource(), GcaSetting.commandBotAction));
         page.sendPageInfo(
             context,
@@ -495,7 +492,6 @@ public class BotCommand {
         BotInfo bot = getBot(context);
         if (bot == null) return 0;
         PageInfo<BotExecutorInfo> page = PageInfo.of(context, bot.executors());
-        if (page == null) return 0;
         page.sendPageInfo(
             context,
             Pair.of("msg.gca.bot.action.list", new Object[]{bot.name()}),

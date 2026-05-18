@@ -1,0 +1,42 @@
+name: Mod Pull Request Build Check
+
+on: [pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        java: [ 25 ]
+        distro: [ zulu ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    env:
+      CI_BUILD: true
+      PR_BUILD: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v5
+        with:
+          distribution: ${{ matrix.distro }}
+          java-version: ${{ matrix.java }}
+          cache: 'gradle'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: Build
+        run: ./gradlew :ModWrapper:build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: 'Artifacts'
+          path: ./ModWrapper/build/libs/*.jar

@@ -1,5 +1,2 @@
-- Fixed `fakePlayerForceOfflineUUID` not working.
-  - To disable this feature after enabling it, you need to clear the usercache.json file and restart the server/client.
-- Apply i18n translations to all GCA-related messages.
-- Fixed an issue where todos could not be completed.
-- Changed ID generator from snowflake gen to sequential gen.
+- Add support for the 26.2 snapshot
+- Fixed an error when querying paginated data if the page has no results

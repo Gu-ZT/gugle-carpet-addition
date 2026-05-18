@@ -152,12 +152,6 @@ processResources {
                 "minecraft_support": project.minecraft_support_version
         ])
     }
-
-    filesMatching("quickbackupmulti.mixins.json") {
-        filter {
-            text -> text.replace("/*JAVA_VERSION*/", "JAVA_${MIXIN_COMPATIBILITY_LEVEL.ordinal() + 1}")
-        }
-    }
 }
 
 java {

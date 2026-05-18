@@ -153,7 +153,7 @@ abstract class WanderingTraderMixin {
         BlockPos blockPos3
     ) {
         if (!GcaSetting.wanderingTraderSpawnRemind) return;
-        Vec3 center = blockPos3.getCenter();
+        Vec3 center = Vec3.atCenterOf(blockPos3);
         this.gca$server.getPlayerList().broadcastSystemMessage(
             ComponentHelper.tr(
                 "carpet.rule.wanderingTraderSpawnRemind.tip",

@@ -6,6 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.config.IConfigNode;
+import dev.dubhe.gugle.carpet.config.updater.serializer.ChatFormattingSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -44,7 +45,7 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
         private static final Codec<MessageArg> OBJECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ResourceLocation.CODEC.fieldOf("type").forGetter(MessageArg::type),
             ExtraCodecs.JSON.optionalFieldOf("data").forGetter(MessageArg::data),
-            ChatFormatting.CODEC.optionalFieldOf("color", ChatFormatting.GOLD).forGetter(MessageArg::style)
+            ChatFormattingSerializer.CODEC.optionalFieldOf("color", ChatFormatting.GOLD).forGetter(MessageArg::style)
         ).apply(instance, MessageArg::new));
         public static final Codec<MessageArg> CODEC = Codec.either(ResourceLocation.CODEC, OBJECT_CODEC).xmap(
             either -> either.map(MessageArg::new, arg -> arg),
