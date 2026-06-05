@@ -9,7 +9,7 @@ import net.minecraft.commands.Commands;
 public class ModCommands {
     public static LiteralArgumentBuilder<CommandSourceStack> root(CommandDispatcher<CommandSourceStack> dispatcher, String string) {
         String prefix = "";
-        if (dispatcher.getRoot().getChild(string) != null) prefix = "gca";
+        if (dispatcher.getRoot().getChild(string) != null) prefix = "gca_";
         return Commands.literal(prefix + string);
     }
 }
