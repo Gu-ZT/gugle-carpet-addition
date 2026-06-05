@@ -45,8 +45,6 @@ repositories {
 }
 
 loom {
-    accessWidenerPath = file("gca.accesswidener")
-
     runConfigs.configureEach {
         runDir '../../run'
         var isJbr = System.getProperty('java.vm.vendor').contains('JetBrains')
