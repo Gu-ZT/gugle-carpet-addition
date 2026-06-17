@@ -4,8 +4,8 @@ import carpet.patches.EntityPlayerMPFake;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public class ClientUtil {

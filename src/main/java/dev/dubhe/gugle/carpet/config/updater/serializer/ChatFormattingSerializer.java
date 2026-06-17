@@ -9,8 +9,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 import com.mojang.serialization.Codec;
 import net.minecraft.ChatFormatting;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.Optional;
 

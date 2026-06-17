@@ -2,8 +2,8 @@ package dev.dubhe.gugle.carpet.entry;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public record PlayerGameProfileCache(@Nullable ServerPlayer player, GameProfile profile, String name, UUID uuid) {

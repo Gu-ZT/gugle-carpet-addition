@@ -6,7 +6,8 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 //#if MC > 12001
 import java.util.Optional;

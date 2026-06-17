@@ -7,7 +7,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.ActionAccessor;
 import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public record BotActionInfo(
     boolean sneaking,
