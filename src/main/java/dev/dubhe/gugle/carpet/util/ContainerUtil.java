@@ -26,8 +26,10 @@ public class ContainerUtil {
             List<ItemStack> list = contents
                 //#if MC < 260000
                 .stream()
-                //#else
+                //#elseif MC < 260300
                 //$$ .allItemsCopyStream()
+                //#else
+                //$$ .itemCopies()
                 //#endif
                 .collect(Collectors.toList());
 
@@ -58,8 +60,10 @@ public class ContainerUtil {
             List<ItemStack> list = contents
                 //#if MC < 260000
                 .stream()
-                //#else
+                //#elseif MC < 260300
                 //$$ .allItemsCopyStream()
+                //#else
+                //$$ .itemCopies()
                 //#endif
                 .collect(Collectors.toList());
 
