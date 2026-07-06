@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+//#if MC < 12003
+//$$ import dev.dubhe.gugle.carpet.mixin.SimpleContainerAccessor;
+//#endif
+
 public class PlayerEnderChestContainer extends PlayerContainer {
     public final NonNullList<ItemStack> items;
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(27, ItemStack.EMPTY);
@@ -21,7 +25,14 @@ public class PlayerEnderChestContainer extends PlayerContainer {
 
     public PlayerEnderChestContainer(ServerPlayer player) {
         super(player);
-        this.items = this.player.getEnderChestInventory().items;
+        var inv = this.player.getEnderChestInventory();
+        this.items =
+            //#if MC >= 12003
+            inv
+            //#else
+            //$$ ((SimpleContainerAccessor) inv)
+            //#endif
+                .getItems();
         this.compartments = ImmutableList.of(this.items, this.buttons);
         this.createButton();
     }

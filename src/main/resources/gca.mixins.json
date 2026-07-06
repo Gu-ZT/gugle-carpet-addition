@@ -9,6 +9,7 @@
     "ActionAccessor",
     "APAccessor",
     "AxeItemMixin",
+    "BlockTransformerMixin",
     "ChestMenuMixin",
     "EntityInvoker",
     "EntityPlayerMPFakeInvoker",
@@ -33,10 +34,13 @@
     "ServerPlayerGameModeMixin",
     "ServerPlayerMixin",
     "SignBlockMixin",
+    "SimpleContainerAccessor",
+    "SkullBlockEntityAccessor",
     "SlotMixin",
     "TickCommandMixin",
     "TransferCommandMixin",
     "TranslationsMixin",
+    "UseOnContextAccessor",
     "WanderingTraderMixin"
   ],
   "server": [

@@ -5,8 +5,8 @@ import carpet.api.settings.Rule;
 import carpet.api.settings.Validator;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
-import org.jetbrains.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class GcaValidators {

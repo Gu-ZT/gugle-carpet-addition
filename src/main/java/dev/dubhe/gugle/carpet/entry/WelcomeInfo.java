@@ -15,6 +15,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.ExtraCodecs;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -59,7 +60,7 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
 
     @FunctionalInterface
     public interface IMessageReplacer {
-        MutableComponent getMessage(MinecraftServer server, ServerPlayer player, @org.jetbrains.annotations.Nullable JsonElement args) throws Exception;
+        MutableComponent getMessage(MinecraftServer server, ServerPlayer player, @Nullable JsonElement args) throws Exception;
     }
 
 

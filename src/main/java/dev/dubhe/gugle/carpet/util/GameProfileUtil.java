@@ -6,14 +6,19 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 //#if MC > 12001
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 //#else
 //$$ import java.util.concurrent.atomic.AtomicReference;
+//#endif
+//#if MC >= 12002 && MC <= 12004
+//$$ import dev.dubhe.gugle.carpet.mixin.SkullBlockEntityAccessor;
+//#else
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 //#endif
 
 public class GameProfileUtil {
@@ -50,7 +55,11 @@ public class GameProfileUtil {
         if (GcaSetting.fakePlayerForceOfflineUUID) {
             return CompletableFuture.completedFuture(Optional.of(profile));
         }
+        //#if MC >= 12002 && MC <= 12004
+        //$$ return SkullBlockEntityAccessor.invokeFetchGameProfile(profile.getName());
+        //#else
         return SkullBlockEntity.fetchGameProfile(profile.getName());
+        //#endif
     }
     //#endif
 }

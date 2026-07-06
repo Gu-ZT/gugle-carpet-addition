@@ -8,7 +8,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.server.waypoints.ServerWaypointManager;
-import org.jetbrains.annotations.Nullable;
+
+import javax.annotation.Nullable;
 
 public class LocatorBar extends Validator<Boolean> {
     @Override

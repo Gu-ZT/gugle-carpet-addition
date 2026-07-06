@@ -7,6 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
+import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
@@ -31,7 +32,7 @@ public class BotUtil {
         server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
         instance.teleportTo(level, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
         instance.setHealth(20.0F);
-        instance.unsetRemoved();
+        ((EntityInvoker) instance).invokeUnsetRemoved();
         instance.setMaxUpStep(0.6F);
         instance.gameMode.changeGameModeForPlayer(bot.mode());
         server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) (instance.yHeadRot * 256 / 360)), bot.dimension());
