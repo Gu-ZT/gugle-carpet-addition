@@ -23,9 +23,10 @@ public class SimpleInGameCalculator {
         jep.parseExpression(expression);
         if (!jep.hasError()) {
             double result = jep.getValue();
-            return Component.literal("=%f".formatted(result)).withStyle(ChatFormatting.DARK_GRAY);
+            return Component.literal("=%f".formatted(result)).withStyle(ChatFormatting.GRAY);
         } else {
-            return Component.literal("Illegal expression: %s".formatted(jep.getErrorInfo()));
+            return Component.literal("Illegal expression: %s".formatted(jep.getErrorInfo()))
+                .withStyle(ChatFormatting.RED);
         }
     }
 }
