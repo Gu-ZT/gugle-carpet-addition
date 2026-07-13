@@ -123,7 +123,13 @@ public class WelcomeMessage {
             //$$     GcaExtension.LOGGER.warn("No clock found for dimension '{}'", dimension.getRegisteredName());
             //$$     return Component.literal("No clock found for dimension '%s'".formatted(dimension.getRegisteredName())).withStyle(ChatFormatting.RED);
             //$$ }
-            //$$ long ticks = server.clockManager().getTotalTicks(clock);
+            //$$ long ticks = server.clockManager()
+                     //#if MC < 260300
+                     //$$ .getTotalTicks(clock)
+                     //#else
+                     //$$ .getInstance(clock).totalTicks()
+                     //#endif
+            //$$     ;
             //#endif
             MutableComponent component = Component.literal(String.valueOf(ticks / 1728000));
             if (args == null || args.isJsonNull() || (!args.isJsonPrimitive() && !args.isJsonObject()) || (
