@@ -32,13 +32,14 @@ public class BotUtil {
         return spawnBot(server, level, bot, gameProfile, applyAction, null);
     }
 
-    public static boolean spawnBot(MinecraftServer server, @Nullable ServerLevel level, BotInfo bot, GameProfile profile, boolean applyAction, @Nullable EntityPlayerActionPack actionPack) {
+    public static boolean spawnBot(MinecraftServer server, @Nullable ServerLevel level, BotInfo preBot, GameProfile profile, boolean applyAction, @Nullable EntityPlayerActionPack actionPack) {
         if (level == null) {
-            level = server.getLevel(bot.dimension());
+            level = server.getLevel(preBot.dimension());
             if (level == null) return false;
         }
 
         EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile);
+        BotInfo bot = preBot.pos() == null ? preBot.withPos(instance.position()) : preBot;
         instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
         server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
         instance.teleportTo(level, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);

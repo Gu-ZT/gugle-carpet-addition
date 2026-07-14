@@ -81,6 +81,20 @@ public record BotInfo(
         );
     }
 
+    public BotInfo withPos(Vec3 pos) {
+        return new BotInfo(
+            this.name,
+            this.desc,
+            pos,
+            this.facing,
+            this.dimension,
+            this.mode,
+            this.flying,
+            this.actions,
+            this.executors
+        );
+    }
+
     public BotInfo withExecutors(@Nullable BotInfo bot) {
         if (bot == null) return this;
         return this.withExecutors(bot.executors);

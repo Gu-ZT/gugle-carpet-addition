@@ -20,6 +20,7 @@ import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +81,7 @@ public class FakePlayerAutoRespawn {
         float xRot = player.getXRot();
         float yRot = player.getYRot();
 
-        if ("normal".equals(GcaSetting.fakePlayerAutoRespawn)) {
+        if ("spawn".equals(GcaSetting.fakePlayerAutoRespawn)) {
             ServerLevel serverLevel = player.server.getLevel(player.getRespawnDimension());
             BlockPos respawnPos = player.getRespawnPosition();
 
@@ -97,11 +98,8 @@ public class FakePlayerAutoRespawn {
                 optional = Optional.empty();
             }
 
-            ServerLevel level = serverLevel != null && optional.isPresent() ?
-                serverLevel :
-                player.server.overworld();
-
-            Vec3 pos = optional.orElse(Vec3.atBottomCenterOf(level.getSharedSpawnPos()));
+            ServerLevel level = optional.isPresent() ? serverLevel : player.server.overworld();
+            Vec3 pos = optional.orElse(null);
 
             return new PortalDimensionInfo(level.dimension(), pos, Vec3.ZERO, yRot, xRot);
         }
@@ -113,7 +111,7 @@ public class FakePlayerAutoRespawn {
     private static class PortalDimensionInfo extends PortalInfo {
         private final ResourceKey<Level> dimension;
 
-        public PortalDimensionInfo(ResourceKey<Level> dimension, Vec3 pos, Vec3 vec32, float f, float g) {
+        public PortalDimensionInfo(ResourceKey<Level> dimension, @Nullable Vec3 pos, Vec3 vec32, float f, float g) {
             super(pos, vec32, f, g);
             this.dimension = dimension;
         }

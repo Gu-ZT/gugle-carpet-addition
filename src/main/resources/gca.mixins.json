@@ -28,6 +28,7 @@
     "PlayerCommandMixin",
     "PlayerListMixin",
     "PlayerMixin",
+    "PlayerRespawnLogicInvoker",
     "SeedCommandMixin",
     "ServerGamePacketListenerImplMixin",
     "ServerLevelMixin",
