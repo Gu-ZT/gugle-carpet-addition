@@ -23,6 +23,9 @@
   "carpet.rule.fakePlayerReloadAction.name": "Fake Player Reload Action",
   "carpet.rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",
 
+  "carpet.rule.fakePlayerAutoRespawn.name": "Fake Player Auto Respawn",
+  "carpet.rule.fakePlayerAutoRespawn.desc": "Make the fake player automatically respawn after death.\ndeath: Respawning at the death location.\nsetting: Respawning at the location stored in the bot list.\n§eIf the fake player is not in the bot list, the 'death' mode will be used.§r",
+
   "carpet.rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",
 
@@ -33,7 +36,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "Make fake player to auto fish",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "Fake Player Auto Replace Tool",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace damaged tool",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "Make fake player to auto replace damaged tool.\ntrue: Only tools with Mending are automatically replaced before they break. Other tools are replaced after they break.\nkeep: All tools are automatically replaced before they break.",
 
   "carpet.rule.fakePlayerToolDamagedNotification.name": "Fake Player Tool Damaged Notification",
   "carpet.rule.fakePlayerToolDamagedNotification.desc": "Broadcast a server-wide message when a fake player’s tool breaks or when restocking fails. (May cause message spam)",

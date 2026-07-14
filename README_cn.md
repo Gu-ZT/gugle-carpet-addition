@@ -150,8 +150,12 @@
 * 参考选项: `true`, `false`, `keep`
 * 分类: `GCA`, `BOT`
 
+> `true`: 拥有经验修补的工具会保留10点耐久, 其他工具会在损坏后自动切换
+
+> `keep`: 所有工具都会保留10点耐久
+
 ```
-/carpet [setDefault] fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool <true|keep>
 ```
 
 > 当选项为 `true` 时有经验修补的工具会保留10点耐久, 其他在损坏后自动切换

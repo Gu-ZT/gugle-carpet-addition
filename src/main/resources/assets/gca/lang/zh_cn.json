@@ -23,6 +23,9 @@
   "carpet.rule.fakePlayerReloadAction.name": "假人动作保存",
   "carpet.rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
 
+  "carpet.rule.fakePlayerAutoRespawn.name": "假人自动重生",
+  "carpet.rule.fakePlayerAutoRespawn.desc": "使假人在死亡后自动重生\ndeath: 在死亡地点重生\nsetting: 在bot列表中设定的地点重生\n§e如果假人不在bot列表中, 将使用death模式重生§r",
+
   "carpet.rule.fakePlayerAutoReplenishment.name": "假人补货",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",
 
@@ -33,7 +36,7 @@
   "carpet.rule.fakePlayerAutoFish.desc": "让假人自动钓鱼",
 
   "carpet.rule.fakePlayerAutoReplaceTool.name": "假人切换工具",
-  "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换损坏的工具",
+  "carpet.rule.fakePlayerAutoReplaceTool.desc": "让假人自动切换损坏的工具\ntrue: 仅拥有经验修补的工具损坏前自动切换, 其他工具在损坏后自动切换\nkeep: 所有工具都在损坏前自动切换",
 
   "carpet.rule.fakePlayerToolDamagedNotification.name": "假人工具损坏通知",
   "carpet.rule.fakePlayerToolDamagedNotification.desc": "假人工具损坏或补货失败后发送一条全服广播(可能刷屏)",

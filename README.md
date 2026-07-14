@@ -151,12 +151,12 @@ Make fake player to auto replace almost damaged tool
 * Options: `true`, `false`, `keep`
 * Categories: `GCA`, `BOT`
 
-> `true`: Tools with Mending will keep 10 durability; other tools will automatically switch after they break.
+> `true`: Tools with Mending will keep 10 durability; other tools will automatically be replaced after they break.
 
 > `keep`: All tools will keep 10 durability.
 
 ```
-/carpet [setDefault] fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool <true|keep>
 ```
 
 ### fakePlayerToolDamagedNotification
