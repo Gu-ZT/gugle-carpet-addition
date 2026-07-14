@@ -10,7 +10,6 @@ import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
@@ -35,7 +34,7 @@ public class FakePlayerAutoRespawn {
         cachedDiedFakePlayers.put(uuid, actionPack);
     }
 
-    public static void onFakePlayerRespawn(UUID uuid) {
+    public static void onFakePlayerSpawned(UUID uuid) {
         cachedDiedFakePlayers.remove(uuid);
     }
 
@@ -107,12 +106,6 @@ public class FakePlayerAutoRespawn {
             return new PortalDimensionInfo(level.dimension(), pos, Vec3.ZERO, yRot, xRot);
         }
 
-
-        Optional<GlobalPos> optional = player.getLastDeathLocation();
-        if (optional.isPresent()) {
-            return new PortalDimensionInfo(optional.get(), Vec3.ZERO, yRot, xRot);
-        }
-
         ResourceKey<Level> dimension = player.level().dimension();
         return new PortalDimensionInfo(dimension, player.position(), Vec3.ZERO, yRot, xRot);
     }
@@ -123,10 +116,6 @@ public class FakePlayerAutoRespawn {
         public PortalDimensionInfo(ResourceKey<Level> dimension, Vec3 pos, Vec3 vec32, float f, float g) {
             super(pos, vec32, f, g);
             this.dimension = dimension;
-        }
-
-        public PortalDimensionInfo(GlobalPos info, Vec3 vec32, float f, float g) {
-            this(info.dimension(), Vec3.atBottomCenterOf(info.pos()), vec32, f, g);
         }
     }
 

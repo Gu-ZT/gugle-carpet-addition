@@ -9,7 +9,6 @@ import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
@@ -20,7 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class FakePlayerAutoRespawn {
@@ -31,7 +29,7 @@ public class FakePlayerAutoRespawn {
         cachedDiedFakePlayers.put(uuid, actionPack);
     }
 
-    public static void onFakePlayerRespawn(UUID uuid) {
+    public static void onFakePlayerSpawned(UUID uuid) {
         cachedDiedFakePlayers.remove(uuid);
     }
 
@@ -75,19 +73,13 @@ public class FakePlayerAutoRespawn {
     }
 
     private static DimensionTransition getRespawnPosition(EntityPlayerMPFake player) {
-        if ("normal".equals(GcaSetting.fakePlayerAutoRespawn)) {
+        if ("spawn".equals(GcaSetting.fakePlayerAutoRespawn)) {
             return player.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
         }
 
         ServerLevel level = (ServerLevel) player.level();
         float xRot = player.getXRot();
         float yRot = player.getYRot();
-
-        Optional<GlobalPos> optional = player.getLastDeathLocation();
-        if (optional.isPresent()) {
-            Vec3 pos = Vec3.atBottomCenterOf(optional.get().pos());
-            return new DimensionTransition(level, pos, Vec3.ZERO, yRot, xRot, DimensionTransition.DO_NOTHING);
-        }
 
         return new DimensionTransition(level, player.position(), Vec3.ZERO, yRot, xRot, DimensionTransition.DO_NOTHING);
     }

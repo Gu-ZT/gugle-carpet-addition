@@ -26,6 +26,7 @@
     "ParsedRuleMixin",
     "PlayerAccessor",
     "PlayerCommandMixin",
+    "PlayerListMixin",
     "PlayerMixin",
     "SeedCommandMixin",
     "ServerGamePacketListenerImplMixin",

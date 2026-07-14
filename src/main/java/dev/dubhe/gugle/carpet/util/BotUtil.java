@@ -10,6 +10,7 @@ import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoRespawn;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.game.ClientboundRotateHeadPacket;
 import net.minecraft.server.MinecraftServer;
