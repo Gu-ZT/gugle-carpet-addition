@@ -24,7 +24,7 @@
   "carpet.rule.fakePlayerReloadAction.desc": "退出存档时保留假人动作",
 
   "carpet.rule.fakePlayerAutoRespawn.name": "假人自动重生",
-  "carpet.rule.fakePlayerAutoRespawn.desc": "使假人在死亡后自动重生\ndeath: 在死亡地点重生\nsetting: 在bot列表中设定的地点重生\n§e如果假人不在bot列表中, 将使用death模式重生§r",
+  "carpet.rule.fakePlayerAutoRespawn.desc": "使假人在死亡后自动重生\nspawn: 在重生点重生\ndeath: 在死亡地点重生\nsetting: 在bot列表中设定的地点重生\n§e如果假人不在bot列表中, 将使用death模式重生§r",
 
   "carpet.rule.fakePlayerAutoReplenishment.name": "假人补货",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "让假人自动补货",

@@ -24,7 +24,7 @@
   "carpet.rule.fakePlayerReloadAction.desc": "Keep the fake player action when exiting the level",
 
   "carpet.rule.fakePlayerAutoRespawn.name": "Fake Player Auto Respawn",
-  "carpet.rule.fakePlayerAutoRespawn.desc": "Make the fake player automatically respawn after death.\ndeath: Respawning at the death location.\nsetting: Respawning at the location stored in the bot list.\n§eIf the fake player is not in the bot list, the 'death' mode will be used.§r",
+  "carpet.rule.fakePlayerAutoRespawn.desc": "Make the fake player automatically Respawning after death.\nspawn: Respawning at the spawn point.\ndeath: Respawn at the death location.\nsetting: Respawning at the location stored in the bot list.\n§eIf the fake player is not in the bot list, the 'death' mode will be used.§r",
 
   "carpet.rule.fakePlayerAutoReplenishment.name": "Fake Player Auto Replenishment",
   "carpet.rule.fakePlayerAutoReplenishment.desc": "Make fake player to auto replenishment",

@@ -107,15 +107,17 @@ Make the fake player automatically respawn after death
 
 * Type: `String`
 * Default: `false`
-* Options: `death`, `setting`, `false`
-* Categories: `GCA`, `BOT`
+* Options: `spawn`, `death`, `setting`, `false`
+* Categories: `GCA`, `BOT`, `experimental`
+
+> `spawn`: Respawning at the spawn point.
 
 > `death`: Respawning at the death location.
 
 > `setting`: Respawning at the location stored in the bot list. If the fake player is not in the bot list, the `death` mode will be used.
 
 ```
-/carpet [setDefault] fakePlayerAutoRespawn <death|setting>
+/carpet [setDefault] fakePlayerAutoRespawn <spawn|death|setting>
 ```
 
 ### fakePlayerAutoReplenishment
