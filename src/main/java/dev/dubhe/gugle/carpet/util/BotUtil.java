@@ -1,5 +1,7 @@
 package dev.dubhe.gugle.carpet.util;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import com.mojang.authlib.GameProfile;
@@ -7,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
+import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.network.protocol.PacketFlow;
@@ -18,6 +21,7 @@ import net.minecraft.server.network.CommonListenerCookie;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 //#if MC < 12102
@@ -31,6 +35,8 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //#if MC >= 12005
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+
+import javax.annotation.Nullable;
 //#endif
 
 public class BotUtil {
@@ -65,59 +71,68 @@ public class BotUtil {
             //#else
             //$$ p.name().isEmpty() ? gameProfile : p;
             //#endif
-
-            EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile, ClientInformation.createDefault());
-            instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
-            server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation()
-                //#if MC >= 12005
-                , false
-                //#endif
-            ));
-            //#if MC >= 12110
-            //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
-            //#endif
-            instance.teleportTo(
-                level,
-                bot.pos().x,
-                bot.pos().y,
-                bot.pos().z,
-                //#if MC >= 12102
-                //$$ Set.of(),
-                //#endif
-                bot.facing().y,
-                bot.facing().x
-                //#if MC >= 12102
-                //$$ ,true
-                //#endif
-            );
-            instance.setHealth(20.0F);
-            ((EntityInvoker) instance).invokeUnsetRemoved();
-            //#if MC >= 12005
-            AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
-            if (attribute != null) attribute.setBaseValue(0.6F);
-            //#else
-            //$$ instance.setMaxUpStep(0.6F);
-            //#endif
-            instance.gameMode.changeGameModeForPlayer(bot.mode());
-            server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) (instance.yHeadRot * 256 / 360)), bot.dimension());
-            server.getPlayerList().broadcastAll(
-                //#if MC < 12102
-                new ClientboundTeleportEntityPacket(instance),
-                //#else
-                //$$ ClientboundEntityPositionSyncPacket.of(instance),
-                //#endif
-                bot.dimension());
-            instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
-            instance.getAbilities().flying = bot.flying();
-            if (applyAction) applyAction(server, instance, bot);
+            spawnBot(server, level, bot, profile, applyAction, null);
         }, server);
         return true;
     }
 
-    private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
+    public static boolean spawnBot(MinecraftServer server, @Nullable ServerLevel level, BotInfo bot, GameProfile profile, boolean applyAction, @Nullable EntityPlayerActionPack actionPack) {
+        if (level == null) {
+            level = server.getLevel(bot.dimension());
+            if (level == null) return false;
+        }
+
+        EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile, ClientInformation.createDefault());
+        instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
+        server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation()
+            //#if MC >= 12005
+            , false
+            //#endif
+        ));
+        //#if MC >= 12110
+        //$$ EntityPlayerMPFakeInvoker.invokeLoadPlayerData(instance);
+        //#endif
+        instance.teleportTo(
+            level,
+            bot.pos().x,
+            bot.pos().y,
+            bot.pos().z,
+            //#if MC >= 12102
+            //$$ Set.of(),
+            //#endif
+            bot.facing().y,
+            bot.facing().x
+            //#if MC >= 12102
+            //$$ ,true
+            //#endif
+        );
+        instance.setHealth(20.0F);
+        ((EntityInvoker) instance).invokeUnsetRemoved();
+        //#if MC >= 12005
+        AttributeInstance attribute = instance.getAttribute(Attributes.STEP_HEIGHT);
+        if (attribute != null) attribute.setBaseValue(0.6F);
+        //#else
+        //$$ instance.setMaxUpStep(0.6F);
+        //#endif
+        instance.gameMode.changeGameModeForPlayer(bot.mode());
+        server.getPlayerList().broadcastAll(new ClientboundRotateHeadPacket(instance, (byte) (instance.yHeadRot * 256 / 360)), bot.dimension());
+        server.getPlayerList().broadcastAll(
+            //#if MC < 12102
+            new ClientboundTeleportEntityPacket(instance),
+            //#else
+            //$$ ClientboundEntityPositionSyncPacket.of(instance),
+            //#endif
+            bot.dimension());
+        instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
+        instance.getAbilities().flying = bot.flying();
+        if (applyAction) applyAction(server, instance, bot, actionPack);
+        return true;
+    }
+
+    private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot, @Nullable EntityPlayerActionPack actionPack) {
         List<BotExecutorInfo> startups = bot.getStartups();
         if (startups.isEmpty()) {
-            bot.actions().applyAction(instance);
+            bot.actions().applyAction(instance, actionPack);
             return;
         }
 

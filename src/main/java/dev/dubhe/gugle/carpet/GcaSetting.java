@@ -47,7 +47,7 @@ public class GcaSetting {
     // 假人自动重生
     @Rule(
         categories = {GCA, BOT},
-        options = {"death", "setting", "false"}
+        options = {"normal", "death", "setting", "false"}
     )
     public static String fakePlayerAutoRespawn = "false";
 

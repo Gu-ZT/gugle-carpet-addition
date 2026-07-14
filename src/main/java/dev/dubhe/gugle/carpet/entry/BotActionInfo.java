@@ -45,15 +45,27 @@ public record BotActionInfo(
         );
     }
 
-    public void applyAction(ServerPlayer player) {
+    public void applyAction(ServerPlayer player, @Nullable EntityPlayerActionPack actionPack) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
-        ap.setSneaking(this.sneaking);
-        ap.setSprinting(this.sprinting);
-        ap.setForward(this.forward);
-        ap.setStrafing(this.strafing);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.ATTACK, this.attack);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.USE, this.use);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.JUMP, this.jump);
+        if (actionPack == null) {
+            ap.setSneaking(this.sneaking);
+            ap.setSprinting(this.sprinting);
+            ap.setForward(this.forward);
+            ap.setStrafing(this.strafing);
+            setActionInterval(ap, EntityPlayerActionPack.ActionType.ATTACK, this.attack);
+            setActionInterval(ap, EntityPlayerActionPack.ActionType.USE, this.use);
+            setActionInterval(ap, EntityPlayerActionPack.ActionType.JUMP, this.jump);
+        } else {
+            APAccessor accessor = (APAccessor) actionPack;
+            ap.setSneaking(accessor.getSneaking());
+            ap.setSprinting(accessor.getSprinting());
+            ap.setForward(accessor.getForward());
+            ap.setStrafing(accessor.getStrafing());
+            accessor.getActions().forEach((type, action) -> {
+                if (action.done) return;
+                ap.start(type, action);
+            });
+        }
     }
 
     private static int getActionInterval(APAccessor accessor, EntityPlayerActionPack.ActionType type) {

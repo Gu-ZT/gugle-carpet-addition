@@ -1,5 +1,7 @@
 package dev.dubhe.gugle.carpet.util;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
 import com.mojang.authlib.GameProfile;
@@ -7,6 +9,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
+import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.network.protocol.PacketFlow;
@@ -15,6 +18,7 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 public class BotUtil {
@@ -27,7 +31,16 @@ public class BotUtil {
         GameProfile gameProfile = GameProfileUtil.getGameProfile(server, bot.name());
         if (gameProfile == null || level == null) return false;
 
-        EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, gameProfile);
+        return spawnBot(server, level, bot, gameProfile, applyAction, null);
+    }
+
+    public static boolean spawnBot(MinecraftServer server, @Nullable ServerLevel level, BotInfo bot, GameProfile profile, boolean applyAction, @Nullable EntityPlayerActionPack actionPack) {
+        if (level == null) {
+            level = server.getLevel(bot.dimension());
+            if (level == null) return false;
+        }
+
+        EntityPlayerMPFake instance = EntityPlayerMPFake.respawnFake(server, level, profile);
         instance.fixStartingPosition = () -> instance.moveTo(bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
         server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance);
         instance.teleportTo(level, bot.pos().x, bot.pos().y, bot.pos().z, bot.facing().y, bot.facing().x);
@@ -39,14 +52,14 @@ public class BotUtil {
         server.getPlayerList().broadcastAll(new ClientboundTeleportEntityPacket(instance), bot.dimension());
         instance.getEntityData().set(PlayerAccessor.getCustomisationData(), (byte) 0x7f); // show all model layers (incl. capes)
         instance.getAbilities().flying = bot.flying();
-        if (applyAction) applyAction(server, instance, bot);
+        if (applyAction) applyAction(server, instance, bot, actionPack);
         return true;
     }
 
-    private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot) {
+    private static void applyAction(MinecraftServer server, EntityPlayerMPFake instance, BotInfo bot, @Nullable EntityPlayerActionPack actionPack) {
         List<BotExecutorInfo> startups = bot.getStartups();
         if (startups.isEmpty()) {
-            bot.actions().applyAction(instance);
+            bot.actions().applyAction(instance, actionPack);
             return;
         }
 

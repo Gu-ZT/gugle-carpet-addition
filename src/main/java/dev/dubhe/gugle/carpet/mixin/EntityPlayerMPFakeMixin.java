@@ -1,14 +1,18 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import carpet.fakes.ServerPlayerInterface;
+import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.authlib.GameProfile;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoReplaceTool;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoRespawn;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,6 +55,13 @@ public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
         if (!"false".equals(GcaSetting.fakePlayerAutoReplaceTool)) {
             FakePlayerAutoReplaceTool.tryReplaceTool(this);
         }
+    }
+
+    @Inject(method = "die", at = @At("HEAD"))
+    private void onDie(DamageSource cause, CallbackInfo ci) {
+        if ("false".equals(GcaSetting.fakePlayerAutoRespawn)) return;
+        EntityPlayerActionPack pack = ((ServerPlayerInterface) this).getActionPack();
+        FakePlayerAutoRespawn.onFakePlayerDied(this.uuid, pack);
     }
 
     //#if MC >= 12104
