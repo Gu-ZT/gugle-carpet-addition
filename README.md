@@ -101,6 +101,23 @@ Keep the fake player action when exiting the level
 /carpet [setDefault] fakePlayerReloadAction false
 ```
 
+### fakePlayerAutoRespawn
+
+Make the fake player automatically respawn after death
+
+* Type: `String`
+* Default: `false`
+* Options: `death`, `setting`, `false`
+* Categories: `GCA`, `BOT`
+
+> `death`: Respawning at the death location.
+
+> `setting`: Respawning at the location stored in the bot list. If the fake player is not in the bot list, the `death` mode will be used.
+
+```
+/carpet [setDefault] fakePlayerAutoRespawn <death|setting>
+```
+
 ### fakePlayerAutoReplenishment
 
 Make fake player to auto replenishment

@@ -100,6 +100,23 @@
 /carpet [setDefault] fakePlayerReloadAction false
 ```
 
+### 假人自动重生 (fakePlayerAutoRespawn)
+
+使假人在死亡后自动重生
+
+* 类型: `String`
+* 默认值: `false`
+* 参考选项: `death`, `setting`, `false`
+* 分类: `GCA`, `BOT`
+
+> `death`: 在死亡地点重生
+
+> `setting`: 在bot列表中设定的地点重生，如果假人不在bot列表中，将使用 `death` 模式重生
+
+```
+/carpet [setDefault] fakePlayerAutoRespawn <death|setting>
+```
+
 ### 假人补货 (fakePlayerAutoReplenishment)
 
 让假人自动补货
