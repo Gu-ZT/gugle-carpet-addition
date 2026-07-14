@@ -1,6 +1,5 @@
 package dev.dubhe.gugle.carpet.util;
 
-import carpet.fakes.ServerPlayerInterface;
 import carpet.helpers.EntityPlayerActionPack;
 import carpet.patches.EntityPlayerMPFake;
 import carpet.patches.FakeClientConnection;
@@ -9,7 +8,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import dev.dubhe.gugle.carpet.GcaExtension;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
-import dev.dubhe.gugle.carpet.mixin.APAccessor;
 import dev.dubhe.gugle.carpet.mixin.EntityInvoker;
 import dev.dubhe.gugle.carpet.mixin.PlayerAccessor;
 import net.minecraft.network.protocol.PacketFlow;
@@ -19,9 +17,9 @@ import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.CommonListenerCookie;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 //#if MC < 12102
@@ -35,8 +33,6 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //#if MC >= 12005
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-
-import javax.annotation.Nullable;
 //#endif
 
 public class BotUtil {

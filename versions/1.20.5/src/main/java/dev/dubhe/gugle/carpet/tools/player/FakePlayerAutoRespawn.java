@@ -9,11 +9,15 @@ import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.util.BotUtil;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -40,8 +44,7 @@ public class FakePlayerAutoRespawn {
         if (pack == null || "false".equals(GcaSetting.fakePlayerAutoRespawn)) return;
 
         EntityPlayerActionPack actionPack = ((ServerPlayerInterface) player).getActionPack();
-        MinecraftServer server = player.level().getServer();
-        assert server != null;
+        MinecraftServer server = player.server;
         GameProfile profile = player.getGameProfile();
         String name = profile.getName();
 
@@ -58,15 +61,15 @@ public class FakePlayerAutoRespawn {
             if (botInfo != null) return botInfo;
         }
 
-        DimensionTransition transition = getRespawnPosition(player);
-        Vec2 facing = new Vec2(transition.xRot(), transition.yRot());
+        PortalDimensionInfo transition = getRespawnPosition(player);
+        Vec2 facing = new Vec2(transition.xRot, transition.yRot);
 
         return new BotInfo(
             name,
             "",
-            transition.pos(),
+            transition.pos,
             facing,
-            transition.newLevel().dimension(),
+            transition.dimension,
             player.gameMode.getGameModeForPlayer(),
             player.getAbilities().flying,
             BotActionInfo.EMPTY,
@@ -74,21 +77,57 @@ public class FakePlayerAutoRespawn {
         );
     }
 
-    private static DimensionTransition getRespawnPosition(EntityPlayerMPFake player) {
-        if ("normal".equals(GcaSetting.fakePlayerAutoRespawn)) {
-            return player.findRespawnPositionAndUseSpawnBlock(false, DimensionTransition.DO_NOTHING);
-        }
-
-        ServerLevel level = (ServerLevel) player.level();
+    private static PortalDimensionInfo getRespawnPosition(EntityPlayerMPFake player) {
         float xRot = player.getXRot();
         float yRot = player.getYRot();
 
-        Optional<GlobalPos> optional = player.getLastDeathLocation();
-        if (optional.isPresent()) {
-            Vec3 pos = Vec3.atBottomCenterOf(optional.get().pos());
-            return new DimensionTransition(level, pos, Vec3.ZERO, yRot, xRot, DimensionTransition.DO_NOTHING);
+        if ("normal".equals(GcaSetting.fakePlayerAutoRespawn)) {
+            ServerLevel serverLevel = player.server.getLevel(player.getRespawnDimension());
+            BlockPos respawnPos = player.getRespawnPosition();
+
+            Optional<Vec3> optional;
+            if (serverLevel != null && respawnPos != null) {
+                optional = Player.findRespawnPositionAndUseSpawnBlock(
+                    serverLevel,
+                    respawnPos,
+                    player.getRespawnAngle(),
+                    player.isRespawnForced(),
+                    false
+                );
+            } else {
+                optional = Optional.empty();
+            }
+
+            ServerLevel level = serverLevel != null && optional.isPresent() ?
+                serverLevel :
+                player.server.overworld();
+
+            Vec3 pos = optional.orElse(Vec3.atBottomCenterOf(level.getSharedSpawnPos()));
+
+            return new PortalDimensionInfo(level.dimension(), pos, Vec3.ZERO, yRot, xRot);
         }
 
-        return new DimensionTransition(level, player.position(), Vec3.ZERO, yRot, xRot, DimensionTransition.DO_NOTHING);
+
+        Optional<GlobalPos> optional = player.getLastDeathLocation();
+        if (optional.isPresent()) {
+            return new PortalDimensionInfo(optional.get(), Vec3.ZERO, yRot, xRot);
+        }
+
+        ResourceKey<Level> dimension = player.level().dimension();
+        return new PortalDimensionInfo(dimension, player.position(), Vec3.ZERO, yRot, xRot);
     }
+
+    private static class PortalDimensionInfo extends PortalInfo {
+        private final ResourceKey<Level> dimension;
+
+        public PortalDimensionInfo(ResourceKey<Level> dimension, Vec3 pos, Vec3 vec32, float f, float g) {
+            super(pos, vec32, f, g);
+            this.dimension = dimension;
+        }
+
+        public PortalDimensionInfo(GlobalPos info, Vec3 vec32, float f, float g) {
+            this(info.dimension(), Vec3.atBottomCenterOf(info.pos()), vec32, f, g);
+        }
+    }
+
 }
