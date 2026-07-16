@@ -18,6 +18,12 @@ ext {
     }
 }
 
+def includes = []
+
+if (project.hasProperty('wrapper_includes')) {
+    includes = project.getProperty('wrapper_includes').split(',')
+}
+
 configurations {
     if (!unobfuscated) {
         modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
@@ -113,8 +119,12 @@ dependencies {
 
     // fabric-carpet
     autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
-    // jep
-    autoImplementation 'jep:jep:2.24'
+
+    // 引入包装器中的依赖
+    includes.each {
+        implementation it
+    }
+
     // jsr305
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     // mixin-extras
