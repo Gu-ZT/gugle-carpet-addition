@@ -18,29 +18,15 @@ ext {
     }
 }
 
+def includes = []
+
+if (project.hasProperty('wrapper_includes')) {
+    includes = project.getProperty('wrapper_includes').split(',')
+}
+
 configurations {
     if (!unobfuscated) {
         modRuntimeOnly.exclude group: 'net.fabricmc', module: 'fabric-loader'
-    }
-}
-
-repositories {
-    mavenLocal()
-    maven {
-        name 'mavenCentral'
-        url 'https://repo1.maven.org/maven2/'
-    }
-    maven {
-        name 'MasaMaven'
-        url 'https://masa.dy.fi/maven'
-    }
-    maven {
-        name 'CjsahMaven'
-        url 'https://server.cjsah.net:1002/maven/'
-    }
-    maven {
-        name 'CurseMaven'
-        url "https://www.cursemaven.com"
     }
 }
 
@@ -98,6 +84,26 @@ if (mcVersion >= 260000) {
 }
 JavaVersion MIXIN_COMPATIBILITY_LEVEL = TARGET_JAVA_VERSION
 
+repositories {
+    mavenLocal()
+    maven {
+        name 'mavenCentral'
+        url 'https://repo1.maven.org/maven2/'
+    }
+    maven {
+        name 'MasaMaven'
+        url 'https://masa.dy.fi/maven'
+    }
+    maven {
+        name 'CjsahMaven'
+        url 'https://server.cjsah.net:1002/maven/'
+    }
+    maven {
+        name 'CurseMaven'
+        url "https://www.cursemaven.com"
+    }
+}
+
 dependencies {
     // from https://github.com/TISUnion/Carpet-TIS-Addition/blob/master/common.gradle#L41-L54
     def autoImplementation = { dep -> unobfuscated ? implementation(dep) : modImplementation(dep) }
@@ -113,8 +119,12 @@ dependencies {
 
     // fabric-carpet
     autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
-    // jep
-    include(autoImplementation 'jep:jep:2.24')
+
+    // 引入包装器中的依赖
+    includes.each {
+        implementation it
+    }
+
     // jsr305
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     // mixin-extras

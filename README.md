@@ -101,6 +101,25 @@ Keep the fake player action when exiting the level
 /carpet [setDefault] fakePlayerReloadAction false
 ```
 
+### fakePlayerAutoRespawn
+
+Make the fake player automatically respawn after death
+
+* Type: `String`
+* Default: `false`
+* Options: `spawn`, `death`, `setting`, `false`
+* Categories: `GCA`, `BOT`, `experimental`
+
+> `spawn`: Respawning at the spawn point.
+
+> `death`: Respawning at the death location.
+
+> `setting`: Respawning at the location stored in the bot list. If the fake player is not in the bot list, the `death` mode will be used.
+
+```
+/carpet [setDefault] fakePlayerAutoRespawn <spawn|death|setting>
+```
+
 ### fakePlayerAutoReplenishment
 
 Make fake player to auto replenishment
@@ -151,12 +170,12 @@ Make fake player to auto replace almost damaged tool
 * Options: `true`, `false`, `keep`
 * Categories: `GCA`, `BOT`
 
-> `true`: Tools with Mending will keep 10 durability; other tools will automatically switch after they break.
+> `true`: Tools with Mending will keep 10 durability; other tools will automatically be replaced after they break.
 
 > `keep`: All tools will keep 10 durability.
 
 ```
-/carpet [setDefault] fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool <true|keep>
 ```
 
 ### fakePlayerToolDamagedNotification

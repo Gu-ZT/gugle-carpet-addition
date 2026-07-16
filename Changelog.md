@@ -1,1 +1,4 @@
-- Compatible with 26.3 snapshot 2
+- Change the Output Color of the Simple Calculator
+- Optimizing the wrapper structure reduced the package size
+- Support for Minecraft 26.3-snapshot-3
+- New feature: fakePlayerAutoRespawn

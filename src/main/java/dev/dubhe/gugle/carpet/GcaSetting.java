@@ -44,6 +44,13 @@ public class GcaSetting {
     )
     public static boolean fakePlayerReloadAction = true;
 
+    // 假人自动重生
+    @Rule(
+        categories = {GCA, BOT, EXPERIMENTAL},
+        options = {"spawn", "death", "setting", "false"}
+    )
+    public static String fakePlayerAutoRespawn = "false";
+
     // 让假人自动补货
     @Rule(
         categories = {GCA, BOT}

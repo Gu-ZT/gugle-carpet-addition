@@ -100,6 +100,25 @@
 /carpet [setDefault] fakePlayerReloadAction false
 ```
 
+### 假人自动重生 (fakePlayerAutoRespawn)
+
+使假人在死亡后自动重生
+
+* 类型: `String`
+* 默认值: `false`
+* 参考选项: `spawn`, `death`, `setting`, `false`
+* 分类: `GCA`, `BOT`, `experimental`
+
+> `spawn`: 在重生点重生
+
+> `death`: 在死亡地点重生
+
+> `setting`: 在bot列表中设定的地点重生，如果假人不在bot列表中，将使用 `death` 模式重生
+
+```
+/carpet [setDefault] fakePlayerAutoRespawn <spawn|death|setting>
+```
+
 ### 假人补货 (fakePlayerAutoReplenishment)
 
 让假人自动补货
@@ -150,8 +169,12 @@
 * 参考选项: `true`, `false`, `keep`
 * 分类: `GCA`, `BOT`
 
+> `true`: 拥有经验修补的工具会保留10点耐久, 其他工具会在损坏后自动切换
+
+> `keep`: 所有工具都会保留10点耐久
+
 ```
-/carpet [setDefault] fakePlayerAutoReplaceTool true
+/carpet [setDefault] fakePlayerAutoReplaceTool <true|keep>
 ```
 
 > 当选项为 `true` 时有经验修补的工具会保留10点耐久, 其他在损坏后自动切换

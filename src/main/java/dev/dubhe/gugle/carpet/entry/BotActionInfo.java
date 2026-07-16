@@ -18,7 +18,7 @@ public record BotActionInfo(
     int attack,
     int use,
     int jump
-) {
+) implements IFakePlayerAction {
     public static final Codec<BotActionInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.BOOL.optionalFieldOf("sneaking", false).forGetter(BotActionInfo::sneaking),
         Codec.BOOL.optionalFieldOf("sprinting", false).forGetter(BotActionInfo::sprinting),
@@ -45,15 +45,14 @@ public record BotActionInfo(
         );
     }
 
-    public void applyAction(ServerPlayer player) {
+    public void applyAction(ServerPlayer player, @Nullable EntityPlayerActionPack actionPack) {
         EntityPlayerActionPack ap = ((ServerPlayerInterface) player).getActionPack();
-        ap.setSneaking(this.sneaking);
-        ap.setSprinting(this.sprinting);
-        ap.setForward(this.forward);
-        ap.setStrafing(this.strafing);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.ATTACK, this.attack);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.USE, this.use);
-        setActionInterval(ap, EntityPlayerActionPack.ActionType.JUMP, this.jump);
+        IFakePlayerAction action = actionPack == null ? this : IFakePlayerAction.of(actionPack);
+        ap.setSneaking(action.getSneaking());
+        ap.setSprinting(action.getSprinting());
+        ap.setForward(action.getForward());
+        ap.setStrafing(action.getStrafing());
+        action.applyAction(ap);
     }
 
     private static int getActionInterval(APAccessor accessor, EntityPlayerActionPack.ActionType type) {
@@ -71,4 +70,30 @@ public record BotActionInfo(
         ap.start(type, action);
     }
 
+    @Override
+    public boolean getSneaking() {
+        return this.sneaking;
+    }
+
+    @Override
+    public boolean getSprinting() {
+        return this.sprinting;
+    }
+
+    @Override
+    public float getForward() {
+        return this.forward;
+    }
+
+    @Override
+    public float getStrafing() {
+        return this.strafing;
+    }
+
+    @Override
+    public void applyAction(EntityPlayerActionPack actionPack) {
+        setActionInterval(actionPack, EntityPlayerActionPack.ActionType.ATTACK, this.attack);
+        setActionInterval(actionPack, EntityPlayerActionPack.ActionType.USE, this.use);
+        setActionInterval(actionPack, EntityPlayerActionPack.ActionType.JUMP, this.jump);
+    }
 }

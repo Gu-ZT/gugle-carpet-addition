@@ -1,9 +1,11 @@
 package dev.dubhe.gugle.carpet.mixin;
 
+import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FastPingFriend;
 import dev.dubhe.gugle.carpet.tools.SimpleInGameCalculator;
 import dev.dubhe.gugle.carpet.tools.TriConsumer;
+import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoRespawn;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.MinecraftServer;
@@ -20,12 +22,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //$$ import java.util.concurrent.CompletableFuture;
 //$$ import java.util.concurrent.ExecutionException;
 //#endif
+//#if MC > 12005
+import net.minecraft.network.DisconnectionDetails;
+//#endif
 
 @Mixin(ServerGamePacketListenerImpl.class)
 abstract class ServerGamePacketListenerImplMixin {
 
     @Shadow
     public abstract ServerPlayer getPlayer();
+
+    @Inject(method = "onDisconnect", at = @At("TAIL"))
+    private void onDisconnect(
+        //#if MC > 12005
+        DisconnectionDetails
+        //#else
+        //$$ Component
+        //#endif
+            details, CallbackInfo ci) {
+        if (this.getPlayer() instanceof EntityPlayerMPFake fakePlayer) {
+            FakePlayerAutoRespawn.tryRespawn(fakePlayer);
+        }
+    }
 
     @Inject(method =
         //#if MC < 260000
