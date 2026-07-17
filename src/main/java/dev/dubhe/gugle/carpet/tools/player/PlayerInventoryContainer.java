@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +68,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
         return true;
     }
 
+    @Nullable
     public Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot) {
         return switch (slot) {
             case 0 -> Map.entry(buttons, 0);
