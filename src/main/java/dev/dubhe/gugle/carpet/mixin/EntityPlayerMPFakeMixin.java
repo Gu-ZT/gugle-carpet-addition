@@ -26,7 +26,7 @@ import java.util.Optional;
 //$$ import java.util.UUID;
 //#endif
 //#if MC >= 12104
-//$$ import dev.dubhe.gugle.carpet.util.BotUtil;
+//$$ import dev.dubhe.gugle.carpet.util.BotSpawnUtil;
 //#endif
 //#if MC > 12001
 import net.minecraft.server.level.ClientInformation;
@@ -67,7 +67,7 @@ public abstract class EntityPlayerMPFakeMixin extends ServerPlayer {
     //#if MC >= 12104
     //$$ @Inject(method = "isSpawningPlayer", at = @At("RETURN"), cancellable = true, remap = false)
     //$$ private static void isSpawningPlayer(String username, CallbackInfoReturnable<Boolean> cir) {
-    //$$     cir.setReturnValue(cir.getReturnValue() && BotUtil.isGcaSpawningBot(username));
+    //$$     cir.setReturnValue(cir.getReturnValue() && BotSpawnUtil.isGcaSpawningBot(username));
     //$$ }
     //#endif
 

@@ -19,7 +19,7 @@ import net.minecraft.server.level.ServerLevel;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public class BotUtil {
+public class BotSpawnUtil {
     public static boolean spawnBot(MinecraftServer server, BotInfo bot) {
         return spawnBot(server, bot, true);
     }

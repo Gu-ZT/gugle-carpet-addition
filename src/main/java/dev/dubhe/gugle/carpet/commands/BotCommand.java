@@ -21,7 +21,7 @@ import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
-import dev.dubhe.gugle.carpet.util.BotUtil;
+import dev.dubhe.gugle.carpet.util.BotSpawnUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
@@ -272,7 +272,7 @@ public class BotCommand {
         //#if MC>=12002
         if (
             //#if MC < 12104
-            BotUtil.isGcaSpawningBot(bot.name())
+            BotSpawnUtil.isGcaSpawningBot(bot.name())
             //#else
             //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
             //#endif
@@ -285,7 +285,7 @@ public class BotCommand {
             source.sendFailure(fmtTr("msg.gca.bot.load.already", bot.name()));
             return false;
         }
-        boolean success = BotUtil.spawnBot(source.getServer(), bot);
+        boolean success = BotSpawnUtil.spawnBot(source.getServer(), bot);
         if (!success) {
             source.sendFailure(fmtTr("msg.gca.bot.load.failed", bot.name()));
         }
