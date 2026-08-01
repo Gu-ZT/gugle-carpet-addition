@@ -4,7 +4,7 @@ import carpet.patches.EntityPlayerMPFake;
 import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.tools.FastPingFriend;
 import dev.dubhe.gugle.carpet.tools.SimpleInGameCalculator;
-import dev.dubhe.gugle.carpet.tools.TriConsumer;
+import dev.dubhe.gugle.carpet.entry.TriConsumer;
 import dev.dubhe.gugle.carpet.tools.player.FakePlayerAutoRespawn;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;

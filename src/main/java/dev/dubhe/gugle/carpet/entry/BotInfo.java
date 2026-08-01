@@ -27,7 +27,7 @@ import java.util.List;
 import static dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper.tr;
 
 //#if MC < 12105
-import dev.dubhe.gugle.carpet.tools.CustomCodec;
+import dev.dubhe.gugle.carpet.util.CustomCodec;
 //#endif
 
 public record BotInfo(

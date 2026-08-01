@@ -1,5 +1,5 @@
 //#if MC < 12105
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.util;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.Util;
