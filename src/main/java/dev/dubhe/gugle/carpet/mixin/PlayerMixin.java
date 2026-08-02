@@ -96,7 +96,7 @@ abstract class PlayerMixin {
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.sixRows(
                         i, inventory,
-                        gcaPlayer.getEnderChestContainer()
+                        gcaPlayer.getEnderChestContainer().selfUpdate()
                     ),
                     ComponentHelper.tr("gca.player.ender_chest", otherPlayer.getDisplayName())
                 );
@@ -105,7 +105,7 @@ abstract class PlayerMixin {
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.threeRows(
                         i, inventory,
-                        gcaPlayer.getEnderChestContainer()
+                        gcaPlayer.getEnderChestContainer().selfUpdate()
                     ),
                     ComponentHelper.tr("gca.player.other_controller", otherPlayer.getDisplayName())
                 );
@@ -115,7 +115,7 @@ abstract class PlayerMixin {
             provider = new SimpleMenuProvider(
                 (i, inventory, p) -> new PlayerInventoryMenu(
                     i, inventory,
-                    gcaPlayer.getInventoryContainer()
+                    gcaPlayer.getInventoryContainer().selfUpdate()
                 ),
                 ComponentHelper.tr("gca.player.inventory", otherPlayer.getDisplayName())
             );

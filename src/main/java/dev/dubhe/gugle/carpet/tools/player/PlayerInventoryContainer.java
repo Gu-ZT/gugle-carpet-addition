@@ -116,7 +116,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
     private void createButton() {
         this.addButtonList(this.hotbar);
 
-        Button stopAll = new AutoResetButton("gca.action.stop_all");
+        Button stopAll = AutoResetButton.ofKey("gca.action.stop_all");
         Button attackInterval14 = new Button(false, "gca.action.attack.interval.12");
         Button attackContinuous = new Button(false, "gca.action.attack.continuous");
         Button useContinuous = new Button(false, "gca.action.use.continuous");

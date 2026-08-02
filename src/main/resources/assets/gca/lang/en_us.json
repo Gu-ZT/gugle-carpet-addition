@@ -199,6 +199,14 @@
   "msg.gca.bot.action.remove": "Remove Action",
   "msg.gca.bot.action.startup": "Startup Execution",
 
+  "msg.gca.bot.controller.global": "Global",
+  "msg.gca.bot.controller.list": "%s's Other Controller List",
+  "msg.gca.bot.controller.set.success": "Successfully added the button %3$s to slot %1$s of the %2$s's other controller.",
+  "msg.gca.bot.controller.not_exist": "Could not find the other controller for %s.",
+  "msg.gca.bot.controller.clear.all": "The other controller of %s has been cleared.",
+  "msg.gca.bot.controller.clear": "The %3$s in slot %2$s of the other controller of %1$s has been removed.",
+  "msg.gca.bot.controller.slot.not_exist": "Slot %2$s of the other controller of %1$s is empty.",
+
   "msg.gca.location.list": "Location List",
   "msg.gca.location.not_exist": "Location %s does not exist.",
   "msg.gca.location.add.success": "Location %s added.",

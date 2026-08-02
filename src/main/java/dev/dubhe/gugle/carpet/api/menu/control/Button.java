@@ -120,11 +120,28 @@ public class Button {
         this.offItem = offItemStack;
     }
 
-    public void checkButton(Container container, int slot) {
-        ItemStack onItemStack = this.onItem.copy();
-        ItemStack offItemStack = this.offItem.copy();
+    public boolean check(Container container, int slot) {
         if (!this.init) {
-            updateButton(container, slot, onItemStack, offItemStack);
+            updateButton(container, slot);
+            this.init = true;
+        }
+
+        return container.getItem(slot).isEmpty();
+    }
+
+    public void execute(Container container, int slot) {
+        this.flag = !flag;
+        if (flag) {
+            runTurnOnFunction();
+        } else {
+            runTurnOffFunction();
+        }
+        updateButton(container, slot);
+    }
+
+    public void checkButton(Container container, int slot) {
+        if (!this.init) {
+            updateButton(container, slot);
             this.init = true;
         }
 
@@ -139,10 +156,12 @@ public class Button {
             }
         }
 
-        updateButton(container, slot, onItemStack, offItemStack);
+        updateButton(container, slot);
     }
 
-    public void updateButton(Container container, int slot, ItemStack onItemStack, ItemStack offItemStack) {
+    public void updateButton(Container container, int slot) {
+        ItemStack onItemStack = this.onItem.copy();
+        ItemStack offItemStack = this.offItem.copy();
         if (!(
             container.getItem(slot).is(onItemStack.getItem()) ||
             container.getItem(slot).is(offItemStack.getItem()) ||
