@@ -116,7 +116,7 @@ public class PlayerEnderChestContainer extends PlayerContainer {
         ButtonBuilder builder = ButtonBuilder.ofName(node.desc())
             .resetButton()
             .appendTooltip(Component.literal(node.command()).withStyle(TOOLTIP_STYLE))
-            .addTurnOnCallback(it -> node.execute(this.player, this.ap));
+            .addTurnOnCallback(it -> node.execute(this.player));
         this.addButton(slot, builder);
     }
 }

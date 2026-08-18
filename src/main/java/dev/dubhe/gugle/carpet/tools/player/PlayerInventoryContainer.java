@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.stream.IntStream;
 
@@ -28,6 +29,9 @@ public class PlayerInventoryContainer extends PlayerContainer {
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(13, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> compartments;
     private final List<Button> hotbar;
+    private final Button attack12;
+    private final Button attackContinuous;
+    private final Button useContinuous;
 
     public PlayerInventoryContainer(ServerPlayer player) {
         super(player);
@@ -36,7 +40,34 @@ public class PlayerInventoryContainer extends PlayerContainer {
         this.offhand = InventoryUtil.getOffHand(this.player);
         this.compartments = ImmutableList.of(this.items, this.armor, this.offhand, this.buttons);
         this.hotbar = PlayerInventoryContainer.createHotbarButtons(this, this::addButton);
-        this.createButton();
+
+        ButtonBuilder attack12 = ButtonBuilder.ofKey("gca.action.attack.interval.12")
+            .addTurnOnCallback(button -> ap.start(ActionType.ATTACK, Action.interval(12)))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
+
+        ButtonBuilder attackContinuous = ButtonBuilder.ofKey("gca.action.attack.continuous")
+            .addTurnOnCallback(button -> this.ap.start(ActionType.ATTACK, Action.continuous()))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
+
+        ButtonBuilder useContinuous = ButtonBuilder.ofKey("gca.action.use.continuous")
+            .addTurnOnCallback(button -> this.ap.start(ActionType.USE, Action.continuous()))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.USE, Action.once()));
+
+        attack12.addTurnOnCallback(button -> attackContinuous.get().changeStatus(false, true));
+        attackContinuous.addTurnOnCallback(button -> attack12.get().changeStatus(false, true));
+
+        ButtonBuilder stopAll = ButtonBuilder.ofKey("gca.action.stop_all").resetButton()
+            .addTurnOnCallback(button -> {
+                attack12.get().changeStatus(false, true);
+                attackContinuous.get().changeStatus(false, true);
+                useContinuous.get().changeStatus(false, true);
+                this.ap.stopAll();
+            });
+
+        this.addButton(0, stopAll);
+        this.attack12 = Objects.requireNonNull(this.addButton(5, attack12));
+        this.attackContinuous = Objects.requireNonNull(this.addButton(6, attackContinuous));
+        this.useContinuous = Objects.requireNonNull(this.addButton(8, useContinuous));
     }
 
     @Override
@@ -106,36 +137,6 @@ public class PlayerInventoryContainer extends PlayerContainer {
         }).toList();
     }
 
-    private void createButton() {
-        ButtonBuilder attack12 = ButtonBuilder.ofKey("gca.action.attack.interval.12")
-            .addTurnOnCallback(button -> ap.start(ActionType.ATTACK, Action.interval(12)))
-            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
-
-        ButtonBuilder attackContinuous = ButtonBuilder.ofKey("gca.action.attack.continuous")
-            .addTurnOnCallback(button -> this.ap.start(ActionType.ATTACK, Action.continuous()))
-            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
-
-        ButtonBuilder useContinuous = ButtonBuilder.ofKey("gca.action.use.continuous")
-            .addTurnOnCallback(button -> this.ap.start(ActionType.USE, Action.continuous()))
-            .addTurnOffCallback(button -> this.ap.start(ActionType.USE, Action.once()));
-
-        attack12.addTurnOnCallback(button -> attackContinuous.get().changeStatus(false, true));
-        attackContinuous.addTurnOnCallback(button -> attack12.get().changeStatus(false, true));
-
-        ButtonBuilder stopAll = ButtonBuilder.ofKey("gca.action.stop_all").resetButton()
-            .addTurnOnCallback(button -> {
-                attack12.get().changeStatus(false, true);
-                attackContinuous.get().changeStatus(false, true);
-                useContinuous.get().changeStatus(false, true);
-                this.ap.stopAll();
-            });
-
-        this.addButton(0, stopAll);
-        this.addButton(5, attack12);
-        this.addButton(6, attackContinuous);
-        this.addButton(8, useContinuous);
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -144,5 +145,14 @@ public class PlayerInventoryContainer extends PlayerContainer {
             Button button = this.hotbar.get(i);
             button.changeStatus(i == selected, true);
         }
+    }
+
+    public void resetAttackButton() {
+        this.attack12.changeStatus(false, true);
+        this.attackContinuous.changeStatus(false, true);
+    }
+
+    public void resetUseButton() {
+        this.useContinuous.changeStatus(false, true);
     }
 }

@@ -215,6 +215,10 @@ public class BotCommand {
 
     private static ArgumentBuilder<CommandSourceStack, ?> controllerOperator(ArgumentBuilder<CommandSourceStack, ?> node, CommandDispatcher<CommandSourceStack> dispatcher) {
         return node
+            .executes(BotCommand::controllerList)
+            .then(literal("list")
+                .executes(BotCommand::controllerList)
+            )
             .then(literal("set")
                 .then(argument("slot", IntegerArgumentType.integer(3, 26))
                     .then(carpetActionLoop(dispatcher, BotCommand::controllerSet))
@@ -643,7 +647,8 @@ public class BotCommand {
         PageInfo.ofAll(context, list).sendPageInfo(
             context,
             Pair.of("msg.gca.bot.controller.list", new Object[]{optName(optional)}),
-            "/bot controller" + optional.map(it -> " " + it).orElse("")
+            "/bot controller" + optional.map(it -> " " + it).orElse(""),
+            optional.orElse(null)
         );
         return Command.SINGLE_SUCCESS;
     }

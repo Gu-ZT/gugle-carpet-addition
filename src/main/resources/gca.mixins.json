@@ -12,6 +12,7 @@
     "BlockTransformerMixin",
     "ChestMenuMixin",
     "EntityInvoker",
+    "EntityPlayerActionPackMixin",
     "EntityPlayerMPFakeInvoker",
     "EntityPlayerMPFakeMixin",
     "EntityTypeMixin",
