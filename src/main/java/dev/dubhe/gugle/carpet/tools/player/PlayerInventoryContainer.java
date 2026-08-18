@@ -102,7 +102,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
             ButtonBuilder builder = ButtonBuilder.ofComponent(component)
                 .setItemCount(num)
                 .addTurnOnCallback(button -> container.ap.setSlot(num));
-            return factory.apply(slot, builder);
+            return factory.apply(slot + 9, builder);
         }).toList();
     }
 
@@ -122,12 +122,13 @@ public class PlayerInventoryContainer extends PlayerContainer {
         attack12.addTurnOnCallback(button -> attackContinuous.get().changeStatus(false, true));
         attackContinuous.addTurnOnCallback(button -> attack12.get().changeStatus(false, true));
 
-        ButtonBuilder stopAll = ButtonBuilder.ofKey("gca.action.stop_all").addTurnOnCallback(button -> {
-            attack12.get().changeStatus(false, true);
-            attackContinuous.get().changeStatus(false, true);
-            useContinuous.get().changeStatus(false, true);
-            this.ap.stopAll();
-        });
+        ButtonBuilder stopAll = ButtonBuilder.ofKey("gca.action.stop_all").resetButton()
+            .addTurnOnCallback(button -> {
+                attack12.get().changeStatus(false, true);
+                attackContinuous.get().changeStatus(false, true);
+                useContinuous.get().changeStatus(false, true);
+                this.ap.stopAll();
+            });
 
         this.addButton(0, stopAll);
         this.addButton(5, attack12);

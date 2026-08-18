@@ -11,15 +11,21 @@ import net.minecraft.world.item.Items;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 //#if MC>=12005
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.ItemLore;
+//#else
+//$$ import net.minecraft.nbt.CompoundTag;
+//$$ import net.minecraft.nbt.ListTag;
+//$$ import net.minecraft.nbt.StringTag;
 //#endif
 
 public class ButtonBuilder {
-    private static final Style STYLE = Style.EMPTY.withBold(true).withItalic(false);
+    public static final Style STYLE = Style.EMPTY.withBold(true).withItalic(false);
 
     private ItemStack onItem = Items.BARRIER.getDefaultInstance();
     private ItemStack offItem = Items.STRUCTURE_VOID.getDefaultInstance();
@@ -27,6 +33,7 @@ public class ButtonBuilder {
     private Component offText;
     private final List<Consumer<Button>> turnOnRunnable = new ArrayList<>();
     private final List<Consumer<Button>> turnOffRunnable = new ArrayList<>();
+    private final List<Component> tooltips = new ArrayList<>();
     private boolean defaultState = false;
     @Nullable
     private Button button = null;
@@ -43,7 +50,8 @@ public class ButtonBuilder {
     }
 
     public static ButtonBuilder ofName(String name) {
-        return ofComponent(Component.literal(name));
+        Style style = ButtonBuilder.STYLE.withBold(false).withColor(Color.WHITE);
+        return ofComponent(Component.literal(name).withStyle(style));
     }
 
     public static ButtonBuilder ofComponent(Component component) {
@@ -60,6 +68,11 @@ public class ButtonBuilder {
     public Button build(Container container, int slot) {
         this.setText(this.onItem, this.onText);
         this.setText(this.offItem, this.offText);
+
+        if (!this.tooltips.isEmpty()) {
+            this.setTooltips(this.onItem, this.tooltips);
+            this.setTooltips(this.offItem, this.tooltips);
+        }
 
         this.button = new Button(
             container,
@@ -79,6 +92,30 @@ public class ButtonBuilder {
         item.set(DataComponents.ITEM_NAME, text);
         //#else
         //$$ item.setHoverName(text);
+        //#endif
+    }
+
+    private void setTooltips(ItemStack item, List<Component> tooltips) {
+        //#if MC>=12005
+        ItemLore lore = item.get(DataComponents.LORE);
+        List<Component> list = new ArrayList<>();
+        if (lore != null) list.addAll(lore.lines());
+        list.addAll(tooltips);
+        item.set(DataComponents.LORE, new ItemLore(list));
+        //#else
+        //$$ CompoundTag display = item.getTagElement("display");
+        //$$ if (display == null) {
+        //$$     display = new CompoundTag();
+        //$$     item.addTagElement("display", display);
+        //$$ }
+        //$$ ListTag lores = display.getTagType("Lore") == 9 ? display.getList("Lore", 8) : null;
+        //$$ if (lores == null) {
+        //$$     lores = new ListTag();
+        //$$     display.put("Lore", lores);
+        //$$ }
+        //$$ for (Component tooltip : tooltips) {
+        //$$     lores.add(StringTag.valueOf(Component.Serializer.toJson(tooltip)));
+        //$$ }
         //#endif
     }
 
@@ -144,6 +181,16 @@ public class ButtonBuilder {
         return this.setOnText(text).setOffText(text);
     }
 
+    public ButtonBuilder appendTooltip(Component... tooltips) {
+        this.tooltips.addAll(Arrays.asList(tooltips));
+        return this;
+    }
+
+    public ButtonBuilder changeTooltips(Consumer<List<Component>> consumer) {
+        consumer.accept(this.tooltips);
+        return this;
+    }
+
     public ButtonBuilder addTurnOnCallback(Consumer<Button> turnOnRunnable) {
         this.turnOnRunnable.add(turnOnRunnable);
         return this;
@@ -174,7 +221,6 @@ public class ButtonBuilder {
                 //#else
                 //$$ Items.STAINED_GLASS_PANE.red()
                 //#endif
-
             );
     }
 

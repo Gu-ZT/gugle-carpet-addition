@@ -56,8 +56,8 @@ public abstract class ChestMenuMixin implements IClientMenuTick {
         }
         //#else
         //$$ if (itemStack.is(Items.STRUCTURE_VOID) && itemStack.getTag() != null) {
-        //$$     Tag tag = itemStack.getTag().get(ButtonV2.GCA_CLEAR);
-        //$$     return tag != null && itemStack.getTag().getBoolean(ButtonV2.GCA_CLEAR);
+        //$$     Tag tag = itemStack.getTag().get(Button.GCA_CLEAR);
+        //$$     return tag != null && itemStack.getTag().getBoolean(Button.GCA_CLEAR);
         //$$ }
         //#endif
         return false;

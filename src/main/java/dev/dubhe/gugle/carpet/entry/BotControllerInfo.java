@@ -5,7 +5,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.dubhe.gugle.carpet.config.IComponentNode;
 import dev.dubhe.gugle.carpet.config.IConfigNode;
+import dev.dubhe.gugle.carpet.util.ComponentUtil;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -46,11 +50,17 @@ public record BotControllerInfo(
 
         @Override
         public Component component(MinecraftServer server, String... args) {
-            return null;
+            return Component.literal(String.format("[#%s]", this.slot)).withStyle(ChatFormatting.GOLD)
+                .append(Component.literal(" "))
+                .append(Component.literal(this.desc).withStyle(
+                    Style.EMPTY.withHoverEvent(ComponentUtil.createHoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Component.literal("/player xxx " + this.command)
+                    ))
+                ));
         }
 
         public void execute(ServerPlayer player, EntityPlayerActionPack ap) {
-
         }
 
     }

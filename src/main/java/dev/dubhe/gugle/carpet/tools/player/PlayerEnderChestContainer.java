@@ -5,9 +5,12 @@ import carpet.patches.EntityPlayerMPFake;
 import carpet.utils.Messenger;
 import com.google.common.collect.ImmutableList;
 import dev.dubhe.gugle.carpet.api.menu.control.ButtonBuilder;
+import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.entry.BotControllerInfo;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -20,6 +23,7 @@ import java.util.function.Supplier;
 //#endif
 
 public class PlayerEnderChestContainer extends PlayerContainer {
+    private static final Style TOOLTIP_STYLE = Style.EMPTY.withBold(false).withItalic(false).withColor(Color.GARY);
     public final NonNullList<ItemStack> items;
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(27, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> compartments;
@@ -111,6 +115,7 @@ public class PlayerEnderChestContainer extends PlayerContainer {
 
         ButtonBuilder builder = ButtonBuilder.ofName(node.desc())
             .resetButton()
+            .appendTooltip(Component.literal(node.command()).withStyle(TOOLTIP_STYLE))
             .addTurnOnCallback(it -> node.execute(this.player, this.ap));
         this.addButton(slot, builder);
     }
