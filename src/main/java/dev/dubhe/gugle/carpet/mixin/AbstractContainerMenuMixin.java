@@ -64,8 +64,8 @@ abstract class AbstractContainerMenuMixin {
         //$$ if (itemStack.getTag() == null) {
         //$$     return;
         //$$ }
-        //$$ Tag tag = itemStack.getTag().get(Button.GCA_CLEAR);
-        //$$ if (tag == null || !itemStack.getTag().getBoolean(Button.GCA_CLEAR)) {
+        //$$ Tag tag = itemStack.getTag().get(ButtonV2.GCA_CLEAR);
+        //$$ if (tag == null || !itemStack.getTag().getBoolean(ButtonV2.GCA_CLEAR)) {
         //$$     return;
         //$$ }
         //$$ itemStack.setCount(0);

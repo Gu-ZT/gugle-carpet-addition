@@ -3,13 +3,13 @@ package dev.dubhe.gugle.carpet.api.menu.control;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -25,9 +25,11 @@ public class ButtonBuilder {
     private ItemStack offItem = Items.STRUCTURE_VOID.getDefaultInstance();
     private Component onText;
     private Component offText;
-    private final List<Consumer<ButtonV2>> turnOnRunnable = new ArrayList<>();
-    private final List<Consumer<ButtonV2>> turnOffRunnable = new ArrayList<>();
+    private final List<Consumer<Button>> turnOnRunnable = new ArrayList<>();
+    private final List<Consumer<Button>> turnOffRunnable = new ArrayList<>();
     private boolean defaultState = false;
+    @Nullable
+    private Button button = null;
 
     public ButtonBuilder(Component onText, Component offText) {
         this.onText = onText;
@@ -41,15 +43,25 @@ public class ButtonBuilder {
     }
 
     public static ButtonBuilder ofName(String name) {
-        MutableComponent text = Component.literal(name);
-        return new ButtonBuilder(text, text);
+        return ofComponent(Component.literal(name));
     }
 
-    public ButtonV2 build(Container container, int slot) {
+    public static ButtonBuilder ofComponent(Component component) {
+        return new ButtonBuilder(component, component);
+    }
+
+    public Button get() {
+        if (this.button == null) {
+            throw new IllegalStateException("The button has not been initialized yet.");
+        }
+        return this.button;
+    }
+
+    public Button build(Container container, int slot) {
         this.setText(this.onItem, this.onText);
         this.setText(this.offItem, this.offText);
 
-        return new ButtonV2(
+        this.button = new Button(
             container,
             slot,
             this.onItem,
@@ -58,6 +70,8 @@ public class ButtonBuilder {
             List.copyOf(this.turnOffRunnable),
             this.defaultState
         );
+
+        return this.button;
     }
 
     private void setText(ItemStack item, Component text) {
@@ -102,6 +116,20 @@ public class ButtonBuilder {
         return this.setOnItem(item).setOffItem(item);
     }
 
+    public ButtonBuilder setOnItemCount(int count) {
+        this.onItem.setCount(count);
+        return this;
+    }
+
+    public ButtonBuilder setOffItemCount(int count) {
+        this.offItem.setCount(count);
+        return this;
+    }
+
+    public ButtonBuilder setItemCount(int count) {
+        return this.setOnItemCount(count).setOffItemCount(count);
+    }
+
     public ButtonBuilder setOnText(Component onText) {
         this.onText = onText;
         return this;
@@ -116,12 +144,12 @@ public class ButtonBuilder {
         return this.setOnText(text).setOffText(text);
     }
 
-    public ButtonBuilder addTurnOnCallback(Consumer<ButtonV2> turnOnRunnable) {
+    public ButtonBuilder addTurnOnCallback(Consumer<Button> turnOnRunnable) {
         this.turnOnRunnable.add(turnOnRunnable);
         return this;
     }
 
-    public ButtonBuilder addTurnOffCallback(Consumer<ButtonV2> turnOffRunnable) {
+    public ButtonBuilder addTurnOffCallback(Consumer<Button> turnOffRunnable) {
         this.turnOffRunnable.add(turnOffRunnable);
         return this;
     }
