@@ -659,13 +659,12 @@ public class BotCommand {
         int slot = IntegerArgumentType.getInteger(context, "slot");
         String desc = StringArgumentType.getString(context, "desc");
 
-        String input = context.getInput();
-        int index = input.indexOf(desc);
-
-        input = input.substring(index + desc.length());
-        index = input.indexOf(' ');
-
-        String command = input.substring(index + 1);
+        int descEnd = context.getNodes().stream()
+            .filter(node -> "desc".equals(node.getNode().getName()))
+            .mapToInt(node -> node.getRange().getEnd())
+            .findFirst()
+            .orElseThrow();
+        String command = context.getInput().substring(descEnd).trim();
 
         Optional<String> optional = CommandUtil.getOptional(() -> StringArgumentType.getString(context, "player"));
 
@@ -692,7 +691,7 @@ public class BotCommand {
         CommandSourceStack source = context.getSource();
 
         int slot = CommandUtil.getArgOrDefault(
-            () -> IntegerArgumentType.getInteger(context, "page"),
+            () -> IntegerArgumentType.getInteger(context, "slot"),
             () -> -1
         );
 
@@ -716,6 +715,11 @@ public class BotCommand {
             if (removed == null) {
                 source.sendFailure(fmtTr("msg.gca.bot.controller.slot.not_exist", name, slot));
                 return 0;
+            }
+            if (controllers.isEmpty()) {
+                BOT_CONTROLLER_CONFIG.remove(key);
+            } else {
+                BOT_CONTROLLER_CONFIG.update(new BotControllerInfo(key, controllers));
             }
             source.sendSuccess(() -> fmtTr("msg.gca.bot.controller.clear", name, slot, removed.desc()), true);
         }

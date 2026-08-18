@@ -74,7 +74,7 @@ public class PlayerEnderChestContainer extends PlayerContainer {
 
     @Override
     public PlayerEnderChestContainer selfUpdate() {
-        this.buttons.clear();
+        super.buttons.clear();
         this.refreshButtons();
         return this;
     }

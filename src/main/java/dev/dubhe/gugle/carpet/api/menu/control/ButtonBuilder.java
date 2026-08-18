@@ -136,12 +136,12 @@ public class ButtonBuilder {
     }
 
     public ButtonBuilder setOnItem(ItemStack item) {
-        this.onItem = item;
+        this.onItem = item.copy();
         return this;
     }
 
     public ButtonBuilder setOffItem(ItemStack offItem) {
-        this.offItem = offItem;
+        this.offItem = offItem.copy();
         return this;
     }
 

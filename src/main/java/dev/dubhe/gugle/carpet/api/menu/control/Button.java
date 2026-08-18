@@ -22,6 +22,7 @@ public class Button {
     private final List<Consumer<Button>> turnOnCallback;
     private final List<Consumer<Button>> turnOffCallback;
     private boolean status;
+    private boolean executing;
 
     public Button(
         Container container, int slot,
@@ -66,6 +67,10 @@ public class Button {
         return this.status;
     }
 
+    public boolean isExecuting() {
+        return this.executing;
+    }
+
     public boolean clicked() {
         return this.container.getItem(this.slot).isEmpty();
     }
@@ -85,10 +90,20 @@ public class Button {
         this.callback();
     }
 
+    public void softChangeStatus(boolean status) {
+        if (this.executing) return;
+        this.status = status;
+    }
+
     public void callback() {
         List<Consumer<Button>> callbacks = this.status ? this.turnOnCallback : this.turnOffCallback;
-        for (Consumer<Button> callback : callbacks) {
-            callback.accept(this);
+        this.executing = true;
+        try {
+            for (Consumer<Button> callback : callbacks) {
+                callback.accept(this);
+            }
+        } finally {
+            this.executing = false;
         }
     }
 }

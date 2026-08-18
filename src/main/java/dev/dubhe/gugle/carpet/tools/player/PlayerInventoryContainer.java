@@ -148,11 +148,11 @@ public class PlayerInventoryContainer extends PlayerContainer {
     }
 
     public void resetAttackButton() {
-        this.attack12.changeStatus(false, true);
-        this.attackContinuous.changeStatus(false, true);
+        this.attack12.softChangeStatus(false);
+        this.attackContinuous.softChangeStatus(false);
     }
 
     public void resetUseButton() {
-        this.useContinuous.changeStatus(false, true);
+        this.useContinuous.softChangeStatus(false);
     }
 }

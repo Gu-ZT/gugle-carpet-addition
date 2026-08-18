@@ -69,14 +69,11 @@ abstract class PlayerMixin {
             if (entity instanceof Player otherPlayer && ClientUtil.isFakePlayer(otherPlayer)) {
                 return InteractionResult.CONSUME;
             }
-        } else if (player instanceof ServerPlayer serverPlayer) {
-            if ((GcaSetting.openFakePlayerInventory || SettingUtil.openFakePlayerEnderChest(player)) && entity instanceof ServerPlayer otherPlayer) {
-                // 打开物品栏
-                InteractionResult result = this.openInventory(serverPlayer, otherPlayer);
-                if (result != InteractionResult.PASS) {
-                    player.stopUsingItem();
-                    return result;
-                }
+        } else if (player instanceof ServerPlayer serverPlayer && entity instanceof ServerPlayer otherPlayer) {
+            InteractionResult result = this.openInventory(serverPlayer, otherPlayer);
+            if (result != InteractionResult.PASS) {
+                player.stopUsingItem();
+                return result;
             }
         }
         return original.call(entity, player, hand
@@ -88,9 +85,15 @@ abstract class PlayerMixin {
 
     @Unique
     private InteractionResult openInventory(ServerPlayer player, ServerPlayer otherPlayer) {
-        SimpleMenuProvider provider;
-        if (!(otherPlayer instanceof IGcaPlayer gcaPlayer) || !gca$hasPermission(player, otherPlayer)) return InteractionResult.PASS;
-        if (player.isShiftKeyDown()) {
+        if (!(otherPlayer instanceof IGcaPlayer gcaPlayer)) return InteractionResult.PASS;
+
+        SimpleMenuProvider provider = null;
+        boolean isFakePlayer = otherPlayer instanceof EntityPlayerMPFake;
+        boolean canOperateRealPlayer = !isFakePlayer && gca$canOperateRealPlayer(player);
+        boolean canOperate = isFakePlayer || canOperateRealPlayer;
+        boolean canOpenInventory = canOperateRealPlayer || (isFakePlayer && GcaSetting.openFakePlayerInventory);
+
+        if (canOperate && player.isShiftKeyDown()) {
             // 打开末影箱
             if (SettingUtil.openFakePlayerEnderChest(player)) {
                 provider = new SimpleMenuProvider(
@@ -100,7 +103,7 @@ abstract class PlayerMixin {
                     ),
                     ComponentHelper.tr("gca.player.ender_chest", otherPlayer.getDisplayName())
                 );
-            } else {
+            } else if (canOpenInventory) {
                 // 打开额外功能菜单
                 provider = new SimpleMenuProvider(
                     (i, inventory, p) -> ChestMenu.threeRows(
@@ -110,7 +113,7 @@ abstract class PlayerMixin {
                     ComponentHelper.tr("gca.player.other_controller", otherPlayer.getDisplayName())
                 );
             }
-        } else if (GcaSetting.openFakePlayerInventory) {
+        } else if (canOpenInventory) {
             // 打开物品栏
             provider = new SimpleMenuProvider(
                 (i, inventory, p) -> new PlayerInventoryMenu(
@@ -119,15 +122,16 @@ abstract class PlayerMixin {
                 ),
                 ComponentHelper.tr("gca.player.inventory", otherPlayer.getDisplayName())
             );
-        } else {
-            return InteractionResult.PASS;
         }
+
+        if (provider == null) return InteractionResult.PASS;
+
         player.openMenu(provider);
         return InteractionResult.CONSUME;
     }
 
     @Unique
-    private static boolean gca$hasPermission(ServerPlayer player, ServerPlayer otherPlayer) {
+    private static boolean gca$canOperateRealPlayer(ServerPlayer player) {
         CommandSourceStack stack = player.createCommandSourceStack(
             //#if MC>=12102
             //#if MC<=12105
@@ -136,6 +140,6 @@ abstract class PlayerMixin {
             //$$ player.level()
             //#endif
         );
-        return otherPlayer instanceof EntityPlayerMPFake || CommandHelper.canUseCommand(stack, GcaSetting.openRealPlayerInventory);
+        return CommandHelper.canUseCommand(stack, GcaSetting.openRealPlayerInventory);
     }
 }
