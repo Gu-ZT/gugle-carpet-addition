@@ -103,11 +103,7 @@ public class ButtonBuilder {
         list.addAll(tooltips);
         item.set(DataComponents.LORE, new ItemLore(list));
         //#else
-        //$$ CompoundTag display = item.getTagElement("display");
-        //$$ if (display == null) {
-        //$$     display = new CompoundTag();
-        //$$     item.addTagElement("display", display);
-        //$$ }
+        //$$ CompoundTag display = item.getOrCreateTagElement("display");
         //$$ ListTag lores = display.getTagType("Lore") == 9 ? display.getList("Lore", 8) : null;
         //$$ if (lores == null) {
         //$$     lores = new ListTag();

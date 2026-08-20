@@ -42,21 +42,28 @@ public class Button {
     }
 
     private void init() {
+        //#if MC>=12005
         CompoundTag compound = new CompoundTag();
         compound.putBoolean(GCA_CLEAR, true);
         compound.putInt(GCA_BUTTON, this.slot);
 
-        //#if MC>=12005
         this.onItem.set(DataComponents.CUSTOM_DATA, CustomData.of(compound));
         this.offItem.set(DataComponents.CUSTOM_DATA, CustomData.of(compound));
         //#else
-        //$$ this.onItem.setTag(compound.copy());
-        //$$ this.offItem.setTag(compound.copy());
+        //$$ this.appendGCAMark(this.onItem);
+        //$$ this.appendGCAMark(this.offItem);
         //#endif
-
         ItemStack slotItem = this.status ? this.onItem.copy() : this.offItem.copy();
         this.container.setItem(this.slot, slotItem);
     }
+
+    //#if MC < 12005
+    //$$ private void appendGCAMark(ItemStack item) {
+    //$$     CompoundTag compound = item.getOrCreateTag();
+    //$$     compound.putBoolean(GCA_CLEAR, true);
+    //$$     compound.putInt(GCA_BUTTON, this.slot);
+    //$$ }
+    //#endif
 
     public void refresh() {
         ItemStack slotItem = this.status ? this.onItem.copy() : this.offItem.copy();
