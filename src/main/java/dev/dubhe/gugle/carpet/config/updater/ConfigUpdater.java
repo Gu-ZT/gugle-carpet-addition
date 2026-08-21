@@ -129,7 +129,7 @@ public class ConfigUpdater {
                     if (element.isJsonPrimitive()) {
                         return new WelcomeInfo.MessageArg(GcaExtension.parseLocation(element.getAsString()));
                     }
-                    JsonObject object = json.getAsJsonObject();
+                    JsonObject object = element.getAsJsonObject();
                     ChatFormatting color = Optional.ofNullable(object.get("color"))
                         .map(key -> ChatFormattingSerializer.byName(key.getAsString()))
                         .orElse(ChatFormatting.GOLD);
@@ -183,7 +183,7 @@ public class ConfigUpdater {
             .toList());
     }
 
-    private static <T extends IConfigNode> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
+    protected static <T extends IConfigNode> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
         LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
