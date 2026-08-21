@@ -10,6 +10,9 @@ import net.minecraft.world.item.component.ItemContainerContents;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+//#if MC >= 260300
+//$$ import net.minecraft.util.Prediction;
+//#endif
 
 public class ContainerUtil {
     public static boolean hasContainer(ItemStack stack) {
@@ -98,7 +101,11 @@ public class ContainerUtil {
             shulkerBox.shrink(1);
             newShulker.set(DataComponents.CONTAINER, container);
             if (!player.addItem(newShulker)) {
-                ItemEntity itemEntity = player.drop(newShulker, false);
+                ItemEntity itemEntity = player.drop(newShulker, false
+                    //#if MC >= 260300
+                    //$$ , Prediction.PREDICTED
+                    //#endif
+                );
                 if (itemEntity != null) {
                     itemEntity.setNoPickUpDelay();
                     itemEntity.setTarget(player.getUUID());

@@ -1,3 +1,4 @@
 - Added `/bot controller` command for customizing buttons on the bot’s extra control panel.
 - Fixed the `welcomePlayer` config file could not be upgraded.
 - Fixed the `openRealPlayerInventory` permission did not allow players to open real-player inventory.
+- Support for Minecraft 26.3-snapshot-9

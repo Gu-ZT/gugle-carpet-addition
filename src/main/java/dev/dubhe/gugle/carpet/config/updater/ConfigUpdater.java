@@ -183,7 +183,7 @@ public class ConfigUpdater {
             .toList());
     }
 
-    protected static <T extends IConfigNode> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
+    private static <T extends IConfigNode> void updateResolver(NameMapper fileMapper, Codec<T> codec, Function<JsonObject, List<T>> function) {
         if (!fileMapper.oldPath.toFile().exists()) return;
         LOGGER.info("Found old config file: {}, trying to update...", fileMapper.oldPath);
         try {
