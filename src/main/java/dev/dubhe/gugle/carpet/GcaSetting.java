@@ -118,6 +118,13 @@ public class GcaSetting {
     )
     public static String commandBotAction = "ops";
 
+    // 假人额外面板管理
+    @Rule(
+        categories = {GCA, BOT, COMMAND, EXPERIMENTAL},
+        options = {"ops", "0", "1", "2", "3", "4", "true", "false"}
+    )
+    public static String commandBotController = "ops";
+
     // 待办事项清单
     @Rule(
         categories = {GCA, COMMAND},

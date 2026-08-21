@@ -24,7 +24,7 @@ public record WelcomeInfo(List<String> messages, Map<String, MessageArg> args) i
     public static final String KEY = "info";
     public static final Codec<WelcomeInfo> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         Codec.STRING.listOf().fieldOf("message").forGetter(WelcomeInfo::messages),
-        Codec.unboundedMap(Codec.STRING, MessageArg.CODEC).fieldOf("args").forGetter(WelcomeInfo::args)
+        Codec.unboundedMap(Codec.STRING, MessageArg.CODEC).optionalFieldOf("args", Map.of()).forGetter(WelcomeInfo::args)
     ).apply(instance, WelcomeInfo::new));
 
     @Override

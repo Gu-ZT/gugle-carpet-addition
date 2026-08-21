@@ -33,7 +33,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.entity.player.Player;
 import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
@@ -193,6 +192,7 @@ public class BotCommand {
                 )
             )
             .then(literal("controller")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotController))
                 .executes(BotCommand::controllerList)
                 .then(literal("list")
                     .executes(BotCommand::controllerList)
@@ -215,10 +215,6 @@ public class BotCommand {
 
     private static ArgumentBuilder<CommandSourceStack, ?> controllerOperator(ArgumentBuilder<CommandSourceStack, ?> node, CommandDispatcher<CommandSourceStack> dispatcher) {
         return node
-            .executes(BotCommand::controllerList)
-            .then(literal("list")
-                .executes(BotCommand::controllerList)
-            )
             .then(literal("set")
                 .then(argument("slot", IntegerArgumentType.integer(3, 26))
                     .then(carpetActionLoop(dispatcher, BotCommand::controllerSet))
@@ -727,7 +723,7 @@ public class BotCommand {
         return Command.SINGLE_SUCCESS;
     }
 
-    public static Map<Integer, BotControllerInfo.ControllerNode> controllers(Player player) {
+    public static Map<Integer, BotControllerInfo.ControllerNode> controllers(ServerPlayer player) {
         BOT_CONTROLLER_CONFIG.tryInit(player.level().getServer());
         String name = player.getGameProfile().getName();
 

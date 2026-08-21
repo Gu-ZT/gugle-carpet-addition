@@ -619,11 +619,7 @@
 /carpet [setDefault] welcomePlayer true
 ```
 
-**配置方法**: 编辑 `config/gca/welcome.json` 文件，支持的变量类型:
-- `gca:player` - 玩家名称
-- `gca:day_count` - 服务器运行天数/指定日期起的天数
-- `gca:random` - 随机文本
-- `gca:server` - 服务器列表(可点击跳转)
+[欢迎玩家功能配置说明](welcome_cn.md)
 
 ### 流浪商人生成失败提醒 (wanderingTraderSpawnFailedWarning)
 
