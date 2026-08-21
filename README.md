@@ -264,6 +264,32 @@ A Bot Management Menu for saving, loading, and grouping fake players
 /bot group generated <name> <count> [load]  # Batch generate bots and group them
 ```
 
+#### Bot Controller
+
+Use `/bot controller` to customize buttons on a fake player's extra control panel. Buttons can be configured globally or for an individual fake player. An individual setting overrides the global setting when both use the same slot.
+
+Slots `3` through `26` are available. Clicking a button runs the configured `/player <player> <action>` command using the target fake player's name, so `<action>` should contain only the part after the player name. For example, `attack continuous` runs `/player <player> attack continuous`.
+
+**Command Usage**:
+```
+/bot controller                                             # Show the global button list
+/bot controller list [player]                               # Show global buttons or the effective buttons for a player
+/bot controller global set <slot> <desc> <action>           # Set a global button
+/bot controller global clear <slot>                         # Clear a global button from a slot
+/bot controller global clear all                            # Clear all global buttons
+/bot controller player <player> set <slot> <desc> <action>  # Set a button for one fake player
+/bot controller player <player> clear <slot>                # Clear one button for a fake player
+/bot controller player <player> clear all                   # Clear all buttons for a fake player
+```
+
+**Examples**:
+```
+/bot controller global set 3 "Continuous Attack" attack continuous
+/bot controller player Steve set 4 "Continuous Use" use continuous
+```
+
+Enable `openFakePlayerInventory` or `openFakePlayerEnderChest`, then sneak and right-click a fake player to open the extra control panel. When the fake player's ender chest is enabled, the control buttons appear above its contents. Button descriptions containing spaces must be enclosed in double quotes.
+
 ### commandBotAction
 
 A Bot Action Management Menu for adding/removing actions and setting startup actions for bots

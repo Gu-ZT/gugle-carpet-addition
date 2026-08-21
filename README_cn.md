@@ -267,6 +267,32 @@
 /bot group generated <name> <count> [load]  # 批量生成假人并分组
 ```
 
+#### 假人控制器 (Bot Controller)
+
+使用 `/bot controller` 可以自定义假人额外控制面板中的按钮。按钮可设为全局配置，也可单独为某个假人配置；单独配置与全局配置使用同一槽位时，单独配置优先生效。
+
+槽位编号可选 `3` 至 `26`。按钮被点击后，会以目标假人的名称执行对应的 `/player <player> <action>` 命令，因此 `<action>` 只需填写玩家名之后的部分。例如，`attack continuous` 会执行 `/player <player> attack continuous`。
+
+**命令用法**:
+```
+/bot controller                                             # 查看全局按钮列表
+/bot controller list [player]                               # 查看全局配置或指定假人的实际按钮列表
+/bot controller global set <slot> <desc> <action>           # 设置全局按钮
+/bot controller global clear <slot>                         # 清除指定槽位的全局按钮
+/bot controller global clear all                            # 清除全部全局按钮
+/bot controller player <player> set <slot> <desc> <action>  # 为指定假人设置按钮
+/bot controller player <player> clear <slot>                # 清除指定假人的指定按钮
+/bot controller player <player> clear all                   # 清除指定假人的全部按钮
+```
+
+**示例**:
+```
+/bot controller global set 3 "持续攻击" attack continuous
+/bot controller player Steve set 4 "持续使用" use continuous
+```
+
+启用 `openFakePlayerInventory` 或 `openFakePlayerEnderChest` 后，潜行并右键假人即可打开额外控制面板。启用假人末影箱时，控制按钮会显示在末影箱内容上方。按钮说明中包含空格时，需要使用双引号包裹。
+
 ### 假人动作管理 (commandBotAction)
 
 方便快捷的假人动作管理菜单，可以为假人添加、移除动作，设置登入后自动执行的动作
