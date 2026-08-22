@@ -589,7 +589,7 @@ Welcome Player
 /carpet [setDefault] welcomePlayer true
 ```
 
-[Detailed welcome message configuration guide](welcome.md)
+[Detailed welcome message configuration guide](docs/welcome.md)
 
 ### wanderingTraderSpawnFailedWarning
 

@@ -589,7 +589,7 @@ Welcome Player
 /carpet [setDefault] welcomePlayer true
 ```
 
-[Detailed welcome message configuration guide](https://raw.githubusercontent.com/Gu-ZT/gugle-carpet-addition/releases/preprocess/welcome.md)
+[Detailed welcome message configuration guide](https://raw.githubusercontent.com/Gu-ZT/gugle-carpet-addition/releases/preprocess/docs/welcome.md)
 
 ### wanderingTraderSpawnFailedWarning
 

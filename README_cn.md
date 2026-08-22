@@ -619,7 +619,7 @@
 /carpet [setDefault] welcomePlayer true
 ```
 
-[欢迎玩家功能配置说明](welcome_cn.md)
+[欢迎玩家功能配置说明](docs/welcome_cn.md)
 
 ### 流浪商人生成失败提醒 (wanderingTraderSpawnFailedWarning)
 
