@@ -4,7 +4,7 @@
 [![CurseForge downloads](http://cf.way2muchnoise.eu/full_662867_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/guglecarpetaddition)
 [![Modrinth downloads](https://img.shields.io/modrinth/dt/gca?color=00AF5C&label=Modrinth%20downloads&logo=modrinth)](https://modrinth.com/mod/gca)
 [![GitHub downloads](https://img.shields.io/github/downloads/Gu-ZT/gugle-carpet-addition/total?label=Github%20downloads&logo=github)](https://github.com/Gu-ZT/gugle-carpet-addition/releases)
-[![Static Badge](https://img.shields.io/badge/%E7%BE%A4-255072087-73c465?logo=QQ)](https://qm.qq.com/q/XxElk1U6As)
+[![QQ Group](https://img.shields.io/badge/%E7%BE%A4-255072087-73c465?logo=QQ)](https://qm.qq.com/q/XxElk1U6As)
 
 ![menu](docs/pics/menu_zh.png)
 

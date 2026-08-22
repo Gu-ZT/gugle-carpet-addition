@@ -71,6 +71,9 @@
   "carpet.rule.commandBotAction.name": "假人动作管理",
   "carpet.rule.commandBotAction.desc": "一个假人动作管理菜单",
 
+  "carpet.rule.commandBotController.name": "假人额外面板管理",
+  "carpet.rule.commandBotController.desc": "自定义假人额外控制面板",
+
   "carpet.rule.commandLoc.name": "地标管理",
   "carpet.rule.commandLoc.desc": "地标管理菜单",
 
@@ -198,6 +201,14 @@
   "msg.gca.bot.action.execute": "执行动作",
   "msg.gca.bot.action.remove": "删除动作",
   "msg.gca.bot.action.startup": "登入后执行",
+
+  "msg.gca.bot.controller.global": "全局",
+  "msg.gca.bot.controller.list": "%s的自定义按钮列表",
+  "msg.gca.bot.controller.set.success": "成功为%2$s的第%1$s槽添加按钮%3$s",
+  "msg.gca.bot.controller.not_exist": "%s没有为额外控制面板自定义按钮",
+  "msg.gca.bot.controller.clear.all": "已清除%s的额外控制面板中所有自定义的按钮",
+  "msg.gca.bot.controller.clear": "成功移除%s的额外控制面板第%s槽自定义的按钮%s ",
+  "msg.gca.bot.controller.slot.not_exist": "%s的额外控制面板第n槽没有自定义按钮",
 
   "msg.gca.location.list": "标记点",
   "msg.gca.location.not_exist": "标记点%s不存在",
