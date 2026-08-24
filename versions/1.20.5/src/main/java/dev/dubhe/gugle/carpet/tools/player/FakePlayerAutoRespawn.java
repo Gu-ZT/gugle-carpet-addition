@@ -8,7 +8,7 @@ import dev.dubhe.gugle.carpet.GcaSetting;
 import dev.dubhe.gugle.carpet.commands.BotCommand;
 import dev.dubhe.gugle.carpet.entry.BotActionInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
-import dev.dubhe.gugle.carpet.util.BotUtil;
+import dev.dubhe.gugle.carpet.util.BotSpawnUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -39,6 +39,10 @@ public class FakePlayerAutoRespawn {
         cachedDiedFakePlayers.remove(uuid);
     }
 
+    public static void clear() {
+        cachedDiedFakePlayers.clear();
+    }
+
     public static void tryRespawn(EntityPlayerMPFake player) {
         EntityPlayerActionPack pack = cachedDiedFakePlayers.remove(player.getUUID());
         if (pack == null || "false".equals(GcaSetting.fakePlayerAutoRespawn)) return;
@@ -51,7 +55,7 @@ public class FakePlayerAutoRespawn {
         BotInfo respawnBot = getRespawnBotInfo(player, server, name);
 
         server.tell(new TickTask(server.getTickCount() + 1, () -> {
-            BotUtil.spawnBot(server, null, respawnBot, profile, GcaSetting.fakePlayerReloadAction, actionPack);
+            BotSpawnUtil.spawnBot(server, null, respawnBot, profile, GcaSetting.fakePlayerReloadAction, actionPack);
         }));
     }
 

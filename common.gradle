@@ -99,6 +99,13 @@ repositories {
         url 'https://server.cjsah.net:1002/maven/'
     }
     maven {
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
+    maven {
         name 'CurseMaven'
         url "https://www.cursemaven.com"
     }
@@ -107,6 +114,7 @@ repositories {
 dependencies {
     // from https://github.com/TISUnion/Carpet-TIS-Addition/blob/master/common.gradle#L41-L54
     def autoImplementation = { dep -> unobfuscated ? implementation(dep) : modImplementation(dep) }
+    def autoRuntimeOnly = { dep -> unobfuscated ? runtimeOnly(dep) : modRuntimeOnly(dep) }
 
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     if (!unobfuscated) {
@@ -119,6 +127,10 @@ dependencies {
 
     // fabric-carpet
     autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
+
+    if (project.hasProperty('carpet_tis_addition_version')) {
+        autoRuntimeOnly("maven.modrinth:carpet-tis-addition:${project.carpet_tis_addition_version}")
+    }
 
     // 引入包装器中的依赖
     includes.each {

@@ -1,11 +1,11 @@
-# Gugle's Carpet Addition [ English | [中文](README_cn.md) ]
+# Gugle's Carpet Addition
 
 [![Development Builds](https://github.com/Gu-ZT/gugle-carpet-addition/workflows/Mod%20Build/badge.svg)](https://github.com/Gu-ZT/gugle-carpet-addition/actions/workflows/build.yml)
 [![CurseForge downloads](http://cf.way2muchnoise.eu/full_662867_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/guglecarpetaddition)
 [![Modrinth downloads](https://img.shields.io/modrinth/dt/gca?color=00AF5C&label=Modrinth%20downloads&logo=modrinth)](https://modrinth.com/mod/gca)
 [![GitHub downloads](https://img.shields.io/github/downloads/Gu-ZT/gugle-carpet-addition/total?label=Github%20downloads&logo=github)](https://github.com/Gu-ZT/gugle-carpet-addition/releases)
 
-![menu](docs/pics/menu_en.png)
+![menu](https://raw.githubusercontent.com/Gu-ZT/gugle-carpet-addition/releases/preprocess/docs/pics/menu_en.png)
 
 ## GCA
 
@@ -39,7 +39,7 @@ Allow player to open the fake player's inventory
 
 **Usage**: Right-click on a fake player to open their inventory
 
-![inv](docs/pics/inv.png)
+![inv](https://raw.githubusercontent.com/Gu-ZT/gugle-carpet-addition/releases/preprocess/docs/pics/inv.png)
 
 ### openRealPlayerInventory
 
@@ -73,7 +73,7 @@ Allow player to open the fake player's ender chest
 
 **Usage**: Sneak (hold Shift) + right-click on a fake player to open their ender chest
 
-![ender](docs/pics/ender.png)
+![ender](https://raw.githubusercontent.com/Gu-ZT/gugle-carpet-addition/releases/preprocess/docs/pics/ender.png)
 
 ### fakePlayerResident
 
@@ -589,7 +589,7 @@ Welcome Player
 /carpet [setDefault] welcomePlayer true
 ```
 
-[Detailed welcome message configuration guide](docs/welcome.md)
+[Detailed welcome message configuration guide](https://github.com/Gu-ZT/gugle-carpet-addition/blob/releases/preprocess/docs/welcome.md)
 
 ### wanderingTraderSpawnFailedWarning
 

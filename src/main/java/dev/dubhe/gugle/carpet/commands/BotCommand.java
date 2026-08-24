@@ -20,8 +20,9 @@ import dev.dubhe.gugle.carpet.config.GcaConfig;
 import dev.dubhe.gugle.carpet.entry.BotExecutorInfo;
 import dev.dubhe.gugle.carpet.entry.BotGroupInfo;
 import dev.dubhe.gugle.carpet.entry.BotInfo;
+import dev.dubhe.gugle.carpet.entry.BotControllerInfo;
 import dev.dubhe.gugle.carpet.entry.PageInfo;
-import dev.dubhe.gugle.carpet.util.BotUtil;
+import dev.dubhe.gugle.carpet.util.BotSpawnUtil;
 import dev.dubhe.gugle.carpet.tools.ModCommands;
 import dev.dubhe.gugle.carpet.util.CommandUtil;
 import dev.dubhe.gugle.carpet.util.IdUtil;
@@ -36,8 +37,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,6 +56,9 @@ public class BotCommand {
     private static final Pattern ACTION_PATTERN = Pattern.compile("bot action (\\S+) add (\"[^\"]+\"|\\S+)(?:\\s+(.*))?");
     private static final GcaConfig<BotInfo> BOT_CONFIG = GcaConfig.create("bot", BotInfo.CODEC);
     private static final GcaConfig<BotGroupInfo> BOT_GROUP_CONFIG = GcaConfig.create("bot_group", BotGroupInfo.CODEC);
+    public static final GcaConfig<BotControllerInfo> BOT_CONTROLLER_CONFIG = GcaConfig.create("controller", BotControllerInfo.CODEC);
+
+    private static final String CONTROLLER_GLOBAL_KEY = "__$#GCA#$GlObAl$#__";
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(ModCommands.root(dispatcher, "bot")
@@ -159,7 +167,7 @@ public class BotCommand {
                         )
                     )
                     .then(literal("add")
-                        .then(actionAddCommand(dispatcher))
+                        .then(carpetActionLoop(dispatcher, BotCommand::actionAdd))
                     )
                     .then(literal("remove")
                         .then(argument("id", LongArgumentType.longArg())
@@ -183,15 +191,53 @@ public class BotCommand {
                     )
                 )
             )
+            .then(literal("controller")
+                .requires(stack -> CommandHelper.canUseCommand(stack, GcaSetting.commandBotController))
+                .executes(BotCommand::controllerList)
+                .then(literal("list")
+                    .executes(BotCommand::controllerList)
+                    .then(argument("player", StringArgumentType.string())
+                        .suggests(BOT_CONFIG::suggestKeys)
+                        .executes(BotCommand::controllerList)
+                    )
+                )
+                .then(controllerOperator(literal("global"), dispatcher))
+                .then(literal("player")
+                    .then(controllerOperator(
+                        argument("player", StringArgumentType.string())
+                            .suggests(BOT_CONFIG::suggestKeys),
+                        dispatcher
+                    ))
+                )
+            )
         );
     }
 
-    private static ArgumentBuilder<CommandSourceStack, ?> actionAddCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
+    private static ArgumentBuilder<CommandSourceStack, ?> controllerOperator(ArgumentBuilder<CommandSourceStack, ?> node, CommandDispatcher<CommandSourceStack> dispatcher) {
+        return node
+            .then(literal("set")
+                .then(argument("slot", IntegerArgumentType.integer(3, 26))
+                    .then(carpetActionLoop(dispatcher, BotCommand::controllerSet))
+                )
+            )
+            .then(literal("clear")
+                .then(literal("all")
+                    .executes(BotCommand::controllerClear)
+                )
+                .then(argument("slot", IntegerArgumentType.integer(3, 26))
+                    .suggests((context, builder) -> CommandUtil.suggestRange(builder, 3, 26))
+                    .executes(BotCommand::controllerClear)
+                )
+            )
+        ;
+    }
+
+    private static ArgumentBuilder<CommandSourceStack, ?> carpetActionLoop(CommandDispatcher<CommandSourceStack> dispatcher, Command<CommandSourceStack> execute) {
         ArgumentBuilder<CommandSourceStack, ?> node = argument("desc", StringArgumentType.string());
         CommandNode<CommandSourceStack> playerOperateNode = dispatcher.getRoot()
             .getChild("player")
             .getChild("player");
-        loopCommand(node, playerOperateNode, BotCommand::actionAdd);
+        loopCommand(node, playerOperateNode, execute);
         return node;
     }
 
@@ -221,8 +267,8 @@ public class BotCommand {
         List<String> actionIds = bot == null ?
             List.of() :
             bot.executors().stream()
-            .map(it -> String.valueOf(it.id()))
-            .toList();
+                .map(it -> String.valueOf(it.id()))
+                .toList();
         return SharedSuggestionProvider.suggest(actionIds, builder);
     }
 
@@ -272,7 +318,7 @@ public class BotCommand {
         //#if MC>=12002
         if (
             //#if MC < 12104
-            BotUtil.isGcaSpawningBot(bot.name())
+            BotSpawnUtil.isGcaSpawningBot(bot.name())
             //#else
             //$$ EntityPlayerMPFake.isSpawningPlayer(bot.name())
             //#endif
@@ -285,7 +331,7 @@ public class BotCommand {
             source.sendFailure(fmtTr("msg.gca.bot.load.already", bot.name()));
             return false;
         }
-        boolean success = BotUtil.spawnBot(source.getServer(), bot);
+        boolean success = BotSpawnUtil.spawnBot(source.getServer(), bot);
         if (!success) {
             source.sendFailure(fmtTr("msg.gca.bot.load.failed", bot.name()));
         }
@@ -566,6 +612,138 @@ public class BotCommand {
         BOT_CONFIG.update(bot.withExecutors(executors));
         context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.action.clear", bot.name()), false);
         return Command.SINGLE_SUCCESS;
+    }
+
+    // controller
+
+    private static int controllerList(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BOT_CONTROLLER_CONFIG.tryInit(context);
+
+        Map<Integer, BotControllerInfo.ControllerNode> controllers = new HashMap<>();
+
+        BotControllerInfo globalInfo = BOT_CONTROLLER_CONFIG.get(CONTROLLER_GLOBAL_KEY);
+        if (globalInfo != null) {
+            controllers.putAll(globalInfo.controllers());
+        }
+
+        Optional<String> optional = CommandUtil.getOptional(() -> StringArgumentType.getString(context, "player"));
+
+        if (optional.isPresent()) {
+            String player = optional.get();
+            BotControllerInfo botInfo = BOT_CONTROLLER_CONFIG.get(player);
+            if (botInfo != null) {
+                controllers.putAll(botInfo.controllers());
+            }
+        }
+
+        List<BotControllerInfo.ControllerNode> list = controllers.values().stream()
+            .sorted(Comparator.comparingInt(BotControllerInfo.ControllerNode::slot))
+            .toList();
+
+        PageInfo.ofAll(context, list).sendPageInfo(
+            context,
+            Pair.of("msg.gca.bot.controller.list", new Object[]{optName(optional)}),
+            "/bot controller" + optional.map(it -> " " + it).orElse(""),
+            optional.orElse(null)
+        );
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int controllerSet(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BOT_CONTROLLER_CONFIG.tryInit(context);
+
+        int slot = IntegerArgumentType.getInteger(context, "slot");
+        String desc = StringArgumentType.getString(context, "desc");
+
+        int descEnd = context.getNodes().stream()
+            .filter(node -> "desc".equals(node.getNode().getName()))
+            .mapToInt(node -> node.getRange().getEnd())
+            .findFirst()
+            .orElseThrow();
+        String command = context.getInput().substring(descEnd).trim();
+
+        Optional<String> optional = CommandUtil.getOptional(() -> StringArgumentType.getString(context, "player"));
+
+        String key = optional.orElse(CONTROLLER_GLOBAL_KEY);
+
+        BotControllerInfo info = BOT_CONTROLLER_CONFIG.get(key);
+
+        Map<Integer, BotControllerInfo.ControllerNode> controllers = new HashMap<>();
+        if (info != null) {
+            controllers.putAll(info.controllers());
+        }
+
+        controllers.put(slot, new BotControllerInfo.ControllerNode(slot, desc, command));
+
+        BOT_CONTROLLER_CONFIG.update(new BotControllerInfo(key, controllers));
+
+        context.getSource().sendSuccess(() -> fmtTr("msg.gca.bot.controller.set.success", slot, optName(optional), desc), false);
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    private static int controllerClear(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        BOT_CONTROLLER_CONFIG.tryInit(context);
+        CommandSourceStack source = context.getSource();
+
+        int slot = CommandUtil.getArgOrDefault(
+            () -> IntegerArgumentType.getInteger(context, "slot"),
+            () -> -1
+        );
+
+        Optional<String> optional = CommandUtil.getOptional(() -> StringArgumentType.getString(context, "player"));
+
+        String key = optional.orElse(CONTROLLER_GLOBAL_KEY);
+        Object name = optName(optional);
+
+        BotControllerInfo info = BOT_CONTROLLER_CONFIG.get(key);
+        if (info == null) {
+            source.sendFailure(fmtTr("msg.gca.bot.controller.not_exist", name));
+            return 0;
+        }
+
+        if (slot == -1) {
+            BOT_CONTROLLER_CONFIG.remove(key);
+            source.sendSuccess(() -> fmtTr("msg.gca.bot.controller.clear.all", name), true);
+        } else {
+            Map<Integer, BotControllerInfo.ControllerNode> controllers = new HashMap<>(info.controllers());
+            BotControllerInfo.ControllerNode removed = controllers.remove(slot);
+            if (removed == null) {
+                source.sendFailure(fmtTr("msg.gca.bot.controller.slot.not_exist", name, slot));
+                return 0;
+            }
+            if (controllers.isEmpty()) {
+                BOT_CONTROLLER_CONFIG.remove(key);
+            } else {
+                BOT_CONTROLLER_CONFIG.update(new BotControllerInfo(key, controllers));
+            }
+            source.sendSuccess(() -> fmtTr("msg.gca.bot.controller.clear", name, slot, removed.desc()), true);
+        }
+
+        return Command.SINGLE_SUCCESS;
+    }
+
+    public static Map<Integer, BotControllerInfo.ControllerNode> controllers(ServerPlayer player) {
+        BOT_CONTROLLER_CONFIG.tryInit(player.level().getServer());
+        String name = player.getGameProfile().getName();
+
+        Map<Integer, BotControllerInfo.ControllerNode> controllers = new HashMap<>();
+
+        BotControllerInfo globalInfo = BOT_CONTROLLER_CONFIG.get(CONTROLLER_GLOBAL_KEY);
+        if (globalInfo != null) {
+            controllers.putAll(globalInfo.controllers());
+        }
+
+        BotControllerInfo botInfo = BOT_CONTROLLER_CONFIG.get(name);
+        if (botInfo != null) {
+            controllers.putAll(botInfo.controllers());
+        }
+
+        return controllers;
+    }
+
+    private static Object optName(Optional<String> optional) {
+        return optional.isPresent() ? optional.get() : tr("msg.gca.bot.controller.global");
     }
 
     record GroupNode(BotGroupInfo group, List<BotInfo> bots) {

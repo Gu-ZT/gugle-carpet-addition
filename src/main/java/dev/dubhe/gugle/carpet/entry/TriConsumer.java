@@ -1,4 +1,4 @@
-package dev.dubhe.gugle.carpet.tools;
+package dev.dubhe.gugle.carpet.entry;
 
 @FunctionalInterface
 public interface TriConsumer<T, U, V> {

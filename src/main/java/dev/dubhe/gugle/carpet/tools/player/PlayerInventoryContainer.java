@@ -3,9 +3,8 @@ package dev.dubhe.gugle.carpet.tools.player;
 import carpet.helpers.EntityPlayerActionPack.Action;
 import carpet.helpers.EntityPlayerActionPack.ActionType;
 import com.google.common.collect.ImmutableList;
-import dev.dubhe.gugle.carpet.api.menu.control.AutoResetButton;
+import dev.dubhe.gugle.carpet.api.menu.control.ButtonBuilder;
 import dev.dubhe.gugle.carpet.api.menu.control.Button;
-import dev.dubhe.gugle.carpet.api.menu.control.RadioList;
 import dev.dubhe.gugle.carpet.api.tools.text.Color;
 import dev.dubhe.gugle.carpet.api.tools.text.ComponentHelper;
 import dev.dubhe.gugle.carpet.util.InventoryUtil;
@@ -16,10 +15,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 
-import java.util.ArrayList;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.stream.IntStream;
 
 public class PlayerInventoryContainer extends PlayerContainer {
     public final NonNullList<ItemStack> items;
@@ -27,7 +28,10 @@ public class PlayerInventoryContainer extends PlayerContainer {
     public final NonNullList<ItemStack> offhand;
     private final NonNullList<ItemStack> buttons = NonNullList.withSize(13, ItemStack.EMPTY);
     private final List<NonNullList<ItemStack>> compartments;
-    private final RadioList hotbar;
+    private final List<Button> hotbar;
+    private final Button attack12;
+    private final Button attackContinuous;
+    private final Button useContinuous;
 
     public PlayerInventoryContainer(ServerPlayer player) {
         super(player);
@@ -35,8 +39,35 @@ public class PlayerInventoryContainer extends PlayerContainer {
         this.armor = InventoryUtil.getArmor(this.player);
         this.offhand = InventoryUtil.getOffHand(this.player);
         this.compartments = ImmutableList.of(this.items, this.armor, this.offhand, this.buttons);
-        this.hotbar = PlayerInventoryContainer.createHotbarButton(this::addButton, this);
-        this.createButton();
+        this.hotbar = PlayerInventoryContainer.createHotbarButtons(this, this::addButton);
+
+        ButtonBuilder attack12 = ButtonBuilder.ofKey("gca.action.attack.interval.12")
+            .addTurnOnCallback(button -> ap.start(ActionType.ATTACK, Action.interval(12)))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
+
+        ButtonBuilder attackContinuous = ButtonBuilder.ofKey("gca.action.attack.continuous")
+            .addTurnOnCallback(button -> this.ap.start(ActionType.ATTACK, Action.continuous()))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.ATTACK, Action.once()));
+
+        ButtonBuilder useContinuous = ButtonBuilder.ofKey("gca.action.use.continuous")
+            .addTurnOnCallback(button -> this.ap.start(ActionType.USE, Action.continuous()))
+            .addTurnOffCallback(button -> this.ap.start(ActionType.USE, Action.once()));
+
+        attack12.addTurnOnCallback(button -> attackContinuous.get().changeStatus(false, true));
+        attackContinuous.addTurnOnCallback(button -> attack12.get().changeStatus(false, true));
+
+        ButtonBuilder stopAll = ButtonBuilder.ofKey("gca.action.stop_all").resetButton()
+            .addTurnOnCallback(button -> {
+                attack12.get().changeStatus(false, true);
+                attackContinuous.get().changeStatus(false, true);
+                useContinuous.get().changeStatus(false, true);
+                this.ap.stopAll();
+            });
+
+        this.addButton(0, stopAll);
+        this.attack12 = Objects.requireNonNull(this.addButton(5, attack12));
+        this.attackContinuous = Objects.requireNonNull(this.addButton(6, attackContinuous));
+        this.useContinuous = Objects.requireNonNull(this.addButton(8, useContinuous));
     }
 
     @Override
@@ -67,6 +98,7 @@ public class PlayerInventoryContainer extends PlayerContainer {
         return true;
     }
 
+    @Nullable
     public Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot) {
         return switch (slot) {
             case 0 -> Map.entry(buttons, 0);
@@ -89,74 +121,38 @@ public class PlayerInventoryContainer extends PlayerContainer {
         }
     }
 
-    private static RadioList createHotbarButton(BiConsumer<Integer, Button> adder, PlayerInventoryContainer container) {
-        List<Button> hotBarList = new ArrayList<>();
-        for (int i = 0; i < 9; i++) {
-            Component hotBarComponent = ComponentHelper.tr(
+    private static List<Button> createHotbarButtons(PlayerInventoryContainer container, BiFunction<Integer, ButtonBuilder, Button> factory) {
+        return IntStream.range(0, 9).mapToObj(slot -> {
+            int num = slot + 1;
+            Component component = ComponentHelper.tr(
                 "gca.hotbar",
                 Color.WHITE,
                 Style.EMPTY.withBold(true).withItalic(false),
-                i + 1
+                num
             );
-            boolean defaultState = i == 0;
-            Button button = new Button(defaultState, i + 1,
-                hotBarComponent,
-                hotBarComponent
-            );
-            int finalI = i + 1;
-            button.addTurnOnFunction(() -> container.ap.setSlot(finalI));
-            adder.accept(i + 9, button);
-            hotBarList.add(button);
-        }
-        return new RadioList(hotBarList, true);
-    }
-
-    private void createButton() {
-        this.addButtonList(this.hotbar);
-
-        Button stopAll = new AutoResetButton("gca.action.stop_all");
-        Button attackInterval14 = new Button(false, "gca.action.attack.interval.12");
-        Button attackContinuous = new Button(false, "gca.action.attack.continuous");
-        Button useContinuous = new Button(false, "gca.action.use.continuous");
-
-        stopAll.addTurnOnFunction(() -> {
-            attackInterval14.turnOffWithoutFunction();
-            attackContinuous.turnOffWithoutFunction();
-            useContinuous.turnOffWithoutFunction();
-            ap.stopAll();
-        });
-
-        attackInterval14.addTurnOnFunction(() -> {
-            ap.start(ActionType.ATTACK, Action.interval(12));
-            attackContinuous.turnOffWithoutFunction();
-        });
-        attackInterval14.addTurnOffFunction(() -> ap.start(ActionType.ATTACK, Action.once()));
-
-        attackContinuous.addTurnOnFunction(() -> {
-            ap.start(ActionType.ATTACK, Action.continuous());
-            attackInterval14.turnOffWithoutFunction();
-        });
-        attackContinuous.addTurnOffFunction(() -> ap.start(ActionType.ATTACK, Action.once()));
-
-        useContinuous.addTurnOnFunction(() -> ap.start(ActionType.USE, Action.continuous()));
-        useContinuous.addTurnOffFunction(() -> ap.start(ActionType.USE, Action.once()));
-
-        this.addButton(0, stopAll);
-        this.addButton(5, attackInterval14);
-        this.addButton(6, attackContinuous);
-        this.addButton(8, useContinuous);
+            ButtonBuilder builder = ButtonBuilder.ofComponent(component)
+                .setItemCount(num)
+                .addTurnOnCallback(button -> container.ap.setSlot(num));
+            return factory.apply(slot + 9, builder);
+        }).toList();
     }
 
     @Override
     public void tick() {
         super.tick();
-        List<Button> buttonList = this.hotbar.getButtons();
-        for (int i = 0; i < buttonList.size(); i++) {
-            if (i == InventoryUtil.getSelected(this.player)) {
-                buttonList.get(i).turnOnWithoutFunction();
-            } else {
-                buttonList.get(i).turnOffWithoutFunction();
-            }
+        int selected = InventoryUtil.getSelected(this.player);
+        for (int i = 0; i < this.hotbar.size(); i++) {
+            Button button = this.hotbar.get(i);
+            button.changeStatus(i == selected, true);
         }
+    }
+
+    public void resetAttackButton() {
+        this.attack12.softChangeStatus(false);
+        this.attackContinuous.softChangeStatus(false);
+    }
+
+    public void resetUseButton() {
+        this.useContinuous.softChangeStatus(false);
     }
 }

@@ -129,7 +129,7 @@ public class ConfigUpdater {
                     if (element.isJsonPrimitive()) {
                         return new WelcomeInfo.MessageArg(GcaExtension.parseLocation(element.getAsString()));
                     }
-                    JsonObject object = json.getAsJsonObject();
+                    JsonObject object = element.getAsJsonObject();
                     ChatFormatting color = Optional.ofNullable(object.get("color"))
                         .map(key -> ChatFormattingSerializer.byName(key.getAsString()))
                         .orElse(ChatFormatting.GOLD);

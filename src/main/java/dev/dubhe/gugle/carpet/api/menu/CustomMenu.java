@@ -1,35 +1,45 @@
 package dev.dubhe.gugle.carpet.api.menu;
 
+import dev.dubhe.gugle.carpet.api.menu.control.ButtonBuilder;
 import dev.dubhe.gugle.carpet.api.menu.control.Button;
-import dev.dubhe.gugle.carpet.api.menu.control.ButtonList;
 import net.minecraft.world.Container;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public abstract class CustomMenu implements Container {
-    public final List<Map.Entry<Integer, Button>> buttons = new ArrayList<>();
-    public final List<ButtonList> buttonLists = new ArrayList<>();
+    protected final List<Button> buttons = new ArrayList<>(54);
 
     public void tick() {
-        this.checkButton();
+        this.tickButtons();
     }
 
-    public void addButton(int slot, Button button) {
-        if (getContainerSize() < (slot + 1)) {
-            return;
+    @Nullable
+    public Button addButton(int slot, ButtonBuilder builder) {
+        if (this.getContainerSize() < (slot + 1)) {
+            return null;
         }
-        buttons.add(Map.entry(slot, button));
+        Button button = builder.build(this, slot);
+        this.buttons.add(button);
+        return button;
     }
 
-    public void addButtonList(ButtonList buttonList) {
-        this.buttonLists.add(buttonList);
+    public Container selfUpdate() {
+        return this;
     }
 
-    private void checkButton() {
-        for (Map.Entry<Integer, Button> button : buttons) {
-            button.getValue().checkButton(this, button.getKey());
+    private void tickButtons() {
+        List<Button> clicked = this.buttons.stream().filter(Button::clicked).toList();
+
+        if (!clicked.isEmpty() && clicked.size() < 3) {
+            for (Button button : clicked) {
+                button.clickCallback();
+            }
+        }
+
+        for (Button button : this.buttons) {
+            button.refresh();
         }
     }
 }

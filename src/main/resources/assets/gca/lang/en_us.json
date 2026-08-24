@@ -71,6 +71,9 @@
   "carpet.rule.commandBotAction.name": "Bot Action Management",
   "carpet.rule.commandBotAction.desc": "A Bot Action Management Menu",
 
+  "carpet.rule.commandBotController.name": "Bot Extra Panel Controller",
+  "carpet.rule.commandBotController.desc": "Customize the bot's extra control panel",
+
   "carpet.rule.commandLoc.name": "Loc Management",
   "carpet.rule.commandLoc.desc": "A Loc Management Menu",
 
@@ -198,6 +201,14 @@
   "msg.gca.bot.action.execute": "Execute Action",
   "msg.gca.bot.action.remove": "Remove Action",
   "msg.gca.bot.action.startup": "Startup Execution",
+
+  "msg.gca.bot.controller.global": "Global",
+  "msg.gca.bot.controller.list": "%s's Extra Button List",
+  "msg.gca.bot.controller.set.success": "Successfully added the button %3$s to slot %1$s of the %2$s's extra controller.",
+  "msg.gca.bot.controller.not_exist": "No extra buttons are defined for %s.",
+  "msg.gca.bot.controller.clear.all": "Successfully cleared all defined buttons in %s's extra control panel.",
+  "msg.gca.bot.controller.clear": "Successfully removed the button \"%3$s\" defined in slot %2$s of %1$s's extra control panel.",
+  "msg.gca.bot.controller.slot.not_exist": "No button is defined in slot %2$s of %1$s's extra control panel.",
 
   "msg.gca.location.list": "Location List",
   "msg.gca.location.not_exist": "Location %s does not exist.",

@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 public abstract class PlayerContainer extends CustomMenu {
@@ -31,6 +32,7 @@ public abstract class PlayerContainer extends CustomMenu {
         }
     }
 
+    @Nullable
     public abstract Map.Entry<NonNullList<ItemStack>, Integer> getItemSlot(int slot);
 
     @Override

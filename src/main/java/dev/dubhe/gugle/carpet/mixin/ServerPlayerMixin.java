@@ -20,8 +20,6 @@ import net.minecraft.server.level.ClientInformation;
 @Mixin(value = ServerPlayer.class, priority = 1001)
 abstract class ServerPlayerMixin implements IGcaPlayer {
     @Unique
-    private final ServerPlayer gca$self = (ServerPlayer) (Object) this;
-    @Unique
     private PlayerInventoryContainer gca$playerInventoryContainer = null;
     @Unique
     private PlayerEnderChestContainer gca$playerEnderChestContainer = null;
@@ -32,8 +30,9 @@ abstract class ServerPlayerMixin implements IGcaPlayer {
     //#else
     private void init(MinecraftServer minecraftServer, ServerLevel serverLevel, GameProfile gameProfile, ClientInformation clientInformation, CallbackInfo ci) {
     //#endif
-        this.gca$playerInventoryContainer = new PlayerInventoryContainer(this.gca$self);
-        this.gca$playerEnderChestContainer = new PlayerEnderChestContainer(this.gca$self);
+        ServerPlayer self = (ServerPlayer) (Object) this;
+        this.gca$playerInventoryContainer = new PlayerInventoryContainer(self);
+        this.gca$playerEnderChestContainer = new PlayerEnderChestContainer(self);
     }
 
     @SuppressWarnings("AddedMixinMembersNamePattern")

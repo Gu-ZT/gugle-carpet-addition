@@ -15,6 +15,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
+import javax.annotation.Nullable;
+
 public class FastPingFriend {
     public static void handleChat(MinecraftServer server, ServerPlayer player, String msg) {
         ServerPlayer player1 = FastPingFriend.findPlayer(server, msg);
@@ -30,6 +32,7 @@ public class FastPingFriend {
         playSound(SoundEvents.BELL_BLOCK, player1);
     }
 
+    @Nullable
     public static ServerPlayer findPlayer(MinecraftServer server, String name) {
         return server.getPlayerList().getPlayerByName(name);
     }

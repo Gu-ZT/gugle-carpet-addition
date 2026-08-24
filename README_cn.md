@@ -4,7 +4,7 @@
 [![CurseForge downloads](http://cf.way2muchnoise.eu/full_662867_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/guglecarpetaddition)
 [![Modrinth downloads](https://img.shields.io/modrinth/dt/gca?color=00AF5C&label=Modrinth%20downloads&logo=modrinth)](https://modrinth.com/mod/gca)
 [![GitHub downloads](https://img.shields.io/github/downloads/Gu-ZT/gugle-carpet-addition/total?label=Github%20downloads&logo=github)](https://github.com/Gu-ZT/gugle-carpet-addition/releases)
-[![Static Badge](https://img.shields.io/badge/%E7%BE%A4-255072087-73c465?logo=QQ)](https://qm.qq.com/q/XxElk1U6As)
+[![QQ Group](https://img.shields.io/badge/%E7%BE%A4-255072087-73c465?logo=QQ)](https://qm.qq.com/q/XxElk1U6As)
 
 ![menu](docs/pics/menu_zh.png)
 
@@ -266,6 +266,32 @@
 /bot group info <group>                 # 查看分组详情
 /bot group generated <name> <count> [load]  # 批量生成假人并分组
 ```
+
+#### 假人控制器 (Bot Controller)
+
+使用 `/bot controller` 可以自定义假人额外控制面板中的按钮。按钮可设为全局配置，也可单独为某个假人配置；单独配置与全局配置使用同一槽位时，单独配置优先生效。
+
+槽位编号可选 `3` 至 `26`。按钮被点击后，会以目标假人的名称执行对应的 `/player <player> <action>` 命令，因此 `<action>` 只需填写玩家名之后的部分。例如，`attack continuous` 会执行 `/player <player> attack continuous`。
+
+**命令用法**:
+```
+/bot controller                                             # 查看全局按钮列表
+/bot controller list [player]                               # 查看全局配置或指定假人的实际按钮列表
+/bot controller global set <slot> <desc> <action>           # 设置全局按钮
+/bot controller global clear <slot>                         # 清除指定槽位的全局按钮
+/bot controller global clear all                            # 清除全部全局按钮
+/bot controller player <player> set <slot> <desc> <action>  # 为指定假人设置按钮
+/bot controller player <player> clear <slot>                # 清除指定假人的指定按钮
+/bot controller player <player> clear all                   # 清除指定假人的全部按钮
+```
+
+**示例**:
+```
+/bot controller global set 3 "持续攻击" attack continuous
+/bot controller player Steve set 4 "持续使用" use continuous
+```
+
+启用 `openFakePlayerInventory` 或 `openFakePlayerEnderChest` 后，潜行并右键假人即可打开额外控制面板。启用假人末影箱时，控制按钮会显示在末影箱内容上方。按钮说明中包含空格时，需要使用双引号包裹。
 
 ### 假人动作管理 (commandBotAction)
 
@@ -593,11 +619,7 @@
 /carpet [setDefault] welcomePlayer true
 ```
 
-**配置方法**: 编辑 `config/gca/welcome.json` 文件，支持的变量类型:
-- `gca:player` - 玩家名称
-- `gca:day_count` - 服务器运行天数/指定日期起的天数
-- `gca:random` - 随机文本
-- `gca:server` - 服务器列表(可点击跳转)
+[欢迎玩家功能配置说明](docs/welcome_cn.md)
 
 ### 流浪商人生成失败提醒 (wanderingTraderSpawnFailedWarning)
 

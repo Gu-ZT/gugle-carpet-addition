@@ -91,6 +91,11 @@ public class GcaConfig<T extends IConfigNode> {
         return this.contents.values();
     }
 
+    public void clear() {
+        this.contents.clear();
+        this.setDirty();
+    }
+
     @Nullable
     public MinecraftServer getServer() {
         return this.server;
