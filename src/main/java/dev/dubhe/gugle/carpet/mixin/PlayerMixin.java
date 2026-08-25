@@ -24,9 +24,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-//#if MC>=12102 && MC <= 12105
-//$$ import net.minecraft.server.level.ServerLevel;
-//#endif
 //#if MC >= 260000
 //$$ import net.minecraft.world.phys.Vec3;
 //#endif
@@ -59,11 +56,13 @@ abstract class PlayerMixin {
                 //#endif
         )
     )
-    private InteractionResult interactOn(Entity entity, Player player, InteractionHand hand,
-                                         //#if MC >= 260000
-                                         //$$ Vec3 pos,
-                                         //#endif
-                                         Operation<InteractionResult> original) {
+    private InteractionResult interactOn(
+        Entity entity, Player player, InteractionHand hand,
+        //#if MC >= 260000
+        //$$ Vec3 pos,
+        //#endif
+        Operation<InteractionResult> original
+    ) {
         if (player.level().isClientSide()) {
             // 客户端在交互前要先判断一下当前交互的实体是不是玩家，这用来防止意外的使用物品功能
             if (entity instanceof Player otherPlayer && ClientUtil.isFakePlayer(otherPlayer)) {
@@ -132,14 +131,7 @@ abstract class PlayerMixin {
 
     @Unique
     private static boolean gca$canOperateRealPlayer(ServerPlayer player) {
-        CommandSourceStack stack = player.createCommandSourceStack(
-            //#if MC>=12102
-            //#if MC<=12105
-            //$$ (ServerLevel)
-            //#endif
-            //$$ player.level()
-            //#endif
-        );
+        CommandSourceStack stack = player.createCommandSourceStack();
         return CommandHelper.canUseCommand(stack, GcaSetting.openRealPlayerInventory);
     }
 }

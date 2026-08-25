@@ -1,1 +1,2 @@
 net.minecraft.util.thread.BlockableEventLoop tell() schedule()
+net.minecraft.world.entity.Entity createCommandSourceStackForNameResolution() createCommandSourceStack()
