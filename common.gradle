@@ -109,6 +109,13 @@ repositories {
         name 'CurseMaven'
         url "https://www.cursemaven.com"
     }
+    maven {
+        name 'JitPack'
+        url 'https://jitpack.io'
+        content {
+            includeGroupByRegex("com\\.github\\..*")
+        }
+    }
 }
 
 dependencies {
@@ -126,14 +133,14 @@ dependencies {
     autoImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     // fabric-carpet
-    if (project.carpet_core_version.endsWith('.jar')) {
-        autoImplementation(files("libs/${project.carpet_core_version}"))
+    if (project.carpet_core_version.startsWith('com.github.')) {
+        autoImplementation project.carpet_core_version
     } else {
-        autoImplementation("carpet:fabric-carpet:${project.carpet_core_version}")
+        autoImplementation "carpet:fabric-carpet:${project.carpet_core_version}"
     }
 
     if (project.hasProperty('carpet_tis_addition_version')) {
-        autoRuntimeOnly("maven.modrinth:carpet-tis-addition:${project.carpet_tis_addition_version}")
+        autoRuntimeOnly "maven.modrinth:carpet-tis-addition:${project.carpet_tis_addition_version}"
     }
 
     // 引入包装器中的依赖
