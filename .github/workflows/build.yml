@@ -8,6 +8,7 @@ on:
       - src/**
       - versions/**
       - ModWrapper/**
+      - neoforge-sinytra/**
       - build.gradle
       - common.gradle
       - gradle.properties

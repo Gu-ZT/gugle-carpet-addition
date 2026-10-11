@@ -6,12 +6,20 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
+            name 'Fabric'
+            url 'https://maven.fabricmc.net/'
         }
         maven {
-            name = 'Jitpack'
-            url = "https://jitpack.io"
+            name 'Jitpack'
+            url "https://jitpack.io"
+        }
+        maven {
+            name 'NeoForge'
+            url 'https://maven.neoforged.net/releases'
+        }
+        maven {
+            name "Sinytra"
+            url "https://maven.sinytra.org/"
         }
         resolutionStrategy {
             eachPlugin {
@@ -37,4 +45,26 @@ for (String version : settings.get("versions")) {
     proj.setBuildFileName("../../common.gradle")
 }
 
+for (final def version in ["1.21.1", "26.1.2"]) {
+    def name = ":neoforge-sinytra-mc" + version
+    include(name)
+    ProjectDescriptor proj = project(name)
+    proj.setProjectDir(file("neoforge-sinytra/$version"))
+}
+
 include(":ModWrapper")
+include(":neoforge-debug")
+
+// An unqualified `build` is expanded by Gradle to every project that exposes a
+// task with that name. Keep the development-only launcher out of the normal
+// project build while still allowing its tasks to be invoked explicitly.
+def requestedTasks = gradle.startParameter.taskNames
+def explicitlyTargetsNeoForgeDebug = requestedTasks.any {
+    it == 'neoforge-debug' ||
+    it.startsWith('neoforge-debug:') ||
+    it == ':neoforge-debug' ||
+    it.startsWith(':neoforge-debug:')
+}
+if ('build' in requestedTasks && !explicitlyTargetsNeoForgeDebug) {
+    gradle.startParameter.excludedTaskNames = gradle.startParameter.excludedTaskNames + [':neoforge-debug:build']
+}

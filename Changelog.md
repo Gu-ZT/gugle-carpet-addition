@@ -1,1 +1,1 @@
-- Fixed the `openRealPlayerInventory` permission issue again, preventing players from opening real-player inventories.
+- Compatible with 26.4-snapshot-3

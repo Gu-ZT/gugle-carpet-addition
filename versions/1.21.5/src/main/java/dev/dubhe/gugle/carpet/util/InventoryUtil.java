@@ -12,7 +12,6 @@ import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.List;
 
-
 public class InventoryUtil {
     public static NonNullList<ItemStack> getItems(Player player) {
         return player.getInventory().getNonEquipmentItems();

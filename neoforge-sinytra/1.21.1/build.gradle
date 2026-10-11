@@ -1,0 +1,39 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    maven {
+        name 'NeoForge'
+        url 'https://maven.neoforged.net/releases'
+    }
+    mavenCentral()
+    maven { url 'https://libraries.minecraft.net/' }
+}
+
+dependencies {
+    // Supplied by FML. This sidecar reads the installed Wrapper at runtime;
+    // it embeds neither GCA nor ModWrapper.
+    compileOnly "net.neoforged.fancymodloader:loader:${project.fml_version}"
+    compileOnly 'org.ow2.asm:asm-tree:9.7.1'
+    compileOnly 'com.google.code.gson:gson:2.10.1'
+}
+
+base {
+    archivesName = "${project.mod_id}-compat-${project.name}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 21
+}
+
+jar {
+    from rootProject.file('LICENSE')
+    manifest.attributes('Automatic-Module-Name': 'dev.dubhe.gugle.carpet.sinytra.bootstrap')
+}

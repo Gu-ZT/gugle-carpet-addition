@@ -1,6 +1,5 @@
 package dev.dubhe.gugle.carpet.entry;
 
-import carpet.helpers.EntityPlayerActionPack;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

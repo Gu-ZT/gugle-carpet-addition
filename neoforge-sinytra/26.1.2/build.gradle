@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    maven {
+        name "Sinytra"
+        url "https://maven.sinytra.org/"
+    }
+    mavenCentral()
+}
+
+base {
+    archivesName = "${project.mod_id}-compat-${project.name}"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+}
+
+dependencies {
+    implementation "org.sinytra:connector:${project.connector_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand([
+                "id"               : project.mod_id,
+                "version"          : project.version,
+                "name"             : project.mod_name,
+        ])
+    }
+}
+

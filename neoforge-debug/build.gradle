@@ -1,0 +1,101 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+plugins {
+    id 'net.neoforged.moddev' version "${neoforge_moddev_version}"
+    id 'org.sinytra.adapter.userdev' version '1.2.1-SNAPSHOT'
+}
+
+def resolveWrapperJar = {
+    def fabricInput = project.file(project.fabric_mod_jar)
+    if (fabricInput.isFile()) return fabricInput
+    if (fabricInput.isDirectory()) {
+        def candidates = fabricInput.listFiles({ file ->
+            file.isFile() && file.name.toLowerCase().endsWith('.jar')
+        } as FileFilter)?.toList()?.sort { a, b ->
+            a.lastModified() <=> b.lastModified()
+        }
+        if (candidates != null && !candidates.isEmpty()) return candidates.last()
+    }
+    return null
+}
+
+neoForge {
+    version = project.neo_version
+
+    runs {
+        configureEach {
+            gameDirectory = file('../run/neoforge-debug')
+            jvmArguments.addAll(
+                    "-Dterminal.jline=true",
+//                    '-Dmixin.debug=true',
+                    '-Dmixin.debug.export=true',
+                    '-Dconnector.logging.level=debug',
+                    '-Dneoforge.logging.markers=REGISTRIES,REGISTRYDUMP',
+                    '-Dhttp.proxyHost=127.0.0.1',
+                    '-Dhttp.proxyPort=7890',
+                    '-Dhttps.proxyHost=127.0.0.1',
+                    '-Dhttps.proxyPort=7890'
+            )
+            logLevel = org.slf4j.event.Level.DEBUG
+        }
+
+        client {
+            client()
+            programArguments.addAll('--username', 'NeoForgeDebug')
+        }
+
+        server {
+            server()
+            programArguments.add('--nogui')
+        }
+    }
+}
+
+repositories {
+    maven {
+        name "Sinytra"
+        url "https://maven.sinytra.org/"
+    }
+    maven {
+        name 'MasaMaven'
+        url 'https://masa.dy.fi/maven'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    if (project.hasProperty('connector_launchpad_version')) {
+        runtimeOnly "org.sinytra.launchpad:launchpad:${project.connector_launchpad_version}"
+    }
+
+    additionalRuntimeClasspath "org.sinytra:connector:${project.connector_version}"
+    runtimeOnly "org.sinytra:connector:${project.connector_version}"
+    runtimeOnly "org.sinytra.forgified-fabric-api:forgified-fabric-api:${project.connector_forgified_version}"
+
+//    runtimeOnly("carpet:fabric-carpet:${project.carpet_version}") {
+//        exclude group: 'net.fabricmc'
+//    }
+}
+
+// Place the complete ModWrapper in the game mods directory. The compatibility
+// sidecar is responsible for creating Connector's version-specific input.
+tasks.register('stageFabricMod') {
+    doLast {
+        def wrapperJar = resolveWrapperJar()
+        if (wrapperJar == null) {
+            logger.lifecycle("Skipping ModWrapper staging because no JAR was found at ${project.file(project.fabric_mod_jar)}")
+            return
+        }
+        def stagedWrapperJar = file("../run/neoforge-debug/mods/${wrapperJar.name}")
+        stagedWrapperJar.parentFile.mkdirs()
+        Files.copy(wrapperJar.toPath(), stagedWrapperJar.toPath(), StandardCopyOption.REPLACE_EXISTING)
+        logger.lifecycle("Staged ModWrapper ${wrapperJar.name} as ${stagedWrapperJar.canonicalPath}")
+    }
+}
+
+tasks.configureEach { task ->
+    if (task.name in ['client', 'server', 'runClient', 'runServer']) {
+        task.dependsOn('stageFabricMod')
+    }
+}

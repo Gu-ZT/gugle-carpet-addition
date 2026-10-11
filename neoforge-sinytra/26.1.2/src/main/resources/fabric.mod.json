@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "${id}_sinytra_support",
+  "version": "${version}",
+  "name": "${name} Sinytra Connector Support",
+  "description": "Add support for ${name} on Neoforge",
+  "authors": [
+    "Cjsah"
+  ],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+  },
+  "depends": {
+    "connector": ">=3.0.0-"
+  }
+}

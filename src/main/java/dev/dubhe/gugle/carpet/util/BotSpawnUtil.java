@@ -27,12 +27,15 @@ import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 //#else
 //$$ import net.minecraft.network.protocol.game.ClientboundEntityPositionSyncPacket;
 //#endif
-//#if MC >= 12110
-//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
-//#endif
 //#if MC >= 12005
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+//#endif
+//#if MC >= 12110
+//$$ import dev.dubhe.gugle.carpet.mixin.EntityPlayerMPFakeInvoker;
+//#endif
+//#if MC >= 260400
+//$$ import net.minecraft.server.network.ClientDebugInfo;
 //#endif
 
 public class BotSpawnUtil {
@@ -88,6 +91,9 @@ public class BotSpawnUtil {
         server.getPlayerList().placeNewPlayer(new FakeClientConnection(PacketFlow.SERVERBOUND), instance, new CommonListenerCookie(profile, 0, instance.clientInformation()
             //#if MC >= 12005
             , false
+            //#if MC >= 260400
+            //$$ , new ClientDebugInfo()
+            //#endif
             //#endif
         ));
         //#if MC >= 12110
@@ -141,13 +147,7 @@ public class BotSpawnUtil {
             try {
                 server.getCommands().getDispatcher().execute(
                     startup.command(bot.name()).substring(1),
-                    instance
-                        // 离谱
-                        //#if MC < 12102
-                        .createCommandSourceStack()
-                        //#else
-                        //$$ .createCommandSourceStack()
-                        //#endif
+                    instance.createCommandSourceStack()
                 );
             } catch (CommandSyntaxException e) {
                 GcaExtension.LOGGER.warn("Failed to execute startup action {} for bot {}: {}", startup.desc(), bot.name(), e.getMessage());
