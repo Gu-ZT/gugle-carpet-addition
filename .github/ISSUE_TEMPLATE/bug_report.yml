@@ -36,18 +36,18 @@ body:
   - type: input
     id: version
     attributes:
-      label: Version Details - 版本信息
+      label: GCA Version Details - GCA 版本信息
       description: |
-        What version of Mod do you use?
-        你使用的 Mod 版本是什么
-      placeholder: Mod version
+        What version of GCA Mod do you use?
+        你使用的 GCA Mod 版本是什么
+      placeholder: GCA Mod version
     validations:
       required: true
 
   - type: textarea
     id: exist
     attributes:
-      label: Existing behavior - 现有行为
+      label: Problem Description - 问题描述
       description: |
         Please describe the problem you have encountered carefully.
         请仔细描述你所遇到的问题。
