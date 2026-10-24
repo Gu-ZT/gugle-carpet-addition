@@ -11,6 +11,7 @@
     "AxeItemMixin",
     "BlockTransformerMixin",
     "ChestMenuMixin",
+    "CustomDataAccessor",
     "EntityInvoker",
     "EntityPlayerActionPackMixin",
     "EntityPlayerMPFakeInvoker",

@@ -26,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //#if MC>=12102
 //$$ import net.minecraft.server.level.ServerLevel;
-//#else
 //#endif
 
 @Mixin(ItemFrame.class)
@@ -36,12 +35,11 @@ abstract class ItemFrameMixin extends Entity {
     }
 
     @Inject(
-        method =
+        method = "dropItem(" +
             //#if MC>=12102
-            //$$ "dropItem(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/Entity;Z)V",
-            //#else
-            "dropItem(Lnet/minecraft/world/entity/Entity;Z)V",
-        //#endif
+            //$$ "Lnet/minecraft/server/level/ServerLevel;" +
+            //#endif
+            "Lnet/minecraft/world/entity/Entity;Z)V",
         at = {
             @At(
                 value = "INVOKE",

@@ -46,10 +46,11 @@ public record BotInfo(
         Codec.STRING.fieldOf("desc").forGetter(BotInfo::desc),
         Vec3.CODEC.fieldOf("pos").forGetter(BotInfo::pos),
         //#if MC < 12105
-        CustomCodec.VEC2_CODEC.fieldOf("facing").forGetter(BotInfo::facing),
+        CustomCodec.VEC2_CODEC
         //#else
-        //$$ Vec2.CODEC.fieldOf("facing").forGetter(BotInfo::facing),
+        //$$ Vec2.CODEC
         //#endif
+            .fieldOf("facing").forGetter(BotInfo::facing),
         ResourceKey.codec(Registries.DIMENSION).fieldOf("dimension").forGetter(BotInfo::dimension),
         GameType.CODEC.fieldOf("mode").forGetter(BotInfo::mode),
         Codec.BOOL.fieldOf("flying").forGetter(BotInfo::flying),
