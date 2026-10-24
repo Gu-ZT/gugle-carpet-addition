@@ -1,1 +1,2 @@
-- Compatible with 26.4-snapshot-3
+- Update Minecraft version support and related dependency configurations for Minecraft 26.4-snapshot-5.
+- Unify GCA button handling logic to avoid deep copies of NBT data and improve performance.
