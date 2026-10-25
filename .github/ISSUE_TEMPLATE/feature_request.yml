@@ -2,7 +2,7 @@ name: Feature request - 功能请求
 description: Suggest an idea for this project - 为这个项目推荐一个新想法
 title: "[Feature] "
 labels:
-  - 🪁 enhancement
+  - ✨ enhancement
 
 body:
   - type: markdown

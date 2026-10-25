@@ -7,9 +7,12 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 import java.util.function.Consumer;
 
-//#if MC>=12005
+//#if MC >= 12005
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.component.CustomData;
+//#endif
+//#if MC >= 12109
+//$$ import dev.dubhe.gugle.carpet.mixin.CustomDataAccessor;
 //#endif
 
 public class Button {
@@ -113,4 +116,29 @@ public class Button {
             this.executing = false;
         }
     }
+
+    //#if MC >= 12005 && MC < 12109
+    @SuppressWarnings("deprecation")
+    //#endif
+    public static boolean checkClear(ItemStack item, boolean verify) {
+        //#if MC < 12005
+        //$$ return item.getTag() != null && item.getTag().getBoolean(GCA_CLEAR);
+        //#else
+        CustomData data = item.get(DataComponents.CUSTOM_DATA);
+        if (data == null) return false;
+        CompoundTag tag =
+            //#if MC < 12109
+            data
+            //#else
+            //$$ ((CustomDataAccessor) (Object) data)
+            //#endif
+            .getUnsafe();
+        return verify ? tag.getBoolean(GCA_CLEAR)
+        //#if MC >= 12105
+        //$$ .orElse(false)
+        //#endif
+        : tag.contains(GCA_CLEAR);
+        //#endif
+    }
+
 }

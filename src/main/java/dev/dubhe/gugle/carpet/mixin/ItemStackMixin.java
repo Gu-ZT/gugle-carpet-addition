@@ -11,6 +11,7 @@ import dev.dubhe.gugle.carpet.tools.player.FakePlayerNotification;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -28,6 +29,9 @@ import net.minecraft.world.item.Item;
 import java.util.function.Consumer;
 //#else
 //$$ import net.minecraft.util.RandomSource;
+//#endif
+//#if MC >= 12109
+//$$ import dev.dubhe.gugle.carpet.mixin.CustomDataAccessor;
 //#endif
 
 @Mixin(ItemStack.class)
@@ -72,13 +76,21 @@ abstract class ItemStackMixin {
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "getComponents", at = @At("HEAD"), cancellable = true)
     private void getComponents(CallbackInfoReturnable<DataComponentMap> cir) {
-        CustomData customData = this.components.get(DataComponents.CUSTOM_DATA);
-        if (customData == null || customData.copyTag().get(Button.GCA_CLEAR) == null) {
-            return;
+        CustomData data = this.components.get(DataComponents.CUSTOM_DATA);
+        if (data == null) return;
+        CompoundTag tag =
+            //#if MC < 12109
+            data
+            //#else
+            //$$ ((CustomDataAccessor) (Object) data)
+            //#endif
+            .getUnsafe();
+        if (tag.contains(Button.GCA_CLEAR)) {
+            cir.setReturnValue(this.components);
         }
-        cir.setReturnValue(this.components);
     }
 }
 

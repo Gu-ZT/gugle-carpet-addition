@@ -15,13 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-//#if MC>=12005
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.world.item.component.CustomData;
-//#else
-//$$ import net.minecraft.nbt.Tag;
-//#endif
-
 @SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(ChestMenu.class)
 public abstract class ChestMenuMixin implements IClientMenuTick {
@@ -49,17 +42,6 @@ public abstract class ChestMenuMixin implements IClientMenuTick {
     @Unique
     private boolean isFakePlayerMenu() {
         ItemStack itemStack = thisMenu.getSlot(0).getItem();
-        //#if MC>=12005
-        if (itemStack.is(Items.STRUCTURE_VOID)) {
-            CustomData customData = itemStack.get(DataComponents.CUSTOM_DATA);
-            return customData != null && customData.copyTag().get(Button.GCA_CLEAR) != null;
-        }
-        //#else
-        //$$ if (itemStack.is(Items.STRUCTURE_VOID) && itemStack.getTag() != null) {
-        //$$     Tag tag = itemStack.getTag().get(Button.GCA_CLEAR);
-        //$$     return tag != null && itemStack.getTag().getBoolean(Button.GCA_CLEAR);
-        //$$ }
-        //#endif
-        return false;
+        return itemStack.is(Items.STRUCTURE_VOID) && Button.checkClear(itemStack, false);
     }
 }
